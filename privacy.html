@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy — Pulse Core OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0A0B14;--surface:#14121F;--line:#332D45;--text:#F8F4EE;--text-dim:#B8AECB;--gold:#F7B23B;
+    --font-display:'Space Grotesk',sans-serif;--font-body:'IBM Plex Sans',sans-serif;--font-mono:'IBM Plex Mono',monospace;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-body);line-height:1.7;-webkit-font-smoothing:antialiased;}
+  a{color:var(--gold);}
+  :focus-visible{outline:2px solid var(--gold);outline-offset:3px;}
+  nav{border-bottom:1px solid var(--line);padding:18px 28px;}
+  .wordmark{font-family:var(--font-display);font-weight:700;text-decoration:none;color:var(--text);display:inline-flex;align-items:center;gap:9px;}
+  .wordmark .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);}
+  main{max-width:720px;margin:0 auto;padding:64px 28px 100px;}
+  h1{font-family:var(--font-display);font-size:clamp(1.9rem,4vw,2.6rem);margin:0 0 6px;letter-spacing:-0.01em;}
+  .updated{font-family:var(--font-mono);font-size:.82rem;color:var(--text-dim);margin:0 0 48px;}
+  h2{font-family:var(--font-display);font-size:1.25rem;margin:44px 0 14px;}
+  p,li{color:var(--text-dim);font-size:.98rem;}
+  ul{padding-left:20px;}
+  li{margin-bottom:8px;}
+  .back{font-family:var(--font-mono);font-size:.85rem;display:inline-block;margin-bottom:36px;}
+  footer{border-top:1px solid var(--line);padding:32px 28px;text-align:center;font-family:var(--font-mono);font-size:.8rem;color:var(--text-dim);}
+</style>
+</head>
+<body>
+<nav><a class="wordmark" href="index.html"><span class="dot"></span>PULSE CORE OS</a></nav>
+<main>
+  <a class="back" href="index.html">← Back</a>
+  <h1>Privacy Policy</h1>
+  <p class="updated">Last updated: July 2026</p>
+
+  <p>Pulse Core OS is a positioning-decision tool built and operated by a single independent rideshare driver in Vermont. This policy covers two separate things: this public website, and the private driver dashboard it links to.</p>
+
+  <h2>This public website</h2>
+  <p>This site does not collect any personal data from visitors. There are no accounts, no sign-up forms, no cookies, and no analytics or tracking scripts. The "example output" shown on the homepage is illustrative sample data, not a real person's driving activity.</p>
+
+  <h2>The private driver dashboard</h2>
+  <p>The dashboard is a separate, access-restricted application built on Google Apps Script and a private Google Sheet, used only by the operator. It stores:</p>
+  <ul>
+    <li>Shift logs: dates, times, zones, earnings, tips, and mileage the operator enters themselves.</li>
+    <li>Driving history used to calibrate future recommendations.</li>
+  </ul>
+  <p>This data is never displayed on the public website, never sold, and never shared with third parties for advertising or marketing purposes.</p>
+
+  <h2>Third-party data sources</h2>
+  <p>To generate recommendations, the private dashboard connects to:</p>
+  <ul>
+    <li><strong>Uber Marketplace Signals API</strong> — aggregate, non-personal ETA and demand-signal data, accessed via OAuth client-credentials authentication.</li>
+    <li><strong>AviationStack</strong> — public flight arrival and delay data for Burlington International Airport (BTV).</li>
+    <li><strong>Open-Meteo</strong> — public weather forecast data for the Burlington, VT area.</li>
+    <li><strong>Google</strong> — hosts the private Sheet and Apps Script backend that store and process the operator's own data.</li>
+  </ul>
+  <p>None of these integrations collect or transmit personal data belonging to rideshare passengers or the general public.</p>
+
+  <h2>Credentials and security</h2>
+  <p>API keys, client secrets, and access tokens are stored exclusively server-side, in Google Apps Script's Script Properties. They are never included in this website's code, never logged, and never displayed in any user interface.</p>
+
+  <h2>Data retention</h2>
+  <p>Shift and driving-history data is retained in the operator's private Google Sheet until the operator deletes it. This public website retains nothing, since it collects nothing.</p>
+
+  <h2>Children's privacy</h2>
+  <p>This website is not directed at children and does not knowingly collect information from anyone, regardless of age.</p>
+
+  <h2>Changes to this policy</h2>
+  <p>This policy may be updated as the system's data sources or architecture change. The date at the top of this page reflects the most recent revision.</p>
+
+  <h2>Contact</h2>
+  <p>Questions about this policy or how data is handled can be sent to <a href="mailto:REPLACE_WITH_CONTACT_EMAIL">REPLACE_WITH_CONTACT_EMAIL</a>.</p>
+</main>
+<footer>A Hoy Creative Project</footer>
+</body>
+</html>

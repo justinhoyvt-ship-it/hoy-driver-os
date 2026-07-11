@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pulse Core OS — Work the map, not the app.</title>
+<meta name="description" content="Pulse Core OS is a Vermont positioning engine for rideshare drivers. One clear move, every 15 minutes, built from real flights, weather, events, and your own numbers.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0B14;
+    --surface:#14121F;
+    --surface-2:#1C1829;
+    --line:#332D45;
+    --text:#F8F4EE;
+    --text-dim:#B8AECB;
+    --text-faint:#726A87;
+    --dawn1:#241335; --dawn2:#6B2557; --dawn3:#D6522F; --dawn4:#F7B23B;
+    --gold:#F7B23B;
+    --green:#5FC08A;
+    --font-display:'Space Grotesk',sans-serif;
+    --font-body:'IBM Plex Sans',sans-serif;
+    --font-mono:'IBM Plex Mono',monospace;
+    --max:1180px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;} *{animation-duration:.001ms!important; transition-duration:.001ms!important;}}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:var(--font-body); line-height:1.5; -webkit-font-smoothing:antialiased;}
+  a{color:inherit;}
+  :focus-visible{outline:2px solid var(--gold); outline-offset:3px; border-radius:4px;}
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 28px;}
+  h1,h2{font-family:var(--font-display); font-weight:700; margin:0; letter-spacing:-0.02em;}
+  .eyebrow{font-family:var(--font-mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); margin:0 0 14px;}
+
+  nav{position:sticky; top:0; z-index:50; background:rgba(10,11,20,.85); backdrop-filter:blur(10px); border-bottom:1px solid var(--line);}
+  .nav-inner{max-width:var(--max); margin:0 auto; padding:18px 28px; display:flex; align-items:center; justify-content:space-between;}
+  .wordmark{font-family:var(--font-display); font-weight:700; font-size:1.05rem; text-decoration:none; display:flex; align-items:center; gap:9px;}
+  .wordmark .dot{width:8px; height:8px; border-radius:50%; background:var(--gold);}
+  .nav-links{display:flex; gap:30px; list-style:none; margin:0; padding:0;}
+  .nav-links a{font-size:.85rem; letter-spacing:.04em; text-transform:uppercase; color:var(--text-dim); text-decoration:none;}
+  .nav-links a:hover{color:var(--text);}
+  .nav-cta{font-family:var(--font-mono); font-weight:600; font-size:.8rem; letter-spacing:.04em; background:var(--gold); color:#1D1206; padding:11px 18px; border-radius:6px; text-decoration:none;}
+  @media (max-width:880px){.nav-links{display:none;}}
+
+  .hero{position:relative; overflow:hidden; padding:120px 0 0; min-height:88vh; display:flex; align-items:center;}
+  .hero-sky{
+    position:absolute; inset:0;
+    background:
+      radial-gradient(ellipse 90% 60% at 50% 100%, var(--dawn4), transparent 70%),
+      radial-gradient(ellipse 80% 55% at 50% 108%, var(--dawn3), transparent 65%),
+      linear-gradient(180deg, var(--dawn1) 0%, var(--dawn2) 55%, var(--dawn3) 100%);
+  }
+  .hero-mtns{position:absolute; left:0; right:0; bottom:-2px; width:100%; height:auto; display:block;}
+  .hero-inner{position:relative; z-index:2; max-width:var(--max); margin:0 auto; padding:0 28px 150px; width:100%;}
+  .hero h1{font-size:clamp(2.6rem,7.4vw,5.6rem); line-height:0.98; color:#fff; text-shadow:0 4px 40px rgba(0,0,0,.35);}
+  .hero .lede{font-size:clamp(1.05rem,1.6vw,1.25rem); color:rgba(248,244,238,0.92); max-width:52ch; margin:24px 0 34px;}
+  .hero-actions{display:flex; gap:16px; flex-wrap:wrap;}
+  .btn{font-family:var(--font-body); font-weight:600; font-size:.98rem; padding:15px 26px; border-radius:8px; text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:transform .15s, filter .15s; border:1px solid transparent;}
+  .btn:hover{transform:translateY(-2px);}
+  .btn-solid{background:#0A0B14; color:#fff; border-color:rgba(255,255,255,.2);}
+  .btn-solid:hover{background:#000;}
+  .btn-ghost{border-color:rgba(255,255,255,.55); color:#fff;}
+  .btn-ghost:hover{background:rgba(255,255,255,.1);}
+
+  .output{background:var(--surface); border-bottom:1px solid var(--line); padding:74px 0;}
+  .output-grid{display:grid; grid-template-columns:auto 1fr; gap:40px; align-items:center;}
+  .output-zone{font-family:var(--font-display); font-size:clamp(2rem,4.4vw,3.2rem); font-weight:700; line-height:1; margin:6px 0 10px;}
+  .output-conf{font-family:var(--font-mono); font-size:.8rem; letter-spacing:.06em; color:var(--green); text-transform:uppercase;}
+  .output-score{text-align:center; font-family:var(--font-mono);}
+  .output-score .n{font-family:var(--font-display); font-size:clamp(3.4rem,7vw,5rem); font-weight:700; color:var(--gold); line-height:1;}
+  .output-score .l{font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--text-faint);}
+  .output-line{font-size:1.15rem; color:var(--text); border-left:3px solid var(--gold); padding-left:18px; margin:20px 0 0; max-width:56ch;}
+  .output-meta{font-family:var(--font-mono); font-size:.82rem; color:var(--text-faint); margin-top:16px;}
+  @media (max-width:760px){.output-grid{grid-template-columns:1fr;} .output-score{text-align:left;}}
+
+  section{padding:100px 0;}
+  .section-head{max-width:680px; margin-bottom:52px;}
+  .section-head h2{font-size:clamp(1.9rem,3.6vw,2.8rem); line-height:1.05;}
+
+  .pitch{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:14px; overflow:hidden;}
+  .pitch-item{background:var(--bg); padding:36px 30px;}
+  .pitch-item .tag{font-family:var(--font-mono); font-size:11px; letter-spacing:.1em; color:var(--gold); text-transform:uppercase; margin-bottom:14px;}
+  .pitch-item h3{font-family:var(--font-display); font-size:1.3rem; margin:0 0 10px; font-weight:600;}
+  .pitch-item p{color:var(--text-dim); font-size:.94rem; margin:0;}
+  @media (max-width:880px){.pitch{grid-template-columns:1fr;}}
+
+  .roster{display:flex; flex-direction:column; border-top:1px solid var(--line);}
+  .roster-row{display:grid; grid-template-columns:180px 1fr; gap:24px; padding:26px 0; border-bottom:1px solid var(--line); align-items:baseline;}
+  .roster-row .name{font-family:var(--font-display); font-size:1.35rem; font-weight:600; color:var(--gold);}
+  .roster-row p{margin:0; color:var(--text-dim); font-size:.98rem;}
+  .roster-note{font-family:var(--font-mono); font-size:.85rem; color:var(--text-faint); margin-top:26px;}
+  @media (max-width:640px){.roster-row{grid-template-columns:1fr; gap:6px;}}
+
+  .zone-roster{display:flex; flex-wrap:wrap; gap:10px 28px; margin-top:8px;}
+  .zone-roster span{font-family:var(--font-display); font-size:1.1rem; font-weight:600; color:var(--text-dim);}
+  .zone-roster span::after{content:"·"; margin-left:28px; color:var(--line);}
+  .zone-roster span:last-child::after{content:"";}
+  .region-note{margin-top:30px; padding:24px 26px; background:var(--surface); border-left:3px solid var(--gold); border-radius:0 10px 10px 0; color:var(--text-dim); font-size:.96rem; max-width:70ch;}
+  .region-note strong{color:var(--text);}
+
+  .status-cols{display:grid; grid-template-columns:repeat(3,1fr); gap:32px;}
+  .status-col h3{font-family:var(--font-mono); font-size:.78rem; letter-spacing:.1em; text-transform:uppercase; margin:0 0 18px;}
+  .status-col.live h3{color:var(--green);}
+  .status-col.building h3{color:var(--gold);}
+  .status-col.next h3{color:var(--text-faint);}
+  .status-item{padding:16px 0; border-top:1px solid var(--line);}
+  .status-item .n{font-family:var(--font-display); font-weight:600; font-size:1.05rem;}
+  .status-item p{margin:6px 0 0; color:var(--text-dim); font-size:.87rem;}
+  @media (max-width:880px){.status-cols{grid-template-columns:1fr; gap:44px;}}
+
+  .privacy{background:var(--surface); border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+  .privacy .wrap{max-width:760px; text-align:center;}
+  .privacy h2{font-size:clamp(1.7rem,3.2vw,2.4rem); margin-bottom:18px;}
+  .privacy p{color:var(--text-dim); font-size:1.05rem; margin:0 auto;}
+
+  .cta{text-align:center; padding:120px 0;}
+  .cta h2{font-size:clamp(2rem,4.4vw,3.2rem); margin-bottom:18px;}
+  .cta p{color:var(--text-dim); font-size:1.08rem; margin:0 auto 36px; max-width:50ch;}
+
+  footer{padding:40px 0 56px; border-top:1px solid var(--line);}
+  .footer-inner{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;}
+  .footer-attr{color:var(--text-faint); font-size:.82rem; font-family:var(--font-mono);}
+  .footer-links{display:flex; gap:22px; list-style:none; margin:0; padding:0;}
+  .footer-links a{font-size:.82rem; color:var(--text-dim); text-decoration:none;}
+  .footer-links a:hover{color:var(--text);}
+
+  .reveal{opacity:0; transform:translateY(16px); transition:opacity .6s ease, transform .6s ease;}
+  .reveal.in{opacity:1; transform:none;}
+  @media (prefers-reduced-motion:reduce){.reveal{opacity:1; transform:none; transition:none;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="wordmark" href="#top"><span class="dot"></span>PULSE CORE OS</a>
+    <ul class="nav-links">
+      <li><a href="#what">What it does</a></li>
+      <li><a href="#how">How it thinks</a></li>
+      <li><a href="#coverage">Coverage</a></li>
+      <li><a href="#status">Status</a></li>
+    </ul>
+    <a class="nav-cta" href="#dashboard">LAUNCH →</a>
+  </div>
+</nav>
+
+<main id="top">
+
+  <header class="hero">
+    <div class="hero-sky"></div>
+    <svg class="hero-mtns" viewBox="0 0 1440 340" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M0,340 L0,210 Q120,150 220,185 Q330,225 430,150 Q520,85 610,160 Q700,230 800,175 Q900,120 1000,190 Q1100,255 1200,180 Q1320,95 1440,170 L1440,340 Z" fill="#180E22" opacity="0.55"/>
+      <path d="M0,340 L0,255 Q140,190 260,235 Q380,280 480,210 Q560,155 660,220 Q760,280 880,225 Q980,180 1100,240 Q1220,295 1440,230 L1440,340 Z" fill="#120A19" opacity="0.75"/>
+      <path d="M0,340 L0,300 Q160,255 320,290 Q470,320 620,280 Q760,245 920,290 Q1080,330 1440,285 L1440,340 Z" fill="#0A0713"/>
+    </svg>
+    <div class="hero-inner">
+      <p class="eyebrow">Vermont · positioning engine</p>
+      <h1>WORK THE MAP.<br>NOT THE APP.</h1>
+      <p class="lede">One clear move, every 15 minutes — built from real flights, weather, events, and your own driving history. Not a feeling. A score you can see the reason for.</p>
+      <div class="hero-actions">
+        <a class="btn btn-solid" href="#dashboard">Launch dashboard</a>
+        <a class="btn btn-ghost" href="#how">How it thinks</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="output">
+    <div class="wrap output-grid reveal" data-reveal>
+      <div class="output-score">
+        <div class="n">71</div>
+        <div class="l">Score / 100</div>
+      </div>
+      <div>
+        <p class="eyebrow" style="margin-bottom:6px;">Example output — not live data</p>
+        <div class="output-zone">South Burlington Hotels</div>
+        <div class="output-conf">Confidence: High</div>
+        <p class="output-line">"Default accept. Avoid dead airport queue time."</p>
+        <div class="output-meta">WHY → Morning hotel departures and airport feeder opportunity &nbsp;·&nbsp; NEXT CHECK → 45 min</div>
+      </div>
+    </div>
+  </div>
+
+  <section id="what">
+    <div class="wrap">
+      <div class="section-head reveal" data-reveal>
+        <p class="eyebrow">What it does</p>
+        <h2>A field tool. Not a dashboard to interpret.</h2>
+      </div>
+      <div class="pitch reveal" data-reveal>
+        <div class="pitch-item">
+          <div class="tag">01</div>
+          <h3>Position, not guesswork</h3>
+          <p>Know where to start before you're online — not a gut call about where's "probably busy."</p>
+        </div>
+        <div class="pitch-item">
+          <div class="tag">02</div>
+          <h3>One move, not a wall of data</h3>
+          <p>A single call with a reason attached. Read it in three seconds, act, keep driving.</p>
+        </div>
+        <div class="pitch-item">
+          <div class="tag">03</div>
+          <h3>Your numbers, not an average</h3>
+          <p>Every score is checked against your own logged $/hour, zone by zone.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" style="background:var(--surface); border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+    <div class="wrap">
+      <div class="section-head reveal" data-reveal>
+        <p class="eyebrow">How it thinks</p>
+        <h2>Five inputs. One score. Nothing hidden.</h2>
+      </div>
+      <div class="roster reveal" data-reveal>
+        <div class="roster-row"><div class="name">Flight</div><p>BTV arrivals, clustered near your window and weighted by delay.</p></div>
+        <div class="roster-row"><div class="name">Event</div><p>Local shows and venues, time-windowed so a 9pm set doesn't run the whole day.</p></div>
+        <div class="roster-row"><div class="name">Weather</div><p>Sudden precipitation and wind shifts, tracked in 15-minute resolution.</p></div>
+        <div class="roster-row"><div class="name">History</div><p>Your own logged $/hour by zone — not a citywide average.</p></div>
+        <div class="roster-row"><div class="name">Baseline</div><p>A fallback pattern, used only when nothing else has enough signal — and labeled as exactly that.</p></div>
+      </div>
+      <p class="roster-note">Every score traces back to these five. No black box.</p>
+    </div>
+  </section>
+
+  <section id="coverage">
+    <div class="wrap">
+      <div class="section-head reveal" data-reveal>
+        <p class="eyebrow">Coverage</p>
+        <h2>Tuned for Burlington. Ready for the road.</h2>
+      </div>
+      <div class="zone-roster reveal" data-reveal>
+        <span>BTV Airport</span><span>South Burlington Hotels</span><span>Downtown Church St</span><span>UVM</span><span>Winooski</span><span>Essex Junction</span><span>Waterfront</span>
+      </div>
+      <div class="region-note reveal" data-reveal>
+        <strong>New Hampshire &amp; Maine:</strong> same approach — flights, weather, events, your history. Dedicated zone tuning for those markets is next, not live yet.
+      </div>
+    </div>
+  </section>
+
+  <section id="status" style="background:var(--surface); border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+    <div class="wrap">
+      <div class="section-head reveal" data-reveal>
+        <p class="eyebrow">Current status</p>
+        <h2>What's actually live right now.</h2>
+      </div>
+      <div class="status-cols reveal" data-reveal>
+        <div class="status-col live">
+          <h3>Live</h3>
+          <div class="status-item"><div class="n">Weather</div><p>Open-Meteo, 15-min resolution.</p></div>
+          <div class="status-item"><div class="n">Local events</div><p>Curated calendar, synced each refresh.</p></div>
+          <div class="status-item"><div class="n">Driving history</div><p>Feeds zone-level scoring directly.</p></div>
+        </div>
+        <div class="status-col building">
+          <h3>Building</h3>
+          <div class="status-item"><div class="n">BTV flight arrivals</div><p>Pipeline built; live ingestion still being verified.</p></div>
+          <div class="status-item"><div class="n">Uber Marketplace Signals</div><p>Sandbox auth &amp; token exchange confirmed working. Data endpoint not yet published by Uber.</p></div>
+        </div>
+        <div class="status-col next">
+          <h3>On deck</h3>
+          <div class="status-item"><div class="n">Uber Driver API</div><p>Separate trip/payment integration — not started yet, on purpose.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="privacy">
+    <div class="wrap">
+      <p class="eyebrow" style="text-align:center;">Privacy</p>
+      <h2>This page describes the system. It doesn't expose your data.</h2>
+      <p>Earnings, location, and shift logs live in a private Sheet behind your own Apps Script backend. Nothing here reads them, stores them, or shows them. No sign-up. No tracking.</p>
+    </div>
+  </section>
+
+  <section class="cta" id="dashboard">
+    <div class="wrap">
+      <p class="eyebrow" style="justify-content:center; display:flex;">Driver dashboard</p>
+      <h2>The cockpit's not here.<br>It's in the app.</h2>
+      <p>Shift logging, live scores, and settings run in a private, spreadsheet-backed dashboard.</p>
+      <a class="btn btn-solid" href="#" data-webapp-url-pending style="background:var(--gold); color:#1D1206; border-color:transparent;">Open the driver dashboard</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap footer-inner">
+    <span class="footer-attr">A Hoy Creative Project</span>
+    <ul class="footer-links">
+      <li><a href="privacy.html">Privacy</a></li>
+      <li><a href="terms.html">Terms</a></li>
+      <li><a href="mailto:REPLACE_WITH_CONTACT_EMAIL">Support</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script>
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('[data-reveal]').forEach(function(el){ io.observe(el); });
+  } else {
+    document.querySelectorAll('[data-reveal]').forEach(function(el){ el.classList.add('in'); });
+  }
+</script>
+
+</body>
+</html>
