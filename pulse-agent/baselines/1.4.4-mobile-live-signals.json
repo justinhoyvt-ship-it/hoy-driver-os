@@ -1,0 +1,8 @@
+{
+  "version": "1.4.4-mobile-live-signals",
+  "stagedStatus": "SAVED_NOT_DEPLOYED",
+  "sha256": "acbd803462c3a505040807cf46d8f476a51e1cadaef4e5f1eaed05af3bdf96e3",
+  "sourceBytes": 78402,
+  "syncedAt": "2026-07-14T22:26:00.328Z",
+  "note": "Saved in Apps Script but not deployed when this PR was created."
+}
