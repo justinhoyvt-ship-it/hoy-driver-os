@@ -7,7 +7,7 @@
 /* ===== Config.gs ===== */
 const PULSE = Object.freeze({
   APP_NAME: 'Pulse OS Rebuild',
-  VERSION: '1.4.3-runtime-lite',
+  VERSION: '1.4.4-runtime-lite',
   TIMEZONE: 'America/New_York',
   SPREADSHEET_ID: '1Hd46iUY84N2bvxdaIS4lf6l-uExxbXGIbUjxJzMF-No',
   SHEETS: Object.freeze({
