@@ -1,0 +1,22 @@
+PULSE OS RUNTIME LITE v1.4.2
+
+WHY THIS EXISTS
+The v1.4 Autopilot requested Apps Script project/deployment permissions that Google would not allow. This release does not self-modify and does not use the Apps Script REST API.
+
+INSTALL
+1. Open the separate Pulse OS test Apps Script project.
+2. Back up its current source.
+3. Delete the old installer/Autopilot/Forge source files from the TEST project only.
+4. Keep one script file named Code and replace it with Code.gs from this package.
+5. Show the manifest file and replace appsscript.json with the package manifest.
+6. Save and refresh the editor.
+7. Run setupPulseRebuild.
+8. Allow only the Sheets and external-request permissions shown by Google.
+9. Run doctorPulseRebuild and require overall PASS.
+10. Deploy manually as a web app: execute as you; access only yourself.
+
+DO NOT RUN
+pulseAutopilotInstallV14
+runPulseForge
+
+Those functions are intentionally absent.

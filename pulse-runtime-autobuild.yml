@@ -1,0 +1,44 @@
+name: Pulse Runtime Autobuild
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'pulse-autobuild/**'
+      - '.github/workflows/pulse-runtime-autobuild.yml'
+  pull_request:
+    paths:
+      - 'pulse-autobuild/**'
+      - '.github/workflows/pulse-runtime-autobuild.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate-and-package:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pulse-autobuild
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate runtime
+        run: npm run validate
+      - name: Build one-file Apps Script release
+        if: github.event_name != 'pull_request'
+        run: npm run build
+      - name: Upload tested release
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pulse-runtime-${{ github.sha }}
+          path: |
+            pulse-autobuild/dist/PulseOS_Runtime_Lite_*.zip
+            pulse-autobuild/dist/VALIDATION.json
+            pulse-autobuild/dist/AUTOBUILD_RESULT.json
+          if-no-files-found: error
+          retention-days: 30

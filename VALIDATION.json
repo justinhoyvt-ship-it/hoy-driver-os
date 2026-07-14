@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "release": "1.4.2-runtime-lite",
+  "generatedAt": "2026-07-14T15:02:47.614Z",
+  "serverFunctionCount": 58,
+  "duplicateServerFunctions": [],
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/script.external_request"
+  ],
+  "codeBytes": 51056,
+  "codeSha256": "28e481254f27d89d68794b6f8171de8589f9dba6825932338fc357150e1ca6c6",
+  "problems": []
+}

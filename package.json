@@ -1,0 +1,12 @@
+{
+  "name": "pulse-os-runtime-autobuild",
+  "version": "1.4.2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate": "node scripts/validate.mjs",
+    "build": "node scripts/build.mjs",
+    "autobuild": "npm run validate && npm run build"
+  },
+  "engines": { "node": ">=20" }
+}
