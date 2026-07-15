@@ -1,0 +1,50 @@
+{
+  "Task ID": "PULSE-010",
+  "Created At": "2026-07-15",
+  "Priority": "HIGH",
+  "Status": "READY",
+  "Requested By": "Justin",
+  "Area": "Field Logging",
+  "Title": "Prevent duplicate events and harden GPS capture",
+  "Problem / Request": "The July 15 field session confirmed duplicate current-Pulse offer rows at 10:45, 11:13, 11:42, 12:13, 12:44, and 13:49, plus two one-minute zero-mile Trip Log artifacts near 12:44. The Rebuild captured five accepted rides but reused the same cached coordinates from 10:18 through 12:10 and produced no trip/drop-off rows. Implement one-event-per-action handling, client event IDs, server-side idempotency, a short duplicate lock, and a resilient GPS helper that reports fresh, cached, fallback, or unavailable status instead of silently reusing stale coordinates. Keep this task focused on event integrity and location quality; trip lifecycle is PULSE-013.",
+  "Acceptance Criteria": "One iPhone tap creates exactly one event; repeated delivery of the same client event ID is ignored; rapid duplicate taps are rejected safely; GPS first requests a fresh position, then may use a recent cached position only within a defined age limit, otherwise records unavailable; each event stores GPS status, age, accuracy, and capture source; ping and trip pickup/drop-off controls use the same helper; the July 15 fixture reproduces no duplicate rows and flags stale GPS; normal and test modes pass; no merge or deployment occurs automatically.",
+  "Assigned Agent": "Pulse Builder",
+  "Branch / Build": "Field reconciliation completed; run next through Builder token",
+  "Result URL": "",
+  "Last Error": "Do not expand this patch into routing, background tracking, or the full state machine.",
+  "Updated At": "2026-07-15 16:30:00",
+  "": "",
+  "builder": {
+    "version": "0.3.0-github-patch-runner",
+    "patchSource": "Task Patches",
+    "aiProvider": "none",
+    "summary": "Prevent duplicate events and harden GPS capture",
+    "targets": [
+      "Pings.gs",
+      "Index.Client"
+    ],
+    "operationCount": 5,
+    "moduleNotes": [
+      {
+        "module": "Pings.gs",
+        "summary": "Applied 1 reviewed exact operation.",
+        "operations": [
+          "Add server-side client-event idempotency, a rapid duplicate lock, safe null coordinate parsing, and GPS provenance without changing the Pings sheet schema."
+        ]
+      },
+      {
+        "module": "Index.Client",
+        "summary": "Applied 4 reviewed exact operations.",
+        "operations": [
+          "Track one short action lock per control type on the client.",
+          "Replace five-minute silent GPS reuse with fresh, fallback, bounded-cache, or unavailable outcomes and a deterministic integrity fixture.",
+          "Capture GPS at action time, send a unique client event ID, preserve observed time, and avoid incrementing local totals for server-suppressed duplicates.",
+          "Expose duplicate suppression and stale-GPS detection in no-write test mode."
+        ]
+      }
+    ],
+    "usage": "No AI used — exact operations staged in Task Patches",
+    "generatedAt": "2026-07-15T20:28:04.414Z",
+    "deploymentPerformed": false
+  }
+}
