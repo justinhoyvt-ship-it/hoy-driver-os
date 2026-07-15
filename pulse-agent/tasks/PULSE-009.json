@@ -1,0 +1,41 @@
+{
+  "Task ID": "PULSE-009",
+  "Created At": "2026-07-15",
+  "Priority": "HIGH",
+  "Status": "READY",
+  "Requested By": "Justin",
+  "Area": "Test Harness",
+  "Title": "Add a no-write dashboard test mode",
+  "Problem / Request": "Add a client-side test mode activated by ?mode=test to the Runtime Lite dashboard. It must load deterministic fixture data for the map, heat regions, recommendation, weather, events, flights, plan, pings, shift, trips, and status without calling Apps Script services, GPS, or Sheets. Show a permanent TEST MODE badge and disable all write-producing controls while keeping tabs and visual interactions testable. Normal mode must remain unchanged.",
+  "Acceptance Criteria": "Opening the deployed dashboard with ?mode=test renders within one second using fixture data; makes no server, GPS, or sheet-write calls; visibly labels TEST MODE; disables shift, ping, trip, and refresh writes; permits navigation among all dashboard panels; and leaves normal mode behavior unchanged. Target only Index.Style, Index.Markup, and Index.Client where possible. No deployment or merge occurs automatically.",
+  "Assigned Agent": "Pulse Builder",
+  "Branch / Build": "Exact deterministic patch staged in Task Patches; no AI provider.",
+  "Result URL": "",
+  "Last Error": "",
+  "Updated At": "2026-07-15",
+  "": "",
+  "builder": {
+    "version": "0.3.0-github-patch-runner",
+    "patchSource": "Task Patches",
+    "aiProvider": "none",
+    "summary": "Add a no-write dashboard test mode",
+    "targets": [
+      "Index.Client"
+    ],
+    "operationCount": 3,
+    "moduleNotes": [
+      {
+        "module": "Index.Client",
+        "summary": "Applied 3 reviewed exact operations.",
+        "operations": [
+          "Add deterministic fixture data, local test responses, a permanent TEST MODE badge, and locked write controls without calling an AI or Apps Script in test mode.",
+          "Prevent fixture state from being written into the normal-mode local cache.",
+          "Boot directly from fixture data in test mode and skip cached state, GPS, and runtime refresh calls."
+        ]
+      }
+    ],
+    "usage": "No AI used — exact operations staged in Task Patches",
+    "generatedAt": "2026-07-15T11:43:17.604Z",
+    "deploymentPerformed": false
+  }
+}
