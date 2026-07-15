@@ -1,0 +1,40 @@
+{
+  "Task ID": "PULSE-012",
+  "Created At": "2026-07-15",
+  "Priority": "HIGH",
+  "Status": "READY",
+  "Requested By": "Justin",
+  "Area": "Test Harness",
+  "Title": "Resolve test mode from the Apps Script web-app URL",
+  "Problem / Request": "The dashboard runs inside an Apps Script sandbox, so location.search inside the frame did not retain the outer ?mode=test parameter. Resolve the outer URL with google.script.url.getLocation before booting the dashboard.",
+  "Acceptance Criteria": "Opening the isolated deployment with ?mode=test visibly shows TEST MODE · NO WRITES, renders deterministic fixture data, and performs no runtime server-function, GPS, or Sheet-write calls. Opening without mode=test remains normal. GitHub Actions must pass; no merge or deployment occurs automatically.",
+  "Assigned Agent": "Pulse Builder",
+  "Branch / Build": "",
+  "Result URL": "",
+  "Last Error": "",
+  "Updated At": "2026-07-15",
+  "": "",
+  "builder": {
+    "version": "0.3.0-github-patch-runner",
+    "patchSource": "Task Patches",
+    "aiProvider": "none",
+    "summary": "Resolve test mode from the Apps Script web-app URL",
+    "targets": [
+      "Index.Client"
+    ],
+    "operationCount": 2,
+    "moduleNotes": [
+      {
+        "module": "Index.Client",
+        "summary": "Applied 2 reviewed exact operations.",
+        "operations": [
+          "Allow Apps Script's outer web-app URL to set test mode before the dashboard boots.",
+          "Resolve mode=test from the outer Apps Script web-app URL before running fixture or live boot logic."
+        ]
+      }
+    ],
+    "usage": "No AI used — exact operations staged in Task Patches",
+    "generatedAt": "2026-07-15T12:29:47.067Z",
+    "deploymentPerformed": false
+  }
+}
