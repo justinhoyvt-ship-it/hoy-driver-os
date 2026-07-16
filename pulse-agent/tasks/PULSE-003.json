@@ -1,0 +1,49 @@
+{
+  "Task ID": "PULSE-003",
+  "Created At": "2026-07-15",
+  "Priority": "HIGH",
+  "Status": "READY",
+  "Requested By": "Justin",
+  "Area": "Backend Migration",
+  "Title": "Migrate proven live cockpit data into Rebuild",
+  "Problem / Request": "Use the working Pulse Core OS source and client contract, not the broken Runtime Lite LIVE panel. Adapt the proven cockpit state, refresh flow, recommendation, data health, events, flights, signal plan, and ping evidence to the Rebuild data model. Preserve authentication settings. Do not deploy.",
+  "Acceptance Criteria": "A scoped pull request returns a normalized backend contract with recommendation, data health, events, flights, plan, pings, and explicit unavailable or stale states. GitHub Actions passes. No UI change, merge, or deployment occurs automatically.",
+  "Assigned Agent": "Pulse Builder",
+  "Branch / Build": "Working production contract staged from Pulse Core OS - Driver Dashboard and repaired Apps Script source package.",
+  "Result URL": "",
+  "Last Error": "",
+  "Updated At": "2026-07-16 14:02:00",
+  "": "",
+  "builder": {
+    "version": "0.3.0-github-patch-runner",
+    "patchSource": "Task Patches",
+    "aiProvider": "none",
+    "summary": "Migrate proven live cockpit data into Rebuild",
+    "targets": [
+      "Scoring.gs",
+      "Code.Server"
+    ],
+    "operationCount": 4,
+    "moduleNotes": [
+      {
+        "module": "Scoring.gs",
+        "summary": "Applied 2 reviewed exact operations.",
+        "operations": [
+          "Return the proven live-cockpit contract at top level while preserving every existing Runtime Lite alias consumed by the current client.",
+          "Add normalized data-health, plan, and warning builders with explicit fresh, stale, empty, and unavailable source states."
+        ]
+      },
+      {
+        "module": "Code.Server",
+        "summary": "Applied 2 reviewed exact operations.",
+        "operations": [
+          "Use the proven refresh pattern: refresh available live data, preserve sheet-backed sources, clear cache, and return the normalized cockpit contract.",
+          "Expose the same normalized contract through the dedicated live-signals endpoint while retaining legacy signals, daily, and pingStats fields."
+        ]
+      }
+    ],
+    "usage": "No AI used — exact operations staged in Task Patches",
+    "generatedAt": "2026-07-16T17:58:12.581Z",
+    "deploymentPerformed": false
+  }
+}
