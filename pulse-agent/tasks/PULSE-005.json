@@ -1,0 +1,33 @@
+{
+  "Task ID": "PULSE-005",
+  "Created At": "2026-07-15",
+  "Priority": "HIGH",
+  "Status": "READY_PUBLIC",
+  "Requested By": "Justin",
+  "Area": "Public Web Shell",
+  "Title": "Build the landscape-led Pulse Vermont public shell",
+  "Problem / Request": "Replace the current public landing page with an original landscape-led, section-based Pulse Vermont site inspired by the immersive time-of-day presentation of the supplied design reference. Retain the electric mountain-pulse logo, original dawn palette, Space Grotesk and IBM Plex typography, and strong section separation. Keep the copy factual and restrained: local project, private driver cockpit, testing status, and a small cooperative interest circle outside traditional ridesharing. Do not include route recommendations, startup-pitch language, specific transportation-platform names, public ride booking, or paid-service language.",
+  "Acceptance Criteria": "The static mobile-first site provides Live, Sunrise, Day, Sunset, and Night visual themes; uses original SVG Vermont landscapes rather than copied assets; retains the approved electric mountain-pulse logo; uses the original Pulse colors and fonts; clearly separates Project, Status, and Interest List sections; includes a Netlify-ready email form with interest type and optional town; includes matching Privacy and Site Notes pages; contains no specific transportation-platform name, route recommendation, pitch-deck language, public ride request, reservation, fare, or payment feature; and opens a scoped PR without automatic merge or deployment.",
+  "Assigned Agent": "Pulse Builder",
+  "Branch / Build": "Builder v0.4.1 landscape bundle prepared; deterministic root-file replacement.",
+  "Result URL": "",
+  "Last Error": "",
+  "Updated At": "2026-07-16 15:02:00",
+  "": "",
+  "builder": {
+    "version": "0.4.2-landscape-public-site",
+    "mode": "deterministic-public-file-bundle",
+    "aiProvider": "none",
+    "buildId": "BUILD-20260716-152157",
+    "branch": "pulse/pulse-005-20260716-152158",
+    "targets": [
+      "index.html",
+      "privacy.html",
+      "terms.html"
+    ],
+    "operationCount": 3,
+    "usage": "No AI used during the Builder run — approved static files embedded in Builder v0.4.",
+    "generatedAt": "2026-07-16T19:22:04.089Z",
+    "deploymentPerformed": false
+  }
+}
