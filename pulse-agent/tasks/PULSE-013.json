@@ -8,11 +8,11 @@
   "Title": "",
   "Problem / Request": "",
   "Acceptance Criteria": "",
-  "Assigned Agent": "Pulse Builder",
-  "Branch / Build": "",
-  "Result URL": "",
+  "Assigned Agent": "",
+  "Branch / Build": "BUILD-20260715-182033 / pulse/pulse-013-20260715-182036 / merge dd7d26c3526075d1c37981433c4dbf08420b4b5a",
+  "Result URL": "https://github.com/justinhoyvt-ship-it/hoy-driver-os/pull/6",
   "Last Error": "",
-  "Updated At": "2026-07-15",
+  "Updated At": "2026-07-16 13:22:30",
   "": "",
   "builder": {
     "version": "0.3.0-github-patch-runner",
@@ -21,47 +21,40 @@
     "summary": "Deterministic GitHub runtime patch",
     "targets": [
       "Trips.gs",
-      "Index.Client",
       "Index.Markup",
-      "Code.Server"
+      "Index.Client"
     ],
     "operationCount": 8,
     "moduleNotes": [
       {
         "module": "Trips.gs",
-        "summary": "Applied 1 reviewed exact operation.",
+        "summary": "Applied 2 reviewed exact operations.",
         "operations": [
-          "Add current/queued trip lifecycle, reservation starts, observed/effective timestamps, automatic queue promotion, and zero-mile artifact blocking without changing the Trips sheet schema."
-        ]
-      },
-      {
-        "module": "Index.Client",
-        "summary": "Applied 5 reviewed exact operations.",
-        "operations": [
-          "Track current trip, queued trip, and foreground route state in the mobile client.",
-          "Add shared lifecycle action handling and a foreground-only Leaflet route trail while an active trip is open.",
-          "Wire accepted offers into the lifecycle and bind pickup, drop-off, cancel, and reservation controls exactly once.",
-          "Return the duplicate response so accepted offers do not advance the trip lifecycle after suppression.",
-          "Return successful ping responses and stop lifecycle advancement when the ping request fails."
+          "End a shift without deleting active or queued trip state.",
+          "Add durable client-event idempotency, explicit queued cancellation, and safe queue promotion."
         ]
       },
       {
         "module": "Index.Markup",
         "summary": "Applied 1 reviewed exact operation.",
         "operations": [
-          "Add explicit pickup, drop-off, cancellation, and reservation controls beneath the existing offer controls."
+          "Show current and next trip context and provide a distinct cancel-next control."
         ]
       },
       {
-        "module": "Code.Server",
-        "summary": "Applied 1 reviewed exact operation.",
+        "module": "Index.Client",
+        "summary": "Applied 5 reviewed exact operations.",
         "operations": [
-          "Expose lifecycle transitions and current/queued state to the mobile dashboard without a new external service."
+          "Track route mileage and mutable no-write trip fixture state.",
+          "Add a deterministic no-write lifecycle fixture covering queue, promotion, reservation, drop-off, and cancellation.",
+          "Persist route-derived miles at completion, restore lifecycle state after refresh, and render current/next context.",
+          "Run and report the complete lifecycle fixture in test mode without server, GPS, or Sheet writes.",
+          "Restore active and queued trip state after a normal browser refresh."
         ]
       }
     ],
     "usage": "No AI used — exact operations staged in Task Patches",
-    "generatedAt": "2026-07-15T22:20:39.007Z",
+    "generatedAt": "2026-07-16T17:24:11.274Z",
     "deploymentPerformed": false
   }
 }
