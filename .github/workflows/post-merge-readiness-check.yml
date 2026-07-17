@@ -1,0 +1,194 @@
+name: Post-Merge Readiness Check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'pulse-autobuild/**'
+      - '.github/workflows/post-merge-readiness-check.yml'
+
+permissions:
+  contents: read
+  actions: read
+  checks: read
+  pull-requests: read
+
+jobs:
+  readiness-report:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pulse-autobuild
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run npm validate (current source)
+        id: validate
+        run: npm run validate
+        continue-on-error: true
+
+      - name: Run npm build (current artifacts)
+        id: build
+        run: npm run build
+        continue-on-error: true
+
+      - name: Check DEV spreadsheet configuration
+        id: dev-config
+        run: |
+          EXPECTED_DEV_ID="1Hd46iUY84N2bvxdaIS4lf6l-uExxbXGIbUjxJzMF-No"
+          echo "dev_spreadsheet_id=${EXPECTED_DEV_ID}" >> $GITHUB_OUTPUT
+          echo "✓ DEV spreadsheet ID configured: ${EXPECTED_DEV_ID}"
+          
+          # Verify Code.gs contains the correct SPREADSHEET_ID
+          if grep -q "SPREADSHEET_ID: '${EXPECTED_DEV_ID}'" ../pulse-autobuild/runtime/Code.gs; then
+            echo "✓ Code.gs references correct DEV spreadsheet"
+            echo "config_valid=true" >> $GITHUB_OUTPUT
+          else
+            echo "✗ Code.gs SPREADSHEET_ID mismatch"
+            echo "config_valid=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Verify required sheet definitions exist in Code.gs
+          REQUIRED_SHEETS="Settings Zones Zone_Priors Events Flights Weather Pings Shifts Trips Predictions Alert_Ledger RAW_UBER_SIGNALS System_Log"
+          MISSING_SHEETS=""
+          for sheet in $REQUIRED_SHEETS; do
+            if ! grep -q "SHEETS.*${sheet}" ../pulse-autobuild/runtime/Code.gs; then
+              MISSING_SHEETS="${MISSING_SHEETS} ${sheet}"
+            fi
+          done
+          
+          if [ -z "$MISSING_SHEETS" ]; then
+            echo "✓ All required sheet definitions present"
+            echo "sheets_valid=true" >> $GITHUB_OUTPUT
+          else
+            echo "✗ Missing sheet definitions:${MISSING_SHEETS}"
+            echo "sheets_valid=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Verify setup and doctor functions exist
+          if grep -q "function setupPulseRebuild()" ../pulse-autobuild/runtime/Code.gs && \
+             grep -q "function doctorPulseRebuild()" ../pulse-autobuild/runtime/Code.gs; then
+            echo "✓ Setup and doctor functions present"
+            echo "functions_valid=true" >> $GITHUB_OUTPUT
+          else
+            echo "✗ Setup or doctor functions missing"
+            echo "functions_valid=false" >> $GITHUB_OUTPUT
+          fi
+        shell: bash
+        continue-on-error: true
+
+      - name: Check open Pulse PRs and labels
+        id: open-prs
+        run: |
+          echo "Fetching open pull requests..."
+          PR_DATA=$(gh pr list --state open --json number,title,headRefName,statusCheckRollup,labels --limit 20)
+          
+          PULSE_PRS=$(echo "$PR_DATA" | grep -c "pulse/" || true)
+          APPROVED_COUNT=$(echo "$PR_DATA" | grep -c "approved-for-merge" || true)
+          
+          echo "pulse_prs_open=${PULSE_PRS}" >> $GITHUB_OUTPUT
+          echo "approved_for_merge_count=${APPROVED_COUNT}" >> $GITHUB_OUTPUT
+          
+          echo "Open Pulse PRs: ${PULSE_PRS}"
+          echo "PRs with approved-for-merge label: ${APPROVED_COUNT}"
+          
+          if [ "${PULSE_PRS}" -eq 0 ]; then
+            echo "prs_status=no_pending_builds" >> $GITHUB_OUTPUT
+          elif [ "${APPROVED_COUNT}" -gt 0 ]; then
+            echo "prs_status=approved_pending_merge" >> $GITHUB_OUTPUT
+          else
+            echo "prs_status=pending_approval" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+        continue-on-error: true
+
+      - name: Generate readiness summary
+        id: summary
+        run: |
+          VALIDATE_RESULT="${{ steps.validate.outcome }}"
+          BUILD_RESULT="${{ steps.build.outcome }}"
+          CONFIG_VALID="${{ steps.dev-config.outputs.config_valid }}"
+          SHEETS_VALID="${{ steps.dev-config.outputs.sheets_valid }}"
+          FUNCTIONS_VALID="${{ steps.dev-config.outputs.functions_valid }}"
+          PRS_STATUS="${{ steps.open-prs.outputs.prs_status }}"
+          
+          echo "## 📋 Post-Merge Readiness Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Current Source Validation" >> $GITHUB_STEP_SUMMARY
+          if [ "${VALIDATE_RESULT}" = "success" ]; then
+            echo "- ✅ npm run validate: **PASSED**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ npm run validate: **FAILED**" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Current Artifact Build" >> $GITHUB_STEP_SUMMARY
+          if [ "${BUILD_RESULT}" = "success" ]; then
+            echo "- ✅ npm run build: **PASSED**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ npm run build: **FAILED**" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Static DEV Configuration Check" >> $GITHUB_STEP_SUMMARY
+          echo "*(Live Google Sheet not queried; no credentials used)*" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${CONFIG_VALID}" = "true" ]; then
+            echo "- ✅ DEV Spreadsheet ID: Correct in Code.gs" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ DEV Spreadsheet ID: Mismatch" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "${SHEETS_VALID}" = "true" ]; then
+            echo "- ✅ Required sheet definitions: Present" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ Required sheet definitions: Missing" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "${FUNCTIONS_VALID}" = "true" ]; then
+            echo "- ✅ Setup/doctor functions: Present" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ Setup/doctor functions: Missing" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Open Pull Requests" >> $GITHUB_STEP_SUMMARY
+          echo "- Pulse Builder PRs open: **${{ steps.open-prs.outputs.pulse_prs_open }}**" >> $GITHUB_STEP_SUMMARY
+          echo "- With 'approved-for-merge' label: **${{ steps.open-prs.outputs.approved_for_merge_count }}**" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: **${{ steps.open-prs.outputs.prs_status }}**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Manual Deployment Status" >> $GITHUB_STEP_SUMMARY
+          echo "- Live Apps Script deployment: **Manual** (not automated in this workflow)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Determine overall readiness
+          if [ "${VALIDATE_RESULT}" = "success" ] && [ "${BUILD_RESULT}" = "success" ] && \
+             [ "${CONFIG_VALID}" = "true" ] && [ "${SHEETS_VALID}" = "true" ] && [ "${FUNCTIONS_VALID}" = "true" ]; then
+            READINESS_STATUS="✅ **READY** for isolated test deployment"
+            echo "readiness_status=ready" >> $GITHUB_OUTPUT
+          else
+            READINESS_STATUS="⚠️ **NOT READY** — see details above"
+            echo "readiness_status=not_ready" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "### Summary" >> $GITHUB_STEP_SUMMARY
+          echo "${READINESS_STATUS}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Next step (if ready):** Manually deploy via Apps Script project ID `pulse-autobuild/runtime/Code.gs` to DEV spreadsheet." >> $GITHUB_STEP_SUMMARY
+
+      - name: Report readiness to job output
+        run: |
+          echo "Readiness Status: ${{ steps.summary.outputs.readiness_status }}"
