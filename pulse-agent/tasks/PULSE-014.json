@@ -1,0 +1,65 @@
+{
+  "Task ID": "PULSE-014",
+  "Created At": "2026-07-16",
+  "Priority": "HIGH",
+  "Status": "READY",
+  "Requested By": "Justin",
+  "Area": "Field Test Readiness",
+  "Title": "Add live GPS, trace, trip status, and read-only preflight",
+  "Problem / Request": "Add a compact live field-test status strip and a read-only preflight check to the merged mobile cockpit. Preserve all existing writable DEV behavior, lifecycle controls, map, Signals, and normalized contract. Do not alter production IDs, deployment behavior, or write endpoints.",
+  "Acceptance Criteria": "Normal mode shows GPS status and accuracy, foreground tracer state, route points and miles, and current/next trip. Settings can run a read-only DEV preflight that verifies sheet headers, endpoint inventory, Signals counts, and current shift/trip state and reports writesPerformed:false. ?mode=test remains no-write. GitHub Actions passes; no merge or deployment occurs automatically.",
+  "Assigned Agent": "Pulse Builder",
+  "Branch / Build": "6 reviewed operations / 4 modules. Full sequence simulated locally: unique matches, JavaScript syntax PASS, 44 unique IDs, no forbidden markers.",
+  "Result URL": "",
+  "Last Error": "",
+  "Updated At": "2026-07-16 22:48:00",
+  "": "",
+  "builder": {
+    "version": "0.4.3-resilient-exact-patch",
+    "patchSource": "Task Patches",
+    "aiProvider": "none",
+    "summary": "Add live GPS, trace, trip status, and read-only preflight",
+    "targets": [
+      "Code.Server",
+      "Index.Style",
+      "Index.Markup",
+      "Index.Client"
+    ],
+    "operationCount": 6,
+    "moduleNotes": [
+      {
+        "module": "Code.Server",
+        "summary": "Applied 1 reviewed exact operation.",
+        "operations": [
+          "Add a read-only DEV preflight endpoint without changing any write path."
+        ]
+      },
+      {
+        "module": "Index.Style",
+        "summary": "Applied 1 reviewed exact operation.",
+        "operations": [
+          "Style the compact live field status strip and preflight result without moving existing controls."
+        ]
+      },
+      {
+        "module": "Index.Markup",
+        "summary": "Applied 2 reviewed exact operations.",
+        "operations": [
+          "Show live GPS, trace, route-distance, and trip status directly in the mobile dock.",
+          "Add a phone-accessible read-only preflight control in Settings."
+        ]
+      },
+      {
+        "module": "Index.Client",
+        "summary": "Applied 2 reviewed exact operations.",
+        "operations": [
+          "Render the live field status and expose a read-only phone preflight report.",
+          "Bind the preflight button and continuously refresh the non-writing field status display."
+        ]
+      }
+    ],
+    "usage": "No AI used — exact operations staged in Task Patches",
+    "generatedAt": "2026-07-17T10:36:24.655Z",
+    "deploymentPerformed": false
+  }
+}
