@@ -1,0 +1,64 @@
+{
+  "Task ID": "PULSE-004",
+  "Created At": "2026-07-15",
+  "Priority": "HIGH",
+  "Status": "READY",
+  "Requested By": "Justin",
+  "Area": "Client Dashboard",
+  "Title": "Connect the mobile cockpit to the normalized backend contract",
+  "Problem / Request": "Use the merged PULSE-003 backend contract and PULSE-013 trip lifecycle as the client source of truth. Preserve the mobile map, region heat visuals, GPS, shift, ping, current/next trip, cancellation, reservation, and foreground route controls. Restore compact Now, Events, Flights, Plan, and Log views with explicit loading, fresh, stale, empty, unavailable, and error states. Do not change the public website or backend schema.",
+  "Acceptance Criteria": "Normal mode loads through the normalized state contract; Now, Events, Flights, Plan, and Log render contract fields without invented route advice; lifecycle controls remain visible and usable; low-confidence recommendations defer to driver judgment; test mode mirrors the contract with deterministic fixtures and makes no server, GPS, or Sheet calls; a parked-phone mobile check passes; GitHub Actions passes; no merge or deployment occurs automatically.",
+  "Assigned Agent": "Pulse Builder",
+  "Branch / Build": "12-operation sequence fully simulated: 12/12 unique matches, JavaScript syntax PASS, top-level DOM binding PASS, 42 unique control IDs, no missing onclick targets.",
+  "Result URL": "",
+  "Last Error": "",
+  "Updated At": "2026-07-16 18:11:00",
+  "": "",
+  "builder": {
+    "version": "0.4.3-resilient-exact-patch",
+    "patchSource": "Task Patches",
+    "aiProvider": "none",
+    "summary": "Connect the mobile cockpit to the normalized backend contract",
+    "targets": [
+      "Index.Style",
+      "Index.Markup",
+      "Index.Client"
+    ],
+    "operationCount": 12,
+    "moduleNotes": [
+      {
+        "module": "Index.Style",
+        "summary": "Applied 1 reviewed exact operation.",
+        "operations": [
+          "Add compact cockpit tabs, source-health chips, and explicit loading, empty, stale, unavailable, and error states without changing the map or lifecycle dock."
+        ]
+      },
+      {
+        "module": "Index.Markup",
+        "summary": "Applied 3 reviewed exact operations.",
+        "operations": [
+          "Rename the map shortcut from LIVE to PULSE so it opens the unified cockpit.",
+          "Replace the standalone live-signals sheet with the Now, Events, Flights, Plan, and Log cockpit.",
+          "Remove the redundant standalone history sheet because Log now owns that view."
+        ]
+      },
+      {
+        "module": "Index.Client",
+        "summary": "Applied 8 reviewed exact operations.",
+        "operations": [
+          "Mirror the normalized PULSE-003 contract in deterministic no-write test fixtures without invented positioning guidance.",
+          "Track cockpit tab and history state alongside existing map, GPS, lifecycle, and route state.",
+          "Route all test-mode cockpit and log calls to local fixtures and keep every write-producing control locked.",
+          "Normalize legacy and current contract fields, defer low-confidence guidance to driver judgment, and render Now, Events, Flights, Plan, Log, health, empty, stale, unavailable, and error states.",
+          "Keep normalized shift and legacy aliases synchronized while preserving trip state when a shift ends.",
+          "Update normalized ping evidence after a successful event and refresh the cockpit without a second server write.",
+          "Load and refresh the normalized cockpit contract and recent log through the unified tabbed sheet.",
+          "Bind the PULSE and log buttons, cockpit tabs, and refresh control exactly once while preserving all existing controls."
+        ]
+      }
+    ],
+    "usage": "No AI used — exact operations staged in Task Patches",
+    "generatedAt": "2026-07-17T00:34:33.681Z",
+    "deploymentPerformed": false
+  }
+}
