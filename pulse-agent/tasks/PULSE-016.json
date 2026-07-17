@@ -1,0 +1,71 @@
+{
+  "Task ID": "PULSE-016",
+  "Created At": "2026-07-17 08:14:52",
+  "Priority": "HIGH",
+  "Status": "READY",
+  "Requested By": "Justin",
+  "Area": "Private Friend Requests",
+  "Title": "Add a private friend ride-request form and confirmed rides view",
+  "Problem / Request": "Start the invite-only friend-request phase prompted by a confirmed Saturday 4:00 AM airport ride. Provide a simple private form for a known adult to request a ride and a driver-only view for requested and confirmed rides. Keep this separate from official shift telemetry and from any public interest form.",
+  "Acceptance Criteria": "A private request form captures requester name, contact method, requested pickup date/time, pickup location, destination, passenger count, notes, and consent. Each request receives an ID, source, created/updated timestamps, and status REQUESTED, CONFIRMED, DECLINED, CANCELLED, or COMPLETED. The driver dashboard shows the next confirmed ride and a compact requested/confirmed list. Friend requests use a separate DEV data sheet and never become official shift/trip records automatically. Deterministic ?mode=test fixtures make no writes. There are no fares, payments, public listings, automatic matching, or automatic dispatch. Production remains untouched until separate approval.",
+  "Assigned Agent": "Pulse Builder",
+  "Branch / Build": "12 reviewed operations / 4 modules staged",
+  "Result URL": "",
+  "Last Error": "",
+  "Updated At": "2026-07-17 08:48:00",
+  "": "",
+  "builder": {
+    "version": "0.4.3-resilient-exact-patch",
+    "patchSource": "Task Patches",
+    "aiProvider": "none",
+    "summary": "Add a private friend ride-request form and confirmed rides view",
+    "targets": [
+      "Code.Server",
+      "Index.Style",
+      "Index.Markup",
+      "Index.Client"
+    ],
+    "operationCount": 12,
+    "moduleNotes": [
+      {
+        "module": "Code.Server",
+        "summary": "Applied 1 reviewed exact operation.",
+        "operations": [
+          "Create a separate DEV-only friend request data store, tokenized private request link, request submission, active request list, and manual status updates without creating shift or trip records."
+        ]
+      },
+      {
+        "module": "Index.Style",
+        "summary": "Applied 2 reviewed exact operations.",
+        "operations": [
+          "Add a sixth compact cockpit tab for private friend rides.",
+          "Style the request form, private link, ride cards, and manual confirmation controls without altering the one-screen driving dock."
+        ]
+      },
+      {
+        "module": "Index.Markup",
+        "summary": "Applied 2 reviewed exact operations.",
+        "operations": [
+          "Expose a dedicated RIDES cockpit tab without moving the existing driver controls.",
+          "Add the private token-link request form with required contact, pickup, destination, passenger, notes, and consent fields."
+        ]
+      },
+      {
+        "module": "Index.Client",
+        "summary": "Applied 7 reviewed exact operations.",
+        "operations": [
+          "Add deterministic friend-request fixtures and client state for requested and confirmed rides.",
+          "Keep friend request reads and status changes deterministic and no-write under mode=test.",
+          "Render the next confirmed ride, compact requested/confirmed list, private share link, and manual confirmation lifecycle in the driver cockpit.",
+          "Load and update friend requests separately from official telemetry, submit the private form, and copy the tokenized request link.",
+          "Bind the private request form without changing existing field controls.",
+          "Open the tokenized request form directly and retain the no-write test harness.",
+          "Resolve the private request token from the outer Apps Script web-app URL before boot."
+        ]
+      }
+    ],
+    "usage": "No AI used — exact operations staged in Task Patches",
+    "generatedAt": "2026-07-17T13:10:28.623Z",
+    "deploymentPerformed": false
+  }
+}
