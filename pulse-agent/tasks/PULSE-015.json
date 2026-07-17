@@ -1,0 +1,71 @@
+{
+  "Task ID": "PULSE-015",
+  "Created At": "2026-07-17 08:14:52",
+  "Priority": "HIGH",
+  "Status": "READY",
+  "Requested By": "Justin",
+  "Area": "Mobile Field UI",
+  "Title": "Make driver controls one-screen and preserve live-state fixes",
+  "Problem / Request": "The isolated DEV field test now loads and preflight passes, but the driver dock clips its bottom controls and requires scrolling through too many windows. Rebuild the mobile field screen around the actions needed while driving, and commit the manual weather-serialization and null-response protections back into the canonical GitHub runtime so a later deployment cannot lose them.",
+  "Acceptance Criteria": "At 375×667 and 390×844, the main driver screen has no vertical dock scrolling. GO/END SHIFT, current/next trip, GPS/trace, PING, ACCEPT, PICKUP, DROP OFF, DECLINE, NO RIDE, and CANCEL remain readable and reachable. Reservation and Cancel Next live under one MORE control. The bottom safe area is respected. Cockpit sheets remain the only intentional scroll areas. latestWeather_ returns an ISO/string timestamp, preflight and cockpit calls fail readably on null payloads, normal mode continues writing only to DEV, ?mode=test remains no-write, GitHub Actions passes, and no merge or deployment occurs automatically.",
+  "Assigned Agent": "Pulse Builder",
+  "Branch / Build": "",
+  "Result URL": "",
+  "Last Error": "",
+  "Updated At": "2026-07-17 08:14:52",
+  "": "",
+  "builder": {
+    "version": "0.4.3-resilient-exact-patch",
+    "patchSource": "Task Patches",
+    "aiProvider": "none",
+    "summary": "Make driver controls one-screen and preserve live-state fixes",
+    "targets": [
+      "Signals.gs",
+      "Index.Style",
+      "Index.Markup",
+      "Index.Client"
+    ],
+    "operationCount": 12,
+    "moduleNotes": [
+      {
+        "module": "Signals.gs",
+        "summary": "Applied 1 reviewed exact operation.",
+        "operations": [
+          "Commit the working Apps Script weather serialization fix so mobile state and live cockpit responses remain JSON-safe after the next GitHub deployment."
+        ]
+      },
+      {
+        "module": "Index.Style",
+        "summary": "Applied 6 reviewed exact operations.",
+        "operations": [
+          "Reserve enough predictable space for the compact two-row field controls without consuming most of the map.",
+          "Remove the nested dock scroll and keep the entire driving control surface fixed above the phone safe area.",
+          "Compact the shift and action buttons while increasing action-label reliability on narrow phones.",
+          "Make GPS, trace, miles, and current/next status readable without horizontal scrolling.",
+          "Style one obvious primary action surface and keep reservation/cancel-next behind a single expandable MORE control.",
+          "Keep the complete compact control surface visible on wider screens instead of reverting to the older clipped height."
+        ]
+      },
+      {
+        "module": "Index.Markup",
+        "summary": "Applied 1 reviewed exact operation.",
+        "operations": [
+          "Put the eight most-used field actions into two fixed rows and move lower-frequency reservation and queued cancellation behind MORE."
+        ]
+      },
+      {
+        "module": "Index.Client",
+        "summary": "Applied 4 reviewed exact operations.",
+        "operations": [
+          "Add a no-write expandable advanced-action panel without introducing another window or scrolling region.",
+          "Commit the readable null-response guard already verified in the isolated deployment.",
+          "Convert null live-state responses into a clear field message instead of a checkedAt TypeError.",
+          "Bind the one-screen MORE control exactly once without changing any server call or write behavior."
+        ]
+      }
+    ],
+    "usage": "No AI used — exact operations staged in Task Patches",
+    "generatedAt": "2026-07-17T12:20:48.071Z",
+    "deploymentPerformed": false
+  }
+}
