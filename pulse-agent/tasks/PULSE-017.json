@@ -1,0 +1,70 @@
+{
+  "Task ID": "PULSE-017",
+  "Created At": "2026-07-17 10:02:00",
+  "Priority": "HIGH",
+  "Status": "READY",
+  "Requested By": "Justin",
+  "Area": "Private Request Architecture",
+  "Title": "Split the hardened request app from Runtime Lite and connect the RIDES view",
+  "Problem / Request": "The user-provided request app includes email confirmation and Calendar permissions that do not belong in the narrow Runtime Lite project. Replace the merged embedded writer with a read-only adapter to the shared DEV Ride Requests sheet, preserve the RIDES cockpit, and use the separate hardened request-app bundle for intake, signed driver decisions, email, and calendar events.",
+  "Acceptance Criteria": "Runtime Lite reads but never creates or updates the Ride Requests sheet; the embedded request form and pulseSubmitFriendRide/pulseUpdateFriendRideStatus endpoints are removed; RIDES shows requested and confirmed records plus the next confirmed ride; the private link comes from PULSE_FRIEND_REQUEST_URL; ?mode=test remains deterministic and no-write; the separate request-app bundle uses action-specific expiring signatures, explicit lifecycle rules, consent, duplicate suppression, email receipts/decisions, Calendar events, and its own manifest; production is untouched; CI passes; no automatic deployment.",
+  "Assigned Agent": "Pulse Builder",
+  "Branch / Build": "11 reviewed operations / 4 modules staged; companion request-app bundle built",
+  "Result URL": "",
+  "Last Error": "",
+  "Updated At": "2026-07-17 10:02:00",
+  "": "",
+  "builder": {
+    "version": "0.4.3-resilient-exact-patch",
+    "patchSource": "Task Patches",
+    "aiProvider": "none",
+    "summary": "Split the hardened request app from Runtime Lite and connect the RIDES view",
+    "targets": [
+      "Code.Server",
+      "Index.Style",
+      "Index.Markup",
+      "Index.Client"
+    ],
+    "operationCount": 11,
+    "moduleNotes": [
+      {
+        "module": "Code.Server",
+        "summary": "Applied 1 reviewed exact operation.",
+        "operations": [
+          "Replace the duplicate embedded writer with a read-only adapter to the hardened standalone request app's Ride Requests sheet."
+        ]
+      },
+      {
+        "module": "Index.Style",
+        "summary": "Applied 1 reviewed exact operation.",
+        "operations": [
+          "Remove embedded form and status-button styles while retaining the private-link and read-only ride presentation."
+        ]
+      },
+      {
+        "module": "Index.Markup",
+        "summary": "Applied 1 reviewed exact operation.",
+        "operations": [
+          "Remove the duplicate embedded request form; intake now lives in the separate hardened request app."
+        ]
+      },
+      {
+        "module": "Index.Client",
+        "summary": "Applied 8 reviewed exact operations.",
+        "operations": [
+          "Remove the dashboard request-route state while retaining deterministic requested and confirmed ride fixtures.",
+          "Keep deterministic friend-ride reads in test mode and remove simulated write endpoints.",
+          "Make the Runtime Lite RIDES cards read-only and direct driver decisions to the separate hardened request app.",
+          "Remove Runtime Lite status-button listeners; the request app is authoritative for lifecycle transitions.",
+          "Remove duplicate dashboard submit and status-update functions while retaining private-link copy support.",
+          "Remove the deleted embedded request-form binding.",
+          "Restore Runtime Lite boot to dashboard-only behavior.",
+          "Stop routing private request tokens through the driver dashboard URL."
+        ]
+      }
+    ],
+    "usage": "No AI used — exact operations staged in Task Patches",
+    "generatedAt": "2026-07-17T16:58:05.584Z",
+    "deploymentPerformed": false
+  }
+}
