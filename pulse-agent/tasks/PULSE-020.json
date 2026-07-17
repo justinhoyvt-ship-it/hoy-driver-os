@@ -1,0 +1,20 @@
+{
+  "taskId": "PULSE-020",
+  "title": "Commit the hardened standalone friend-request app as a validated repository package",
+  "area": "Friend Request App Source",
+  "acceptanceCriteria": "Repository contains a separate request-app directory with Code.gs, RequestForm.html, appsscript.json, README/setup instructions, required Script Properties, DEV Ride Requests schema, action-specific expiring signatures, lifecycle rules, consent, duplicate suppression, email and Calendar workflow, and deterministic no-write tests; no secrets; CI passes; no deployment.",
+  "buildId": "BUILD-20260717-151316",
+  "branch": "pulse/pulse-020-20260717-151320",
+  "mode": "standalone-request-app-package",
+  "paths": [
+    "pulse-autobuild/request-app/Code.gs",
+    "pulse-autobuild/request-app/RequestForm.html",
+    "pulse-autobuild/request-app/appsscript.json",
+    "pulse-autobuild/request-app/README.md"
+  ],
+  "source": "validated static bundle",
+  "aiProvider": "none",
+  "deploymentPerformed": false,
+  "productionTouched": false,
+  "createdAt": "2026-07-17T19:13:25.907Z"
+}
