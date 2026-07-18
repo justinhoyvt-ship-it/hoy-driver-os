@@ -1,0 +1,34 @@
+{
+  "Task ID": "PULSE-027",
+  "Created At": "2026-07-18 08:08:39",
+  "Priority": "HIGH",
+  "Status": "READY",
+  "Requested By": "Justin",
+  "Area": "Public Web Shell",
+  "Title": "Repair the Pulse Vermont Netlify production deployment",
+  "Problem / Request": "The approved Pulse Vermont landscape site is merged in the repository, but the Netlify project may still publish an older manual bundle or use stale build settings. Add an explicit root Netlify configuration so the repository is the canonical production source.",
+  "Acceptance Criteria": "The PR contains the existing approved index.html, privacy.html, and terms.html plus a new root netlify.toml; publish directory is the repository root; clean /privacy and /site-notes routes resolve; security headers are present; the Netlify interest form remains intact; no public ride booking or payment is introduced; CI passes; no merge, Netlify deploy, site rename, or production change occurs automatically.",
+  "Assigned Agent": "Pulse Builder",
+  "Branch / Build": "Builder v0.4.8-netlify-public-bundle installed and public bundle test passed: index.html, privacy.html, terms.html, netlify.toml; totalChars 29350.",
+  "Result URL": "",
+  "Last Error": "",
+  "Updated At": "2026-07-18 08:16:31",
+  "": "",
+  "builder": {
+    "version": "0.4.8-netlify-public-bundle",
+    "mode": "deterministic-public-file-bundle",
+    "aiProvider": "none",
+    "buildId": "BUILD-20260718-081952",
+    "branch": "pulse/pulse-027-20260718-081956",
+    "targets": [
+      "index.html",
+      "privacy.html",
+      "terms.html",
+      "netlify.toml"
+    ],
+    "operationCount": 4,
+    "usage": "No AI used during the Builder run — approved public files and Netlify configuration embedded in Builder v0.4.8.",
+    "generatedAt": "2026-07-18T12:20:00.543Z",
+    "deploymentPerformed": false
+  }
+}
