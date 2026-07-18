@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /access
+Disallow: /access.html
+Disallow: /ride-status
+Disallow: /ride-status.html
+Sitemap: https://pulse-core-os.netlify.app/sitemap.xml
