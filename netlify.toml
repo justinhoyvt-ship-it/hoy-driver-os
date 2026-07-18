@@ -1,5 +1,5 @@
-# Pulse Vermont public-site deployment
-# The public website is the static site at the repository root.
+# Pulse Vermont connected public-site deployment
+# Public static pages are served from the repository root.
 
 [build]
   publish = "."
@@ -12,12 +12,23 @@
 
 [[headers]]
   for = "/*"
-
   [headers.values]
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "DENY"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+[[headers]]
+  for = "/ride-status*"
+  [headers.values]
+    Cache-Control = "no-store, private"
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+[[headers]]
+  for = "/access*"
+  [headers.values]
+    Cache-Control = "no-store"
+    X-Robots-Tag = "noindex, nofollow"
 
 [[redirects]]
   from = "/privacy"
@@ -27,4 +38,19 @@
 [[redirects]]
   from = "/site-notes"
   to = "/terms.html"
+  status = 200
+
+[[redirects]]
+  from = "/whats-up"
+  to = "/whats-up.html"
+  status = 200
+
+[[redirects]]
+  from = "/access"
+  to = "/access.html"
+  status = 200
+
+[[redirects]]
+  from = "/ride-status"
+  to = "/ride-status.html"
   status = 200
