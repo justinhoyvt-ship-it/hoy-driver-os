@@ -1,0 +1,64 @@
+{
+  "Task ID": "PULSE-030",
+  "Created At": "2026-07-18 10:40:00",
+  "Priority": "HIGH",
+  "Status": "READY",
+  "Requested By": "Justin",
+  "Area": "Private Booking Access",
+  "Title": "Add booking QR and complete mobile field resilience",
+  "Problem / Request": "Create the reusable token-free booking QR card and harden Runtime Lite for short portrait phones, rotation, screen lock, tab switching, reload, and brief network interruption in one reviewed build.",
+  "Acceptance Criteria": "QR uses only PULSE_REQUEST_PORTAL_URL; no private token or rider photo storage. BOOK QR provides readable link, copy, share, print, and open controls. Short portrait phones keep primary controls visible without dock scrolling. Offline writes fail closed and are not replayed. Hidden or offline state pauses geolocation. Foreground return restores active and queued trip state, resumes an in-progress route without erasing collected miles, repairs the map after rotation, and keeps GPS/lifecycle freshness explicit. Test mode remains no-write; CI must pass; no automatic merge, deployment, authorization, or production-data change.",
+  "Assigned Agent": "Pulse Builder + Validator",
+  "Branch / Build": "Twelve exact patches staged: PULSE-030 QR plus PULSE-024 mobile resilience.",
+  "Result URL": "",
+  "Last Error": "",
+  "Updated At": "2026-07-18 11:12:00",
+  "": "",
+  "builder": {
+    "version": "0.4.8-netlify-public-bundle",
+    "patchSource": "Task Patches",
+    "aiProvider": "none",
+    "summary": "Add booking QR and complete mobile field resilience",
+    "targets": [
+      "Index.Style",
+      "Index.Markup",
+      "Index.Client"
+    ],
+    "operationCount": 12,
+    "moduleNotes": [
+      {
+        "module": "Index.Style",
+        "summary": "Applied 2 reviewed exact operations.",
+        "operations": [
+          "Add the direct QR control, high-contrast scannable card, phone controls, and print-only layout without adding rider photos or a new data writer.",
+          "Keep all primary driving controls visible without dock scrolling on 375x667 and similarly short portrait phones."
+        ]
+      },
+      {
+        "module": "Index.Markup",
+        "summary": "Applied 1 reviewed exact operation.",
+        "operations": [
+          "Add a one-tap BOOK QR control to the existing map tool stack so the card can be shown from the phone without navigating through unrelated views."
+        ]
+      },
+      {
+        "module": "Index.Client",
+        "summary": "Applied 9 reviewed exact operations.",
+        "operations": [
+          "Replace the plain link card with a reusable booking QR card using only the clean token-free portal URL.",
+          "Add copy, native share with copy fallback, and print-card actions for the clean portal URL.",
+          "Wire the rendered QR card controls exactly once whenever the RIDES tab is displayed.",
+          "Open the existing read-only RIDES view and booking QR card directly from the new map control.",
+          "Fail closed while offline so a reconnect cannot replay or duplicate a driver observation.",
+          "Block lifecycle writes while offline instead of queueing ambiguous pickup, drop-off, cancellation, or reservation actions.",
+          "Resume foreground tracking without erasing the route already collected before a lock, tab switch, rotation, or brief network interruption.",
+          "Pause geolocation when hidden or offline, safely restore active and queued trip state in the foreground, and repair the map after rotation without background tracking.",
+          "Expose foreground, paused, and offline state alongside existing GPS freshness, route miles, and current/next trip context."
+        ]
+      }
+    ],
+    "usage": "No AI used — exact operations staged in Task Patches",
+    "generatedAt": "2026-07-18T15:27:37.457Z",
+    "deploymentPerformed": false
+  }
+}
