@@ -1,0 +1,124 @@
+{
+  "updated": "2026-07-18",
+  "policy": "Use canonical outbound links by default. Embed or ingest only when a publisher provides a documented feed/API or grants permission. Never copy full descriptions or images without rights.",
+  "sources": [
+    {
+      "name": "Seven Days Events",
+      "category": "events",
+      "url": "https://www.sevendaysvt.com/vermont/EventSearch?v=d",
+      "coverage": "Statewide Vermont",
+      "publisherType": "Independent media",
+      "integration": "outbound-link",
+      "partnerPotential": [
+        "featured events",
+        "calendar sponsorship",
+        "event submission education"
+      ]
+    },
+    {
+      "name": "Vermont Vacation Events",
+      "category": "events",
+      "url": "https://plan.vermontvacation.com/events",
+      "coverage": "Statewide Vermont",
+      "publisherType": "Official tourism",
+      "integration": "outbound-link",
+      "partnerPotential": [
+        "official destination links",
+        "signature-event features"
+      ]
+    },
+    {
+      "name": "Hello Burlington Events",
+      "category": "events",
+      "url": "https://www.helloburlingtonvt.com/events/",
+      "coverage": "Burlington region",
+      "publisherType": "Destination marketing organization",
+      "integration": "outbound-link-feed-to-verify",
+      "partnerPotential": [
+        "regional feature",
+        "weekend spotlight",
+        "event submissions"
+      ]
+    },
+    {
+      "name": "NOFA Vermont Farmers Market Map",
+      "category": "markets",
+      "url": "https://www.nofavt.org/farmers-markets/map",
+      "coverage": "Statewide Vermont",
+      "publisherType": "Nonprofit association",
+      "integration": "outbound-link",
+      "partnerPotential": [
+        "market spotlights",
+        "local food sponsorship"
+      ]
+    },
+    {
+      "name": "Visit Vermont Events",
+      "category": "events",
+      "url": "https://www.visit-vermont.com/state/events/",
+      "coverage": "Statewide Vermont",
+      "publisherType": "Visitor publisher",
+      "integration": "outbound-link",
+      "partnerPotential": [
+        "event submissions",
+        "advertising",
+        "destination listings"
+      ]
+    },
+    {
+      "name": "Vermont Vacation",
+      "category": "destinations",
+      "url": "https://vermontvacation.com",
+      "coverage": "Statewide Vermont",
+      "publisherType": "Official tourism",
+      "integration": "outbound-link",
+      "partnerPotential": [
+        "canonical destination research"
+      ]
+    },
+    {
+      "name": "Vermont Department of Tourism and Marketing",
+      "category": "industry",
+      "url": "https://accd.vermont.gov/tourism",
+      "coverage": "Statewide Vermont",
+      "publisherType": "State government",
+      "integration": "outbound-link",
+      "partnerPotential": [
+        "industry resources",
+        "program context"
+      ]
+    },
+    {
+      "name": "Tripadvisor Vermont",
+      "category": "traveler-research",
+      "url": "https://www.tripadvisor.com/Tourism-g28966-Vermont-Vacations.html",
+      "coverage": "Statewide Vermont",
+      "publisherType": "Travel platform",
+      "integration": "outbound-link",
+      "partnerPotential": [
+        "secondary traveler research"
+      ]
+    },
+    {
+      "name": "Vermont Tourism YouTube",
+      "category": "video",
+      "url": "https://youtube.com/@vermonttourism",
+      "coverage": "Statewide Vermont",
+      "publisherType": "Official tourism media",
+      "integration": "channel-link-embed-individual-video-only-with-rights",
+      "partnerPotential": [
+        "video inspiration",
+        "seasonal features"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "name": "VT Roads community updates",
+      "url": "https://www.facebook.com/share/g/1DHxsDkj7Z/?mibextid=wwXIfr",
+      "use": "Small road-conditions link only",
+      "ingestion": "link",
+      "visualReference": false
+    }
+  ]
+}
