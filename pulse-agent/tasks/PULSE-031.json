@@ -1,0 +1,43 @@
+{
+  "Task ID": "PULSE-031",
+  "Created At": "2026-07-18 18:10:00",
+  "Priority": "HIGH",
+  "Status": "READY",
+  "Requested By": "Justin",
+  "Area": "Public Web Shell",
+  "Title": "Build the connected Pulse Vermont and What's Up in Vermont public system",
+  "Problem / Request": "Preserve the accepted layouts and shared visual feel. Keep the electric Pulse identity, purple mountain background, white car, and Live/Sunrise/Day/Sunset/Night cycle. Build What's Up in Vermont as a Vermont destination and community resource with live-source event, market, destination, contribution, partnership, and sponsor lanes. Keep public interest separate from private access, booking request, confirmation, and rider-status shells. Use experienced gig drivers language and do not use vetted-drivers wording. Treat the supplied VT Roads Facebook group only as a small road-conditions resource link, never as visual inspiration.",
+  "Acceptance Criteria": "The PR contains index.html, whats-up.html, access.html, ride-status.html, privacy.html, terms.html, shared CSS/JS/config, source registry, robots.txt, sitemap.xml, and netlify.toml; both primary sites can be entered independently and cross-link naturally; the approved layout and feel remain recognizable; the Pulse logo replaces leaf branding; the time-of-day theme works in Live and manual modes; What's Up in Vermont links to Seven Days, Vermont Vacation, Hello Burlington, Visit Vermont, NOFA Vermont, ACCD tourism, Tripadvisor, and Vermont Tourism video sources; VT Roads appears only in a compact road-conditions lane; resource submission and clearly labeled partnership/sponsor opportunities are present; public interest is not a confirmed booking; private access and rider status remain configurable shells; no vetted-drivers wording, automatic merge, deployment, payment activation, or production-data change occurs.",
+  "Assigned Agent": "Pulse Builder",
+  "Branch / Build": "Builder v0.4.9 connected-site source prepared; install before READY",
+  "Result URL": "",
+  "Last Error": "Do not mark READY under Builder v0.4.8; it would replay the previous four-file public bundle.",
+  "Updated At": "2026-07-18 18:10:00",
+  "": "",
+  "builder": {
+    "version": "0.4.9-connected-vermont-site-bundle",
+    "mode": "deterministic-public-file-bundle",
+    "aiProvider": "none",
+    "buildId": "BUILD-20260718-162202",
+    "branch": "pulse/pulse-031-20260718-162204",
+    "targets": [
+      "index.html",
+      "whats-up.html",
+      "access.html",
+      "ride-status.html",
+      "privacy.html",
+      "terms.html",
+      "assets/site.css",
+      "assets/site.js",
+      "assets/site-config.js",
+      "data/source-registry.json",
+      "robots.txt",
+      "sitemap.xml",
+      "netlify.toml"
+    ],
+    "operationCount": 13,
+    "usage": "No AI used during the Builder run — the approved Pulse Vermont and What's Up in Vermont connected-site files are embedded in Builder v0.4.9.",
+    "generatedAt": "2026-07-18T20:22:19.102Z",
+    "deploymentPerformed": false
+  }
+}
