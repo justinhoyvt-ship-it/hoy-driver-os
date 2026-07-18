@@ -1,0 +1,48 @@
+{
+  "Task ID": "PULSE-022",
+  "Created At": "2026-07-17 13:17:30",
+  "Priority": "HIGH",
+  "Status": "READY",
+  "Requested By": "Justin",
+  "Area": "Request App Integration",
+  "Title": "Create a clean token-free request portal and keep confirmed rides in the Runtime scheduled list",
+  "Problem / Request": "Give people a clean shareable Runtime Lite URL that does not display the request token. The wrapper must open the standalone request app, while Runtime Lite continues reading the shared DEV Ride Requests tab so a successful confirmation appears in the RIDES scheduled list without a second POST, duplicate record, or new writer.",
+  "Acceptance Criteria": "Runtime Lite serves ?requestRide=1 as a full-screen wrapper around the configured private request app; mode=test remains deterministic and no-write; pulseGetFriendRides never returns the raw tokenized URL; the dashboard copies only PULSE_REQUEST_PORTAL_URL; confirmed records continue appearing from the shared DEV Ride Requests sheet; the standalone request app remains the only writer to Ride Requests; Runtime Lite operational telemetry writes remain unchanged; the legacy Core app is not modified; CI passes; no merge, deployment, authorization, or production change occurs automatically.",
+  "Assigned Agent": "Pulse Builder",
+  "Branch / Build": "Corrected operation 1 to replace the existing doGet; 3 reviewed exact operations remain staged across Code.Server and Index.Client.",
+  "Result URL": "",
+  "Last Error": "",
+  "Updated At": "2026-07-18 06:24:39",
+  "": "",
+  "builder": {
+    "version": "0.4.7-nested-template-repair",
+    "patchSource": "Task Patches",
+    "aiProvider": "none",
+    "summary": "Create a clean token-free request portal and keep confirmed rides in the Runtime scheduled list",
+    "targets": [
+      "Code.Server",
+      "Index.Client"
+    ],
+    "operationCount": 3,
+    "moduleNotes": [
+      {
+        "module": "Code.Server",
+        "summary": "Applied 2 reviewed exact operations.",
+        "operations": [
+          "Replace the existing Runtime Lite doGet instead of inserting a second one. Add the token-free portal route while preserving the normal dashboard response and deterministic mode=test handoff.",
+          "Stop returning the raw tokenized request-app URL to the dashboard client. Return only the separately configured clean portal URL while preserving the read-only Ride Requests adapter and scheduled list."
+        ]
+      },
+      {
+        "module": "Index.Client",
+        "summary": "Applied 1 reviewed exact operation.",
+        "operations": [
+          "Remove the token-shaped URL from deterministic fixtures so test mode verifies the same clean-link contract and still performs no Apps Script, GPS, email, calendar, or Sheet writes."
+        ]
+      }
+    ],
+    "usage": "No AI used — exact operations staged in Task Patches",
+    "generatedAt": "2026-07-18T11:00:56.395Z",
+    "deploymentPerformed": false
+  }
+}
