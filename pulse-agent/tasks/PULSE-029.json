@@ -1,0 +1,34 @@
+{
+  "Task ID": "PULSE-029",
+  "Created At": "2026-07-18 09:33:33",
+  "Priority": "HIGH",
+  "Status": "READY",
+  "Requested By": "Justin",
+  "Area": "Public Web Shell",
+  "Title": "Retry Netlify production deploy after credits restored",
+  "Problem / Request": "Netlify production deploys were paused because the jhoy team exhausted its credits. Usage has now been restored. Create a fresh harmless public-site commit so Netlify receives a new main-branch production event after service restoration.",
+  "Acceptance Criteria": "The PR preserves the approved Pulse Vermont index.html, privacy.html, terms.html, and netlify.toml without visible design changes; Netlify deploy preview succeeds; after merge, production deploy runs from main; no Apps Script deployment, public ride booking, payment, secret, Runtime Lite, or production-data change occurs; no automatic merge.",
+  "Assigned Agent": "Pulse Builder",
+  "Branch / Build": "Builder v0.4.8-netlify-public-bundle installed; retry after Netlify credits restored.",
+  "Result URL": "",
+  "Last Error": "",
+  "Updated At": "2026-07-18 09:33:33",
+  "": "",
+  "builder": {
+    "version": "0.4.8-netlify-public-bundle",
+    "mode": "deterministic-public-file-bundle",
+    "aiProvider": "none",
+    "buildId": "BUILD-20260718-093924",
+    "branch": "pulse/pulse-029-20260718-093928",
+    "targets": [
+      "index.html",
+      "privacy.html",
+      "terms.html",
+      "netlify.toml"
+    ],
+    "operationCount": 4,
+    "usage": "No AI used during the Builder run — approved public files and Netlify configuration embedded in Builder v0.4.8.",
+    "generatedAt": "2026-07-18T13:39:33.114Z",
+    "deploymentPerformed": false
+  }
+}
