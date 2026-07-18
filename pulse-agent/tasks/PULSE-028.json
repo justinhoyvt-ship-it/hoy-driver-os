@@ -1,0 +1,34 @@
+{
+  "Task ID": "PULSE-028",
+  "Created At": "2026-07-18 08:46:19",
+  "Priority": "HIGH",
+  "Status": "READY",
+  "Requested By": "Justin",
+  "Area": "Public Web Shell",
+  "Title": "Force a fresh Netlify production deploy after reconnect",
+  "Problem / Request": "Netlify was reconnected to GitHub after the merged PULSE-027 commit did not trigger a production build. Create a new harmless public-site commit so the restored connection receives a fresh main-branch event.",
+  "Acceptance Criteria": "The PR rewrites the approved index.html, privacy.html, terms.html, and netlify.toml bundle without visible content changes; the new merge commit is based on current main; Netlify production status attaches to the new commit and deploys from main; Pulse Vermont remains the live design; no public ride booking, payment, secret, Runtime Lite, or production-data change; CI passes; no automatic merge.",
+  "Assigned Agent": "Pulse Builder",
+  "Branch / Build": "Builder v0.4.8-netlify-public-bundle installed; run after Netlify GitHub reconnection.",
+  "Result URL": "",
+  "Last Error": "",
+  "Updated At": "2026-07-18 08:46:19",
+  "": "",
+  "builder": {
+    "version": "0.4.8-netlify-public-bundle",
+    "mode": "deterministic-public-file-bundle",
+    "aiProvider": "none",
+    "buildId": "BUILD-20260718-084837",
+    "branch": "pulse/pulse-028-20260718-084844",
+    "targets": [
+      "index.html",
+      "privacy.html",
+      "terms.html",
+      "netlify.toml"
+    ],
+    "operationCount": 4,
+    "usage": "No AI used during the Builder run — approved public files and Netlify configuration embedded in Builder v0.4.8.",
+    "generatedAt": "2026-07-18T12:48:48.831Z",
+    "deploymentPerformed": false
+  }
+}
