@@ -1,0 +1,56 @@
+{
+  "Task ID": "PULSE-034",
+  "Created At": "2026-07-19",
+  "Priority": "HIGH",
+  "Status": "READY",
+  "Requested By": "Justin",
+  "Area": "Rider Request Workflow",
+  "Title": "Fix Pulse Console Accept and Decline bridge",
+  "Problem / Request": "The Builder failed because PULSE-034 was marked READY before exact patches existed. Add the smallest working bridge now: requested rides in the Pulse Console RIDES view receive secure Accept and Decline actions that open the existing standalone request app, which remains the only writer and continues its existing email and Calendar results.",
+  "Acceptance Criteria": "Four reviewed exact patches are staged. Pulse Console reads requested rides from the shared DEV Ride Requests sheet and generates action-specific expiring HMAC Accept and Decline links compatible with the standalone request app. Accept opens the existing confirm flow, which updates the one request row, sends the customer confirmation, and creates the existing Calendar event. Decline opens the existing decline flow and sends its existing rider update. Runtime never writes Ride Requests, sends rider email, or creates Calendar events. mode=test uses example.invalid links and makes no writes. The build opens a reviewed pull request only; no merge, deployment, authorization, production data, fare, payment, or automatic dispatch.",
+  "Assigned Agent": "Pulse Builder",
+  "Branch / Build": "Target branch: pulse/pulse-034-rider-decision-bridge",
+  "Result URL": "",
+  "Last Error": "",
+  "Updated At": "2026-07-19",
+  "": "",
+  "builder": {
+    "version": "0.5.0-proof-locked-mockup-site",
+    "patchSource": "Task Patches",
+    "aiProvider": "none",
+    "summary": "Fix Pulse Console Accept and Decline bridge",
+    "targets": [
+      "Code.Server",
+      "Index.Style",
+      "Index.Client"
+    ],
+    "operationCount": 4,
+    "moduleNotes": [
+      {
+        "module": "Code.Server",
+        "summary": "Applied 1 reviewed exact operation.",
+        "operations": [
+          "Generate action-specific expiring HMAC links that open the existing standalone request app for Accept or Decline. Pulse Console remains read-only against Ride Requests and does not send email, create Calendar events, or write rider status itself."
+        ]
+      },
+      {
+        "module": "Index.Style",
+        "summary": "Applied 1 reviewed exact operation.",
+        "operations": [
+          "Restore compact driver decision controls in RIDES as signed links, without adding a second request form or a direct Ride Requests writer."
+        ]
+      },
+      {
+        "module": "Index.Client",
+        "summary": "Applied 2 reviewed exact operations.",
+        "operations": [
+          "Mirror Accept and Decline links in deterministic mode=test while preserving the no-write fixture contract.",
+          "Replace the read-only instruction with direct signed Accept and Decline actions that preserve the standalone request app as the only lifecycle writer."
+        ]
+      }
+    ],
+    "usage": "No AI used — exact operations staged in Task Patches",
+    "generatedAt": "2026-07-19T19:11:01.426Z",
+    "deploymentPerformed": false
+  }
+}
