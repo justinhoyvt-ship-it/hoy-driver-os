@@ -1,0 +1,20 @@
+{
+  "links": {
+    "home": "index.html",
+    "whatsUp": "whats-up.html",
+    "rideInterest": "#interest",
+    "access": "access.html",
+    "rideStatus": "ride-status.html",
+    "about": "#about",
+    "contact": "mailto:justinhoyvt@gmail.com",
+    "events": "https://www.sevendaysvt.com/vermont/EventSearch",
+    "markets": "https://nofavt.org/farmers-markets",
+    "destinations": "https://vermontvacation.com/",
+    "scenic": "https://www.visit-vermont.com/state/scenic-drives/",
+    "weather": "https://www.weather.gov/btv/",
+    "vtRoads": "https://www.facebook.com/share/g/1DHxsDkj7Z/?mibextid=wwXIfr",
+    "train": "https://www.amtrak.com/vermonter-train",
+    "bus": "https://www.connectingcommuters.org/transit/",
+    "bookingEndpoint": ""
+  }
+}
