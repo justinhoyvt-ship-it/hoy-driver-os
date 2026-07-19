@@ -1,0 +1,80 @@
+{
+  "Task ID": "PULSE-035",
+  "Created At": "2026-07-19",
+  "Priority": "HIGH",
+  "Status": "READY",
+  "Requested By": "Justin",
+  "Area": "Scheduled Ride Navigation",
+  "Title": "Start confirmed scheduled rides and switch phone navigation",
+  "Problem / Request": "Connect a CONFIRMED request to the existing active or queued trip lifecycle without creating a duplicate request or reservation record. Preserve the request ID and addresses through reload and queue promotion, then hand pickup or destination to the phone's navigation app.",
+  "Acceptance Criteria": "Fourteen reviewed exact patches are staged. A CONFIRMED ride shows Start Scheduled Ride, Navigate Pickup, and Navigate Destination. Starting is idempotent by Request ID and creates or restores one reservation-tagged active or queued trip state. The request app remains the sole Ride Requests writer. The dock navigation target is pickup before pickup and destination after pickup, including after reload or queue promotion. Completion retains the existing one-row Trips behavior and records Request ID, addresses, and route-derived miles in audit notes. mode=test is deterministic and no-write. This phase uses phone-native navigation handoff and does not claim embedded routing, background tracking, rider-status writes, fare, payment, automatic dispatch, merge, deployment, authorization, or production-data change.",
+  "Assigned Agent": "Pulse Builder",
+  "Branch / Build": "Target branch: pulse/pulse-035-scheduled-navigation",
+  "Result URL": "",
+  "Last Error": "",
+  "Updated At": "2026-07-19",
+  "": "",
+  "builder": {
+    "version": "0.5.0-proof-locked-mockup-site",
+    "patchSource": "Task Patches",
+    "aiProvider": "none",
+    "summary": "Start confirmed scheduled rides and switch phone navigation",
+    "targets": [
+      "Trips.gs",
+      "Code.Server",
+      "Index.Client",
+      "Index.Style",
+      "Index.Markup"
+    ],
+    "operationCount": 14,
+    "moduleNotes": [
+      {
+        "module": "Trips.gs",
+        "summary": "Applied 2 reviewed exact operations.",
+        "operations": [
+          "Preserve the original request ID and rider addresses in active or queued reservation state so reload, pickup, promotion, and navigation do not require a duplicate request row.",
+          "Record the originating request ID and scheduled addresses in the one completed Trips audit row."
+        ]
+      },
+      {
+        "module": "Code.Server",
+        "summary": "Applied 2 reviewed exact operations.",
+        "operations": [
+          "Create an idempotent Start Scheduled Ride endpoint that validates the existing CONFIRMED request and creates or queues one reservation state keyed by Request ID.",
+          "Advertise the scheduled-ride start endpoint in the fail-closed client/server capability handshake."
+        ]
+      },
+      {
+        "module": "Index.Client",
+        "summary": "Applied 8 reviewed exact operations.",
+        "operations": [
+          "Allowlist the new scheduled-ride start call instead of using an opaque dynamic server invocation.",
+          "Keep deterministic no-write trip fixtures compatible with scheduled request identity and navigation targets.",
+          "Exercise Start Scheduled Ride entirely against local fixtures in mode=test.",
+          "Restore the correct navigation target after refresh, rotation, queue promotion, pickup, completion, or cancellation.",
+          "Start the confirmed reservation, preserve active or queued state, and hand the current target to the phone's navigation app.",
+          "Show one idempotent Start Scheduled Ride control plus explicit pickup and destination navigation for each confirmed request.",
+          "Bind confirmed-ride start and navigation controls exactly once whenever RIDES renders.",
+          "Bind the context-aware dock navigation control without changing pickup, drop-off, cancellation, or route tracing."
+        ]
+      },
+      {
+        "module": "Index.Style",
+        "summary": "Applied 1 reviewed exact operation.",
+        "operations": [
+          "Add compact confirmed-ride start and native-navigation controls without expanding the driving dock."
+        ]
+      },
+      {
+        "module": "Index.Markup",
+        "summary": "Applied 1 reviewed exact operation.",
+        "operations": [
+          "Add one context-aware navigation handoff behind MORE so the primary driving controls remain unchanged."
+        ]
+      }
+    ],
+    "usage": "No AI used — exact operations staged in Task Patches",
+    "generatedAt": "2026-07-19T19:25:23.265Z",
+    "deploymentPerformed": false
+  }
+}
