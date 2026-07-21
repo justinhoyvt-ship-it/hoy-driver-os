@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#241335">
   <title>Pulse Vermont — Local project in testing</title>
-  <meta name="description" content="Pulse Vermont is a local driver-built project in testing, exploring a small cooperative circle outside traditional ridesharing.">
+  <meta name="description" content="Pulse Vermont is a local driver-built project in testing, exploring a small community model outside traditional ridesharing.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -139,7 +139,26 @@
     .logo path{fill:none;stroke:url(#pulseGradient);stroke-width:2.7;stroke-linecap:square;stroke-linejoin:miter}
     .nav-links{display:flex;gap:27px;font-family:var(--mono);font-size:.69rem;letter-spacing:.12em;text-transform:uppercase}
     .nav-links a:hover{color:var(--signal)}
-    @media(max-width:700px){.nav-links a:not(:last-child){display:none}}
+    .nav-toggle{
+      display:none;border:none;background:none;padding:7px;cursor:pointer;
+      flex-direction:column;justify-content:space-between;
+      width:36px;height:30px;flex-shrink:0
+    }
+    .nav-toggle span{display:block;width:100%;height:2px;background:var(--ink);border-radius:1px;transition:transform .2s,opacity .2s}
+    .nav-toggle[aria-expanded="true"] span:nth-child(1){transform:translateY(14px) rotate(45deg)}
+    .nav-toggle[aria-expanded="true"] span:nth-child(2){opacity:0}
+    .nav-toggle[aria-expanded="true"] span:nth-child(3){transform:translateY(-14px) rotate(-45deg)}
+    @media(max-width:700px){
+      .nav-toggle{display:flex}
+      .nav-links{
+        display:none;position:absolute;top:76px;left:0;right:0;z-index:59;
+        flex-direction:column;gap:0;
+        background:var(--paper);border-bottom:1px solid var(--line);
+        padding:10px 0;box-shadow:0 8px 24px rgba(0,0,0,.08)
+      }
+      .nav-links.open{display:flex}
+      .nav-links a{padding:13px 20px;font-size:.77rem;color:var(--ink)}
+    }
 
     .hero{
       position:relative;
@@ -290,11 +309,15 @@
         </svg>
         <span>PULSE VERMONT</span>
       </a>
-      <div class="nav-links">
+      <div class="nav-links" id="navMenu">
         <a href="#project">Project</a>
         <a href="#status">Status</a>
         <a href="#interest">Interest list</a>
+        <a href="whats-up.html">What's Up</a>
       </div>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navMenu" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </nav>
 
@@ -307,7 +330,7 @@
         <div class="hero-copy">
           <p class="eyebrow">Local project · in testing</p>
           <h1>Pulse <span>Vermont</span></h1>
-          <p class="hero-lede">A driver-built local mobility project exploring a small cooperative circle outside traditional ridesharing.</p>
+          <p class="hero-lede">A driver-built local project in testing, exploring a small community model outside traditional ridesharing.</p>
           <div class="hero-actions">
             <a class="text-link" href="#project">See the project</a>
             <a class="text-link" href="#interest">Add your email</a>
@@ -344,7 +367,7 @@
           <h2>One project. Two connected layers.</h2>
           <div class="section-copy">
             <p><strong>Driver cockpit</strong>An experienced Vermont driver is bringing route state, local conditions, trip history, and field notes into one mobile view.</p>
-            <p><strong>Cooperative circle</strong>Pulse is also gathering interest from local people who want to follow or help shape a small community model outside traditional ridesharing.</p>
+            <p><strong>Community circle</strong>Pulse is also gathering interest from local people who want to follow the project and give feedback as it develops.</p>
           </div>
         </div>
       </div>
@@ -388,7 +411,7 @@
           </div>
           <div class="scene-num">03 / LOCAL CIRCLE</div>
           <h3>Interest before scale</h3>
-          <p>A small list of local people following the project and helping shape what a cooperative model could become.</p>
+          <p>A small list of local people following the project and giving feedback as it develops.</p>
         </article>
       </div>
     </section>
@@ -498,6 +521,23 @@
       if(new URLSearchParams(location.search).get('submitted')==='1'){
         document.getElementById('successMessage').classList.add('show');
       }
+    })();
+
+    // Mobile navigation toggle
+    (function(){
+      var toggle=document.getElementById('navToggle');
+      var menu=document.getElementById('navMenu');
+      if(!toggle||!menu)return;
+      toggle.addEventListener('click',function(){
+        var open=menu.classList.toggle('open');
+        toggle.setAttribute('aria-expanded',String(open));
+      });
+      menu.querySelectorAll('a').forEach(function(a){
+        a.addEventListener('click',function(){
+          menu.classList.remove('open');
+          toggle.setAttribute('aria-expanded','false');
+        });
+      });
     })();
   </script>
 </body>
