@@ -82,7 +82,7 @@
     .logo path{fill:none;stroke:url(#pulseGradient);stroke-width:2.7;stroke-linecap:square;stroke-linejoin:miter}
     .nav-links{display:flex;gap:27px;font-family:var(--mono);font-size:.69rem;letter-spacing:.12em;text-transform:uppercase}
     .nav-links a:hover{color:var(--signal)}
-    .nav-links a.active{color:var(--signal)}
+    .nav-links a[aria-current="page"]{color:var(--signal)}
     .nav-toggle{
       display:none;border:none;background:none;padding:7px;cursor:pointer;
       flex-direction:column;justify-content:space-between;
@@ -177,7 +177,7 @@
         <a href="index.html#project">Project</a>
         <a href="index.html#status">Status</a>
         <a href="index.html#interest">Interest list</a>
-        <a href="whats-up.html" class="active">What's Up</a>
+        <a href="whats-up.html" aria-current="page">What's Up</a>
       </div>
       <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navMenu" aria-label="Toggle navigation">
         <span></span><span></span><span></span>
