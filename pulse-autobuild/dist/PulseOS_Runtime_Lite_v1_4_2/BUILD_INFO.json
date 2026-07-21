@@ -1,0 +1,7 @@
+{
+  "release": "Pulse OS Runtime Lite v1.4.2",
+  "builtAt": "2026-07-21T16:25:11.376Z",
+  "gitSha": "4374ce9c3a25286f016725c1724d043ddb6cabfa",
+  "githubRunId": "29848403137",
+  "deploymentModel": "GitHub autobuild; manual Apps Script deployment; no Apps Script API."
+}
