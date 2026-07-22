@@ -17,9 +17,13 @@ const HOY_SHEET_ID = '1Byk7-bwjhSeZQEqKemi0RxGagD_2RuYw94A8qu48tnY';
 const HOY_TZ = 'America/New_York';
 const HOY_DEFAULT_COST = Object.freeze({ fuelPerGal: 3.5, mpg: 25, maintPerMile: 0.10, taxRate: 0.22 });
 const HOY_DEFAULT_TEST = 'T-001';
-const HOY_BUILD = 'hoy-rider-lane-2026-07-22.2';
+const HOY_BUILD = 'hoy-waffle-inbox-2026-07-22.1';
 const RIDER_SHEET_ID = '1Hd46iUY84N2bvxdaIS4lf6l-uExxbXGIbUjxJzMF-No';
 const RIDER_SHEET_NAME = 'Ride Requests';
+const PULSE_LIVE_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbyde9C6y6iIoJO8AfWxt5z-D2FxwKXXMonpypmW8xaI7BZaAwChYBXM4JO7zqYvmw7Y/exec';
+const REQUEST_APP_URL_PROPERTY = 'PULSE_REQUEST_APP_URL';
+const REQUEST_APP_TOKEN_PROPERTY = 'PULSE_REQUEST_TOKEN';
+const LIVE_URL_PROPERTY = 'PULSE_LIVE_URL';
 
 /* ===== Entry points ===== */
 function doGet() {
@@ -49,6 +53,7 @@ function checkWiring() {
     riderReadError: rider.error || null,
     requestedRides: rider.items.filter(r => r.status === 'REQUESTED').length,
     confirmedRides: rider.items.filter(r => r.status === 'CONFIRMED').length,
+    requestDecisionBridgeConfigured: requestDecisionBridgeConfigured_(),
     nextShiftRow: sl ? firstEmptyShiftRow_(sl) : null,
     t001: t,
     nextOpportunity: getNextOpportunity_(ss),
@@ -62,6 +67,8 @@ function getCockpitBootstrap() {
   const ss = openHoy_();
   const ts = testsSheet_(ss);
   const rider = readRiderRequestsSafe_();
+  const requested = listRequestedRides_(rider.items);
+  const linked = attachRequestDecisionLinksSafe_(requested);
   return {
     ok: true,
     build: HOY_BUILD,
@@ -69,6 +76,9 @@ function getCockpitBootstrap() {
     cost: readCost_(ss),
     opportunity: getNextOpportunity_(ss),
     reservations: listReservations_(rider.items),
+    requests: linked.items,
+    requestDecisionError: linked.error || '',
+    liveUrl: pulseLiveUrl_(),
     riderReadError: rider.error || null
   };
 }
@@ -139,6 +149,80 @@ function endShiftToSheet(payload) {
   } finally {
     lock.releaseLock();
   }
+}
+
+
+/* ===== Driver Inbox (read-only in Hoy; decisions stay in request app) ===== */
+function listRequestedRides() {
+  const rider = readRiderRequestsSafe_();
+  const linked = attachRequestDecisionLinksSafe_(listRequestedRides_(rider.items));
+  return { items: linked.items, error: rider.error || linked.error || '' };
+}
+function listRequestedRides_(knownRiderRows) {
+  const riderRows = Array.isArray(knownRiderRows) ? knownRiderRows : readRiderRequestsSafe_().items;
+  return riderRows
+    .filter(r => r.status === 'REQUESTED')
+    .map(r => ({
+      requestId: r.requestId,
+      name: r.name || 'Ride request',
+      pickup: r.pickup || '',
+      destination: r.destination || '',
+      whenISO: r.whenISO,
+      notes: r.notes || '',
+      status: 'REQUESTED'
+    }))
+    .sort((a, b) => (Date.parse(a.whenISO) || 0) - (Date.parse(b.whenISO) || 0));
+}
+function requestDecisionBridgeConfigured_() {
+  const p = PropertiesService.getScriptProperties();
+  return !!(String(p.getProperty(REQUEST_APP_URL_PROPERTY) || '').trim() &&
+    String(p.getProperty(REQUEST_APP_TOKEN_PROPERTY) || '').trim());
+}
+function requestDecisionBridge_() {
+  const p = PropertiesService.getScriptProperties();
+  return {
+    url: String(p.getProperty(REQUEST_APP_URL_PROPERTY) || '').trim(),
+    token: String(p.getProperty(REQUEST_APP_TOKEN_PROPERTY) || '').trim()
+  };
+}
+function attachRequestDecisionLinksSafe_(items) {
+  try { return { items: attachRequestDecisionLinks_(items), error: '' }; }
+  catch (err) {
+    return {
+      items: (items || []).map(item => Object.assign({}, item, { acceptUrl: '', declineUrl: '' })),
+      error: String(err && err.message ? err.message : err)
+    };
+  }
+}
+function attachRequestDecisionLinks_(items) {
+  items = Array.isArray(items) ? items : [];
+  if (!items.length) return [];
+  const cfg = requestDecisionBridge_();
+  if (!cfg.url || !cfg.token) throw new Error('Request decision bridge is not configured.');
+  const ids = items.map(item => item.requestId).filter(Boolean).slice(0, 25);
+  const sep = cfg.url.indexOf('?') >= 0 ? '&' : '?';
+  const endpoint = cfg.url + sep +
+    'action=driver-actions&request=' + encodeURIComponent(cfg.token) +
+    '&ids=' + encodeURIComponent(ids.join(','));
+  const response = UrlFetchApp.fetch(endpoint, { method: 'get', muteHttpExceptions: true, followRedirects: true });
+  const status = response.getResponseCode();
+  let payload = {};
+  try { payload = JSON.parse(response.getContentText() || '{}'); } catch (err) {}
+  if (status < 200 || status >= 300 || payload.ok !== true) {
+    throw new Error(String(payload.message || ('Request decision bridge returned HTTP ' + status + '.')));
+  }
+  const byId = {};
+  (payload.actions || []).forEach(action => { if (action && action.requestId) byId[String(action.requestId)] = action; });
+  return items.map(item => {
+    const action = byId[String(item.requestId)] || {};
+    return Object.assign({}, item, {
+      acceptUrl: String(action.acceptUrl || ''),
+      declineUrl: String(action.declineUrl || '')
+    });
+  });
+}
+function pulseLiveUrl_() {
+  return String(PropertiesService.getScriptProperties().getProperty(LIVE_URL_PROPERTY) || PULSE_LIVE_URL_DEFAULT).trim();
 }
 
 /* ===== Reservations (Scheduled lane) =====
@@ -254,6 +338,8 @@ function debugRiderLane() {
     riderRows: rider.items,
     startedRiderIds: Object.keys(started).filter(id => id !== 'parseError'),
     projectedReservations: listReservations_(rider.items),
+    projectedInbox: listRequestedRides_(rider.items),
+    requestDecisionBridgeConfigured: requestDecisionBridgeConfigured_(),
     writesToRideRequests: false
   };
   console.log(JSON.stringify(result, null, 2));
