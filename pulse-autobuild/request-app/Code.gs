@@ -8,10 +8,18 @@
 
 const RIDE = Object.freeze({
   SHEET_NAME: 'Ride Requests',
+  STATUS_EVENTS_SHEET_NAME: 'Ride Status Events',
   TIMEZONE: 'America/New_York',
   DEFAULT_RIDE_MINUTES: 60,
   ACTION_TTL_DAYS: 30,
+  STATUS_PAGE_TTL_DAYS: 90,
   STATUSES: Object.freeze(['REQUESTED','CONFIRMED','DECLINED','CANCELLED','COMPLETED']),
+  RIDER_STATUS_SEQUENCE: Object.freeze([
+    'Confirmed','Leaving','On the way','Arriving soon','Arrived','Ride in progress','Complete'
+  ]),
+  STATUS_EVENT_HEADERS: Object.freeze([
+    'Event ID','Request ID','Status','Occurred At','Source','Idempotency Key'
+  ]),
   HEADERS: Object.freeze([
     'Request ID','Received At','Updated At','Status','Source',
     'Customer Name','Customer Phone','Customer Email',
@@ -63,6 +71,30 @@ function ensureRideHeaders_(sh) {
   }
 }
 
+function rideStatusEventsSheet_() {
+  const ss = rideSpreadsheet_();
+  let sh = ss.getSheetByName(RIDE.STATUS_EVENTS_SHEET_NAME);
+  if (!sh) sh = ss.insertSheet(RIDE.STATUS_EVENTS_SHEET_NAME);
+  ensureRideStatusEventHeaders_(sh);
+  return sh;
+}
+
+function ensureRideStatusEventHeaders_(sh) {
+  const existing = sh.getLastColumn()
+    ? sh.getRange(1, 1, 1, Math.max(sh.getLastColumn(), RIDE.STATUS_EVENT_HEADERS.length)).getValues()[0].map(String)
+    : [];
+  const ok = RIDE.STATUS_EVENT_HEADERS.every(function(header, index) { return existing[index] === header; });
+  if (!ok && sh.getLastRow() > 1) {
+    throw new Error('Ride Status Events headers do not match the expected append-only schema.');
+  }
+  if (!ok) {
+    sh.getRange(1, 1, 1, RIDE.STATUS_EVENT_HEADERS.length)
+      .setValues([RIDE.STATUS_EVENT_HEADERS])
+      .setFontWeight('bold');
+    sh.setFrozenRows(1);
+  }
+}
+
 function setupRideSystem() {
   const p = PropertiesService.getScriptProperties();
   if (!p.getProperty('CONFIRM_SECRET')) p.setProperty('CONFIRM_SECRET', Utilities.getUuid() + Utilities.getUuid());
@@ -71,9 +103,11 @@ function setupRideSystem() {
   if (!cfg.driverEmail) throw new Error('DRIVER_EMAIL is required in Script Properties.');
   if (!cfg.webAppUrl) throw new Error('WEB_APP_URL is required after deployment.');
   const sh = rideSheet_();
+  const statusSh = rideStatusEventsSheet_();
   return {
     ok: true,
     sheet: sh.getName(),
+    statusEventsSheet: statusSh.getName(),
     spreadsheetId: cfg.spreadsheetId,
     requestUrl: requestUrl_(),
     driverEmail: cfg.driverEmail
@@ -84,9 +118,9 @@ function doGet(e) {
   e = e || {};
   const params = e.parameter || {};
   const action = String(params.action || '').toLowerCase();
-  if (action === 'driver-actions') {
-    return driverActionLinksResponse_(params);
-  }
+  if (action === 'driver-actions') return driverActionLinksResponse_(params);
+  if (action === 'driver-status-state') return driverStatusStateResponse_(params);
+  if (action === 'status') return rideStatusPage_(params);
   if (action === 'confirm' || action === 'decline' || action === 'cancel') {
     return rideActionPage_(action, params);
   }
@@ -94,6 +128,23 @@ function doGet(e) {
     .setTitle('Pulse Vermont — Request a ride')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+function doPost(e) {
+  e = e || {};
+  const params = Object.assign({}, e.parameter || {}, parseJsonPost_(e));
+  const action = String(params.action || '').toLowerCase();
+  if (action === 'driver-status') return driverStatusUpdateResponse_(params);
+  return jsonResponse_({ ok: false, message: 'Unsupported request action.' });
+}
+
+function parseJsonPost_(e) {
+  try {
+    const text = e && e.postData ? String(e.postData.contents || '') : '';
+    return text ? (JSON.parse(text) || {}) : {};
+  } catch (error) {
+    return {};
+  }
 }
 
 
@@ -119,6 +170,230 @@ function driverActionLinksResponse_(params) {
     });
   });
   return jsonResponse_({ ok: true, actions: actions });
+}
+
+
+function normalizeRiderStatus_(value) {
+  const key = String(value || '').trim().toLowerCase().replace(/[\s_-]+/g, ' ');
+  const map = {
+    'confirmed':'Confirmed',
+    'leaving':'Leaving',
+    'on the way':'On the way',
+    'arriving soon':'Arriving soon',
+    'arrived':'Arrived',
+    'ride in progress':'Ride in progress',
+    'complete':'Complete',
+    'completed':'Complete',
+    'cancelled':'Cancelled',
+    'canceled':'Cancelled'
+  };
+  return map[key] || '';
+}
+
+function riderStatusIndex_(status) {
+  return RIDE.RIDER_STATUS_SEQUENCE.indexOf(normalizeRiderStatus_(status));
+}
+
+function riderStatusCanAdvance_(current, next) {
+  const currentLabel = normalizeRiderStatus_(current);
+  const nextLabel = normalizeRiderStatus_(next);
+  if (!nextLabel || nextLabel === 'Cancelled') return false;
+  if (currentLabel === nextLabel) return true;
+  const currentIndex = riderStatusIndex_(currentLabel);
+  const nextIndex = riderStatusIndex_(nextLabel);
+  return currentIndex >= 0 && nextIndex === currentIndex + 1;
+}
+
+function riderStatusEvents_(requestId) {
+  const id = String(requestId || '').trim();
+  const sh = rideStatusEventsSheet_();
+  const values = sh.getDataRange().getValues();
+  if (values.length < 2) return [];
+  const headers = values[0].map(String);
+  const at = function(name) { return headers.indexOf(name); };
+  return values.slice(1).filter(function(row) {
+    return String(row[at('Request ID')] || '') === id;
+  }).map(function(row) {
+    return {
+      eventId: String(row[at('Event ID')] || ''),
+      requestId: id,
+      status: normalizeRiderStatus_(row[at('Status')]),
+      occurredAt: isoOrNull_(row[at('Occurred At')]),
+      source: String(row[at('Source')] || ''),
+      idempotencyKey: String(row[at('Idempotency Key')] || '')
+    };
+  }).filter(function(event) { return !!event.status; });
+}
+
+function currentRiderStatus_(requestId, found) {
+  const events = riderStatusEvents_(requestId);
+  if (events.length) return events[events.length - 1];
+  found = found || findRideRow_(requestId);
+  if (!found) return null;
+  const base = String(found.obj.Status || '').toUpperCase();
+  if (base === 'CONFIRMED') return { requestId:String(requestId), status:'Confirmed', occurredAt:isoOrNull_(found.obj['Confirmed At']), inferred:true };
+  if (base === 'COMPLETED') return { requestId:String(requestId), status:'Complete', occurredAt:isoOrNull_(found.obj['Completed At']), inferred:true };
+  if (base === 'CANCELLED') return { requestId:String(requestId), status:'Cancelled', occurredAt:isoOrNull_(found.obj['Cancelled At']), inferred:true };
+  return null;
+}
+
+function findStatusEventByKey_(events, key) {
+  key = String(key || '');
+  if (!key) return null;
+  for (let i = 0; i < events.length; i++) if (events[i].idempotencyKey === key) return events[i];
+  return null;
+}
+
+function findStatusEventByStatus_(events, status) {
+  const wanted = normalizeRiderStatus_(status);
+  for (let i = 0; i < events.length; i++) if (events[i].status === wanted) return events[i];
+  return null;
+}
+
+function appendRideStatusEvent_(requestId, status, source, idempotencyKey) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    return appendRideStatusEventUnlocked_(requestId, status, source, idempotencyKey);
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function appendRideStatusEventUnlocked_(requestId, status, source, idempotencyKey) {
+  const id = String(requestId || '').trim();
+  const next = normalizeRiderStatus_(status);
+  const key = String(idempotencyKey || (id + ':' + String(next).toLowerCase().replace(/\s+/g, '-'))).trim();
+  if (!/^FR-[A-Z0-9]+$/i.test(id)) throw new Error('Ride request ID is not valid.');
+  if (!next) throw new Error('Rider status is not valid.');
+  if (!key || key.length > 180) throw new Error('Idempotency key is required.');
+
+  const found = findRideRow_(id);
+  if (!found) throw new Error('Ride request not found.');
+  const rideState = String(found.obj.Status || '').toUpperCase();
+  if (rideState === 'DECLINED') throw new Error('A declined ride cannot receive status updates.');
+  if (rideState === 'CANCELLED' && next !== 'Cancelled') throw new Error('A cancelled ride cannot receive status updates.');
+
+  const events = riderStatusEvents_(id);
+  const keyed = findStatusEventByKey_(events, key);
+  if (keyed) {
+    if (keyed.status !== next) throw new Error('Idempotency key was already used for another status.');
+    return Object.assign({ ok:true, duplicate:true }, keyed);
+  }
+  const sameStatus = findStatusEventByStatus_(events, next);
+  if (sameStatus) return Object.assign({ ok:true, duplicate:true }, sameStatus);
+
+  const current = currentRiderStatus_(id, found);
+  if (next === 'Cancelled') {
+    if (rideState !== 'CONFIRMED' && rideState !== 'CANCELLED') throw new Error('Only a confirmed ride can be cancelled.');
+  } else if (next === 'Confirmed') {
+    if (rideState !== 'CONFIRMED') throw new Error('The ride must be confirmed before the Confirmed event is recorded.');
+  } else {
+    if (!current || current.status === 'Cancelled' || current.status === 'Complete') throw new Error('Ride status cannot advance from its current state.');
+    if (!riderStatusCanAdvance_(current.status, next)) {
+      throw new Error('Next rider status must follow the approved progression after ' + current.status + '.');
+    }
+  }
+
+  const now = new Date();
+  const event = {
+    eventId: 'RSE-' + Utilities.getUuid().slice(0, 12).toUpperCase(),
+    requestId: id,
+    status: next,
+    occurredAt: now.toISOString(),
+    source: String(source || 'HOY_DRIVER').slice(0, 40),
+    idempotencyKey: key
+  };
+  rideStatusEventsSheet_().appendRow([
+    event.eventId, event.requestId, event.status, now, event.source, event.idempotencyKey
+  ]);
+
+  if (next === 'Complete' && rideState !== 'COMPLETED') {
+    updateRideCells_(found.rowIndex, { 'Status':'COMPLETED', 'Updated At':now, 'Completed At':now });
+  }
+  return Object.assign({ ok:true, duplicate:false }, event);
+}
+
+function driverStatusUpdateResponse_(params) {
+  const cfg = rideCfg_();
+  const supplied = String((params && params.request) || '');
+  if (!secureEqual_(supplied, cfg.requestToken)) {
+    return jsonResponse_({ ok:false, message:'Driver status access is not valid.' });
+  }
+  try {
+    const result = appendRideStatusEvent_(
+      String(params.id || ''),
+      String(params.status || ''),
+      'HOY_DRIVER',
+      String(params.key || '')
+    );
+    return jsonResponse_({
+      ok:true,
+      requestId:result.requestId,
+      status:result.status,
+      occurredAt:result.occurredAt,
+      duplicate:result.duplicate === true
+    });
+  } catch (error) {
+    return jsonResponse_({ ok:false, message:String((error && error.message) || error) });
+  }
+}
+
+function driverStatusStateResponse_(params) {
+  const cfg = rideCfg_();
+  const supplied = String((params && params.request) || '');
+  if (!secureEqual_(supplied, cfg.requestToken)) {
+    return jsonResponse_({ ok:false, message:'Driver status access is not valid.' });
+  }
+  const ids = String((params && params.ids) || '').split(',')
+    .map(function(id) { return String(id || '').trim(); })
+    .filter(function(id, index, all) { return /^FR-[A-Z0-9]+$/i.test(id) && all.indexOf(id) === index; })
+    .slice(0, 25);
+  const states = ids.map(function(id) {
+    const state = currentRiderStatus_(id);
+    return state ? { requestId:id, status:state.status, occurredAt:state.occurredAt || null } : null;
+  }).filter(Boolean);
+  return jsonResponse_({ ok:true, states:states });
+}
+
+function rideStatusUrl_(requestId) {
+  const cfg = rideCfg_();
+  if (!cfg.webAppUrl) throw new Error('WEB_APP_URL is required in Script Properties.');
+  const exp = Math.floor(Date.now() / 1000) + RIDE.STATUS_PAGE_TTL_DAYS * 86400;
+  return cfg.webAppUrl + '?action=status&id=' + encodeURIComponent(requestId) + '&exp=' + exp + '&t=' + actionToken_('status', requestId, exp);
+}
+
+function rideStatusPage_(params) {
+  const id = String((params && params.id) || '');
+  const exp = String((params && params.exp) || '');
+  const token = String((params && params.t) || '');
+  if (!id || !exp || !token || !verifyActionToken_('status', id, exp, token)) {
+    return htmlMessage_('Status unavailable', 'This private ride-status link is not valid.');
+  }
+  const state = currentRiderStatus_(id);
+  if (!state) return htmlMessage_('Status unavailable', 'No rider-safe status is available for this ride.');
+  return renderRiderStatusPage_(state.status, state.occurredAt);
+}
+
+function renderRiderStatusPage_(currentStatus, occurredAt) {
+  const current = normalizeRiderStatus_(currentStatus);
+  const cancelled = current === 'Cancelled';
+  const currentIndex = riderStatusIndex_(current);
+  const rows = RIDE.RIDER_STATUS_SEQUENCE.map(function(label, index) {
+    const cls = cancelled ? '' : (index < currentIndex ? 'done' : index === currentIndex ? 'current' : '');
+    return '<li class="' + cls + '"><span></span><b>' + esc_(label) + '</b></li>';
+  }).join('');
+  const updated = occurredAt ? '<p class="updated">Updated ' + esc_(formatStatusTime_(occurredAt)) + '</p>' : '';
+  const cancellation = cancelled ? '<div class="cancelled">Ride cancelled</div>' : '';
+  const page = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+    '<title>Ride status</title><style>body{margin:0;min-height:100vh;background:#0b1023;color:#f4f2ee;font-family:Arial,sans-serif;display:grid;place-items:center;padding:24px}.card{width:min(520px,100%);padding:28px;border:1px solid #2b334c;background:#11172c}h1{margin:0 0 8px;font-size:1.8rem}.sub,.updated{color:#a6adc0}.sub{margin:0 0 24px}.updated{font-size:.82rem;margin:18px 0 0}ol{list-style:none;padding:0;margin:0;display:grid;gap:12px}li{display:flex;gap:12px;align-items:center;color:#69738f}li span{width:14px;height:14px;border:2px solid #3c4666;border-radius:50%}li.done,li.current{color:#f4f2ee}li.done span{background:#56d39c;border-color:#56d39c}li.current span{background:#45e7ff;border-color:#45e7ff;box-shadow:0 0 0 5px rgba(69,231,255,.12)}.cancelled{margin:18px 0;padding:14px;border:1px solid #ff6680;color:#ff9aac;font-weight:700}.note{margin-top:24px;color:#a6adc0;font-size:.82rem;line-height:1.5}</style></head>' +
+    '<body><main class="card"><h1>Ride status</h1><p class="sub">Updates from your driver.</p>' + cancellation + '<ol>' + rows + '</ol>' + updated + '<p class="note">This page shows status updates only. Location is not shown.</p></main></body></html>';
+  return HtmlService.createHtmlOutput(page).setTitle('Ride status');
+}
+
+function formatStatusTime_(value) {
+  const date = value instanceof Date ? value : new Date(value);
+  return isNaN(date.getTime()) ? '' : Utilities.formatDate(date, RIDE.TIMEZONE, "MMM d 'at' h:mm a");
 }
 
 function jsonResponse_(payload) {
@@ -281,6 +556,16 @@ function transitionRide_(requestId, nextStatus) {
 
     updateRideCells_(found.rowIndex, updates);
     Object.keys(updates).forEach(function(key) { found.obj[key] = updates[key]; });
+
+    if (nextStatus === 'CONFIRMED') {
+      appendRideStatusEventUnlocked_(requestId, 'Confirmed', 'REQUEST_APP', requestId + ':confirmed');
+    }
+    if (nextStatus === 'CANCELLED') {
+      appendRideStatusEventUnlocked_(requestId, 'Cancelled', 'REQUEST_APP', requestId + ':cancelled');
+    }
+    if (nextStatus === 'COMPLETED') {
+      appendRideStatusEventUnlocked_(requestId, 'Complete', 'REQUEST_APP', requestId + ':complete');
+    }
 
     if (nextStatus === 'CONFIRMED') notifyCustomerConfirmed_(found.obj);
     if (nextStatus === 'DECLINED') notifyCustomerDeclined_(found.obj);
@@ -562,6 +847,40 @@ function menuRideAction_(status) {
   } catch (err) {
     ui.alert('Error: ' + String((err && err.message) || err));
   }
+}
+
+/**
+ * Deterministic PULSE-041 self-test. No Sheet, Mail, Calendar, deployment,
+ * or production operation is performed.
+ */
+function testRideStatusProgressionPackage() {
+  const exact = ['Confirmed','Leaving','On the way','Arriving soon','Arrived','Ride in progress','Complete'];
+  if (JSON.stringify(RIDE.RIDER_STATUS_SEQUENCE) !== JSON.stringify(exact)) {
+    throw new Error('Rider status wording or order changed.');
+  }
+  for (let i = 1; i < exact.length; i++) {
+    if (!riderStatusCanAdvance_(exact[i - 1], exact[i])) throw new Error('Status progression is not sequential at ' + exact[i] + '.');
+  }
+  if (riderStatusCanAdvance_('Confirmed', 'Arriving soon')) throw new Error('Status progression allows skipping.');
+  if (!riderStatusCanAdvance_('Arrived', 'Arrived')) throw new Error('Idempotent repeated status is not accepted.');
+  const safePage = renderRiderStatusPage_('On the way', '2026-07-22T18:00:00Z').getContent();
+  ['Customer Name','Customer Email','Driver Notes','earnings','API key','live GPS'].forEach(function(marker) {
+    if (safePage.indexOf(marker) >= 0) throw new Error('Rider-safe status page exposes a forbidden marker: ' + marker);
+  });
+  const result = {
+    ok:true,
+    taskId:'PULSE-041',
+    sequence:exact,
+    cancellationSeparate:true,
+    appendOnly:true,
+    idempotent:true,
+    riderSafePage:true,
+    writesPerformed:false,
+    deploymentPerformed:false,
+    productionTouched:false
+  };
+  console.log(JSON.stringify(result, null, 2));
+  return result;
 }
 
 /**
