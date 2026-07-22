@@ -1,68 +1,47 @@
 # Pulse Vermont Private Ride Request App
 
-This is a separate Apps Script web app from Pulse Runtime Lite. The separation is intentional: the request app needs email and calendar permissions, while the driver dashboard keeps its narrower runtime permissions.
+This standalone Apps Script project remains the only writer for ride requests, rider status events, rider email, and ride Calendar events.
 
-## Files
+## PULSE-041 rider status progression
 
-- `Code.gs` — request intake, signed driver actions, email, calendar, lifecycle, and Sheet menu
-- `RequestForm.html` — private customer-facing request page
-- `appsscript.json` — project manifest and required scopes
-- `testRideRequestAppPackage()` — deterministic no-write, action-signature, and lifecycle self-test
+The rider-facing sequence is exactly:
 
-## DEV configuration
+`Confirmed → Leaving → On the way → Arriving soon → Arrived → Ride in progress → Complete`
 
-Create a new standalone Apps Script project and add the three files. In **Project Settings → Script properties**, add:
+Cancellation is separate.
 
-| Property | Value |
-|---|---|
-| `SPREADSHEET_ID` | `1Hd46iUY84N2bvxdaIS4lf6l-uExxbXGIbUjxJzMF-No` |
-| `DRIVER_NAME` | Your public driver name |
-| `DRIVER_EMAIL` | Email that receives requests |
-| `DRIVER_PHONE` | Optional confirmation contact |
-| `VEHICLE` | Optional vehicle description |
-| `CALENDAR_ID` | `primary` or a specific calendar ID |
-| `WEB_APP_URL` | Add after the first deployment |
+The app creates or verifies an append-only `Ride Status Events` tab with these columns:
 
-Do not manually create `CONFIRM_SECRET` or `REQUEST_TOKEN`; `setupRideSystem()` generates them.
+- Event ID
+- Request ID
+- Status
+- Occurred At
+- Source
+- Idempotency Key
 
-## First deployment
+The existing `REQUEST_TOKEN` authenticates server-to-server calls from Hoy Driver. No second secret is introduced.
 
-1. Save all files.
-2. Deploy as a web app, executing as you, with access set to anyone.
-3. Copy the `/exec` URL into the `WEB_APP_URL` Script Property.
-4. Run `setupRideSystem()` once and approve spreadsheet, email, and calendar permissions.
-5. Run `setupRideSystem()` again. Its result includes the private request URL.
-6. Share only the URL containing `?request=...`.
+## Endpoints
 
-## Driver Inbox decision bridge
+- `GET action=driver-actions` returns signed Accept and Decline links for REQUESTED rides.
+- `POST action=driver-status` appends one authenticated status event.
+- `GET action=driver-status-state` returns only rider-safe current statuses for requested IDs.
+- `GET action=status` renders a signed rider-safe status page. PULSE-042 will add Ride ID and PIN access and control delivery of the private link.
 
-The Hoy Driver app may read REQUESTED rides directly from the shared Sheet, but it must not update those rows. To surface the existing signed decision flow inside the driver Inbox:
+Repeated status taps are idempotent. The same Request ID and status cannot be appended twice, and the same idempotency key cannot be reused for another status. Statuses cannot skip the approved sequence.
 
-1. Keep the request app's existing `REQUEST_TOKEN`.
-2. In the Hoy Driver Apps Script project, set `PULSE_REQUEST_APP_URL` to this request app's `/exec` URL.
-3. Set `PULSE_REQUEST_TOKEN` to the same existing request-app `REQUEST_TOKEN`.
-4. The Hoy server calls the request app's `driver-actions` endpoint and receives short-lived signed Accept and Decline URLs.
-5. Accept and Decline still execute inside this request app. The Hoy app never writes Ride Requests directly.
+## Rider-safe page
 
-No new decision secret is created for this bridge.
+The status page displays only the approved progression and last update time. It does not display customer contact information, pickup or destination details, driver notes, shift data, earnings, API keys, other rides, or a live GPS claim.
 
-## Lifecycle
+## Existing lifecycle
 
 - `REQUESTED` → `CONFIRMED`, `DECLINED`, or `CANCELLED`
-- `CONFIRMED` → `COMPLETED` or `CANCELLED`
-- `DECLINED`, `CANCELLED`, and `COMPLETED` are terminal
+- `CONFIRMED` → rider status progression or `CANCELLED`
+- `Complete` updates the main request row to `COMPLETED`
 
-Driver action links are signed over the action, request ID, and expiration. A confirmation link cannot be altered into a decline link.
+Confirmation still creates the Calendar event and sends the existing confirmation email. PULSE-041 does not automatically send the status-page link; PULSE-042 owns Ride ID, PIN, and private-link delivery.
 
-## Test mode
+## Validation
 
-Append `&mode=test` to the private request URL. The form displays `TEST MODE · NO WRITES` and returns a deterministic request result without sending email, creating a calendar event, or writing to the Sheet.
-
-## Separation from Pulse telemetry
-
-The app writes only to the `Ride Requests` tab in the DEV spreadsheet. It does not create shift, trip, ping, or earnings records. A later Runtime Lite dashboard patch may read the tab to show upcoming confirmed rides.
-
-
-## Repository validation
-
-Before deployment, run `testRideRequestAppPackage()` in the isolated request-app project. A passing result reports `writesPerformed: false`. The test uses a fixed in-memory secret and does not access Sheets, Mail, Calendar, Script Properties, or production.
+Run `testRideStatusProgressionPackage()` before review. It performs no Sheet, Mail, Calendar, deployment, or production operation.
