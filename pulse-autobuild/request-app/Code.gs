@@ -84,6 +84,9 @@ function doGet(e) {
   e = e || {};
   const params = e.parameter || {};
   const action = String(params.action || '').toLowerCase();
+  if (action === 'driver-actions') {
+    return driverActionLinksResponse_(params);
+  }
   if (action === 'confirm' || action === 'decline' || action === 'cancel') {
     return rideActionPage_(action, params);
   }
@@ -91,6 +94,37 @@ function doGet(e) {
     .setTitle('Pulse Vermont — Request a ride')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+
+function driverActionLinksResponse_(params) {
+  const cfg = rideCfg_();
+  const supplied = String((params && params.request) || '');
+  if (!secureEqual_(supplied, cfg.requestToken)) {
+    return jsonResponse_({ ok: false, message: 'Request decision access is not valid.' });
+  }
+  const ids = String((params && params.ids) || '')
+    .split(',')
+    .map(function(id) { return String(id || '').trim(); })
+    .filter(function(id, index, all) { return /^FR-[A-Z0-9]+$/i.test(id) && all.indexOf(id) === index; })
+    .slice(0, 25);
+  const actions = [];
+  ids.forEach(function(id) {
+    const found = findRideRow_(id);
+    if (!found || String(found.obj.Status || '').toUpperCase() !== 'REQUESTED') return;
+    actions.push({
+      requestId: id,
+      acceptUrl: actionUrl_('confirm', id),
+      declineUrl: actionUrl_('decline', id)
+    });
+  });
+  return jsonResponse_({ ok: true, actions: actions });
+}
+
+function jsonResponse_(payload) {
+  return ContentService
+    .createTextOutput(JSON.stringify(payload || {}))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 function getPublicConfig(payload) {
