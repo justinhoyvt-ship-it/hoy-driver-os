@@ -1,0 +1,45 @@
+{
+  "taskId": "PULSE-050",
+  "title": "Add the minimal waffle and request decisions to Hoy Driver",
+  "area": "Driver Waffle + Inbox",
+  "acceptanceCriteria": "No extra waffle items and no separate Requests menu. No general copy rewrite or redesign. Keep the same section order, map, Scheduled lane behavior, ride controls, state logic, server calls, and mobile-first layout. GO ONLINE starts the shift and remains labeled GO ONLINE. Accept ride remains labeled Accept ride. Do not display No ride queued or No scheduled rides text. Do not automatically open the per-ride fare overlay after Drop off. Earnings entry is optional during the shift and reconciled at End shift until payments are accepted through Pulse. Inbox reads REQUESTED rows from 1Hd and offers secure Accept and Decline through the existing request app, which remains the only Ride Requests writer. Accept updates the existing row once and moves it to Scheduled; Decline updates the existing row once. No duplicate request or reservation, no direct Hoy write, no rider email/calendar change in test mode, and no production deployment automatically.",
+  "buildId": "BUILD-20260722-185022",
+  "branch": "pulse/pulse-050-hoy-waffle-inbox",
+  "builderVersion": "0.5.4-hoy-waffle-inbox",
+  "mode": "hoy-waffle-inbox-package",
+  "paths": [
+    "apps-script/hoy-driver-os-writer/Code.gs",
+    "apps-script/hoy-driver-os-writer/Index.html",
+    "apps-script/hoy-driver-os-writer/appsscript.json",
+    "apps-script/hoy-driver-os-writer/README.md",
+    "pulse-autobuild/request-app/Code.gs",
+    "pulse-autobuild/request-app/README.md"
+  ],
+  "validation": {
+    "ok": true,
+    "taskId": "PULSE-050",
+    "paths": [
+      "apps-script/hoy-driver-os-writer/Code.gs",
+      "apps-script/hoy-driver-os-writer/Index.html",
+      "apps-script/hoy-driver-os-writer/appsscript.json",
+      "apps-script/hoy-driver-os-writer/README.md",
+      "pulse-autobuild/request-app/Code.gs",
+      "pulse-autobuild/request-app/README.md"
+    ],
+    "totalChars": 103330,
+    "build": "hoy-waffle-inbox-2026-07-22.1",
+    "waffleItems": [
+      "Inbox",
+      "Live",
+      "Settings"
+    ],
+    "requestWriter": "request-app-only",
+    "forcedFarePrompt": false,
+    "deploymentPerformed": false,
+    "productionTouched": false
+  },
+  "aiProvider": "none",
+  "deploymentPerformed": false,
+  "productionTouched": false,
+  "generatedAt": "2026-07-22T22:50:30.661Z"
+}

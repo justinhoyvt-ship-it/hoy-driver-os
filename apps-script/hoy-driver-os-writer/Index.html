@@ -16,8 +16,8 @@
       --green:#45e394; --red:#ff6680;
       --text:#eaf2ff; --muted:#9fb2d6; --line:rgba(255,255,255,.12);
       --display:'Space Grotesk',sans-serif; --sans:'IBM Plex Sans',system-ui,sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
-      --glass:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.022));
-      --glow:0 14px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.10);
+      --glass:linear-gradient(180deg, rgba(255,255,255,.048), rgba(255,255,255,.018));
+      --glow:0 10px 28px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.08);
     }
     *{box-sizing:border-box}
     html,body{margin:0;height:100%}
@@ -30,7 +30,30 @@
     button{font:inherit;cursor:pointer;border:0;color:inherit}
     input,select{font-family:var(--sans)}
     .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
-    .head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .head{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .head-actions{display:flex;align-items:center;gap:8px}
+    .waffle-btn{width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:rgba(255,255,255,.045);display:grid;place-items:center;padding:0}
+    .waffle-grid{width:17px;height:17px;display:grid;grid-template-columns:repeat(3,4px);grid-template-rows:repeat(3,4px);gap:2.5px}
+    .waffle-grid i{width:4px;height:4px;border-radius:1px;background:var(--text);display:block}
+    .menu-pop{position:absolute;right:0;top:48px;z-index:950;width:170px;padding:7px;border:1px solid var(--line);border-radius:13px;background:rgba(10,15,36,.97);box-shadow:0 16px 38px rgba(0,0,0,.42);backdrop-filter:blur(14px);display:none}
+    .menu-pop.show{display:grid}
+    .menu-item{min-height:43px;text-align:left;border-radius:9px;background:transparent;color:var(--text);padding:0 12px;font-family:var(--display);font-size:.9rem;font-weight:600}
+    .menu-item:active{background:rgba(255,255,255,.08)}
+    .menu-sheet{max-height:min(78dvh,620px);overflow:auto}
+    .menu-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .menu-head h2{margin:0}
+    .menu-close{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:1.35rem;line-height:1}
+    .inbox-list{display:grid;gap:10px}
+    .inbox-card{padding:14px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.035)}
+    .inbox-card b{display:block;font-family:var(--display);font-size:1rem;margin-bottom:4px}
+    .inbox-time{font-family:var(--mono);font-size:.7rem;color:var(--sun);margin-bottom:7px}
+    .inbox-route{font-size:.82rem;line-height:1.45}
+    .inbox-notes{font-size:.74rem;color:var(--muted);margin-top:7px}
+    .inbox-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+    .inbox-actions button{min-height:43px;border-radius:10px;font-family:var(--display);font-weight:700}
+    .inbox-accept{background:linear-gradient(180deg,#8ff5c1,var(--green) 55%,#1f9c63);color:#04220f}
+    .inbox-decline{background:rgba(255,102,128,.08);border:1px solid rgba(255,102,128,.38);color:var(--red)}
+    .settings-sheet{height:min(62dvh,480px);background:linear-gradient(180deg,rgba(22,28,58,.98),rgba(10,15,36,.98))}
     .brand{display:flex;align-items:center;gap:9px;font-family:var(--display);font-weight:700;font-size:.98rem}
     .logo{width:36px;height:18px}.logo path{fill:none;stroke:url(#g);stroke-width:3;stroke-linecap:square}
     .tag{font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);border-radius:7px;padding:4px 8px;background:rgba(255,255,255,.04)}
@@ -87,7 +110,7 @@
     .s-main{font-family:var(--display);font-weight:700;font-size:1.5rem;letter-spacing:-.02em;margin:5px 0 3px}
     .s-sub{color:var(--muted);font-size:.84rem}
     .s-timer{font-family:var(--mono);font-size:.9rem;margin-top:9px;font-variant-numeric:tabular-nums}.s-timer span{color:var(--muted);font-size:.64rem;letter-spacing:.04em}
-    .queue{border-radius:11px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--muted);font-size:.84rem;border-style:dashed;transition:.25s}
+    .queue{border-radius:11px;padding:10px 14px;display:none;align-items:center;justify-content:space-between;gap:12px;color:var(--muted);font-size:.84rem;border-style:dashed;transition:.25s}
     .queue.live{border-style:solid;border-color:rgba(247,178,59,.45);background:rgba(247,178,59,.08);color:var(--sun)}
     .q-label{font-size:.76rem}.q-time{font-family:var(--mono);font-size:.74rem}
     .accept{position:relative;overflow:hidden;width:100%;min-height:62px;border-radius:15px;font-family:var(--display);font-weight:700;font-size:1.08rem;letter-spacing:.04em;color:#241606;background:linear-gradient(180deg,#ffe0a6 0%,var(--sun) 46%,#d98f1e 100%);box-shadow:0 12px 30px rgba(247,178,59,.32),inset 0 1px 0 rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .08s}
@@ -161,7 +184,17 @@
 
   <div class="head">
     <div class="brand"><svg class="logo" viewBox="0 0 100 40"><path d="M0,20 L15,20 L25,5 L35,35 L45,10 L55,20 L100,20"/></svg><span>Pulse Console</span></div>
-    <span class="tag" id="modeTag">connecting</span>
+    <div class="head-actions">
+      <span class="tag" id="modeTag">connecting</span>
+      <button class="waffle-btn" id="waffleBtn" type="button" aria-label="Open menu" aria-expanded="false">
+        <span class="waffle-grid" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      </button>
+    </div>
+    <div class="menu-pop" id="waffleMenu">
+      <button class="menu-item" id="menuInbox" type="button">Inbox</button>
+      <button class="menu-item" id="menuLive" type="button">Live</button>
+      <button class="menu-item" id="menuSettings" type="button">Settings</button>
+    </div>
   </div>
 
   <div class="opp" id="oppCard" style="display:none">
@@ -262,16 +295,30 @@
   </div>
 </div>
 
+<!-- Inbox overlay -->
+<div class="overlay" id="inboxOverlay">
+  <div class="sheet menu-sheet">
+    <div class="menu-head"><h2>Inbox</h2><button class="menu-close" id="closeInboxBtn" type="button" aria-label="Close inbox">&times;</button></div>
+    <div class="inbox-list" id="inboxList"></div>
+  </div>
+</div>
+
+<!-- Settings intentionally blank -->
+<div class="overlay" id="settingsOverlay" aria-label="Settings">
+  <div class="sheet settings-sheet"></div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   var $=function(id){return document.getElementById(id)};
-  var S={shift:null, active:null, queued:null, scheduled:[]};
+  var S={shift:null, active:null, queued:null, scheduled:[], requests:[]};
   var boot={test:null, cost:null, opportunity:null};
   var LIVE=(typeof google!=='undefined' && google.script && google.script.run);
   var map=null, meMarker=null, trace={watch:null, pts:[], miles:0, line:null};
   var mockResList=[];
+  var mockRequestList=[{requestId:'FR-PREVIEW1',name:'Preview rider',pickup:'Essex Junction',destination:'BTV Airport',whenISO:new Date(Date.now()+7200000).toISOString(),notes:'',status:'REQUESTED',acceptUrl:'',declineUrl:''}];
 
   function srv(fn){
     var args=[].slice.call(arguments,1);
@@ -283,8 +330,11 @@
       test:{id:'T-001',status:'READY',baseline:38.44,green:45,red:34,alreadyClosed:false},
       cost:{fuelPerGal:3.5,mpg:25,maintPerMile:0.10,taxRate:0.22},
       reservations:mockResList.slice(),
+      requests:mockRequestList.slice(),
+      liveUrl:'https://script.google.com/macros/s/AKfycbyde9C6y6iIoJO8AfWxt5z-D2FxwKXXMonpypmW8xaI7BZaAwChYBXM4JO7zqYvmw7Y/exec',
       opportunity:{date:'Sat Jul 18',event:'SlipBizkit + Sex With Jenna',location:'Higher Ground, South Burlington',demand:'High',window:'10:00 PM-12:00 AM est.',move:'Two same-night events may create staggered exits; work the corridor, not the curb.'}};
     if(fn==='listReservations') return mockResList.slice();
+    if(fn==='listRequestedRides') return {items:mockRequestList.slice(),error:''};
     if(fn==='addReservation'){ var r=args[0]||{}; mockResList.push({id:'r'+Date.now()+Math.floor(Math.random()*1000),name:r.name||'Ride',pickup:r.pickup||'',dest:r.dest||'',phone:r.phone||'',notes:r.notes||'',whenISO:r.whenISO,source:r.source||'manual'}); return mockResList.slice(); }
     if(fn==='removeReservation'||fn==='startReservation'){ var id=args[0]; mockResList=mockResList.filter(function(x){return x.id!==id}); return mockResList.slice(); }
     if(fn==='endShiftToSheet'){
@@ -353,7 +403,6 @@
       }
       if(S.queued){ S.active=S.queued; S.queued=null; toast('Dropped · '+miles.toFixed(2)+' mi · next up'); }
       else { S.active=null; toast('Dropped · '+miles.toFixed(2)+' mi'); }
-      openFare(miles);
     } render();
   }
 
@@ -392,7 +441,7 @@
   }
   function renderSched(){
     var lane=$('schedList'); lane.innerHTML='';
-    if(!S.scheduled.length){ lane.innerHTML='<div class="sched-empty">No reservations. Add friend rides or on-call bookings and they surface at their time.</div>'; return; }
+    if(!S.scheduled.length){ return; }
     S.scheduled.slice().sort(function(a,b){return a.whenTS-b.whenTS}).forEach(function(s){
       var diff=s.whenTS-now(), mins=Math.round(diff/60000);
       var when = mins>90 ? new Date(s.whenTS).toLocaleString([], {weekday:'short',hour:'numeric',minute:'2-digit'}) : (mins>=0 ? ('in '+mins+'m') : (Math.abs(mins)+'m ago'));
@@ -407,6 +456,45 @@
       if(s.dest){var navD=document.createElement('button');navD.className='sc-nav';navD.textContent='Drop';navD.onclick=function(){navTo(s.dest)};acts.appendChild(navD);}
       if(s.source!=='rider'){var del=document.createElement('button'); del.className='sc-del'; del.innerHTML='&times;'; del.onclick=function(){ srv('removeReservation',s.id).then(function(list){schedFromServer(list)}).catch(function(){}); };acts.appendChild(del);}
       card.appendChild(acts); lane.appendChild(card);
+    });
+  }
+
+
+  /* waffle + Inbox */
+  function closeWaffle(){ $('waffleMenu').classList.remove('show'); $('waffleBtn').setAttribute('aria-expanded','false'); }
+  function toggleWaffle(){ var open=$('waffleMenu').classList.toggle('show'); $('waffleBtn').setAttribute('aria-expanded',String(open)); }
+  function openInbox(){ closeWaffle(); $('inboxOverlay').classList.add('show'); refreshInbox(); }
+  function closeInbox(){ $('inboxOverlay').classList.remove('show'); }
+  function openSettings(){ closeWaffle(); $('settingsOverlay').classList.add('show'); }
+  function closeSettings(){ $('settingsOverlay').classList.remove('show'); }
+  function openLive(){ closeWaffle(); var url=boot.liveUrl||''; if(!url){toast('Live page unavailable');return;} window.open(url,'_blank','noopener'); }
+  function requestsFromServer(payload){
+    var list=Array.isArray(payload)?payload:((payload&&payload.items)||[]);
+    S.requests=list; renderInbox();
+  }
+  function refreshInbox(){
+    return srv('listRequestedRides').then(function(payload){requestsFromServer(payload)}).catch(function(){renderInbox()});
+  }
+  function openDecision(url){
+    if(!url)return;
+    window.open(url,'_blank','noopener');
+  }
+  function renderInbox(){
+    var list=$('inboxList'); list.innerHTML='';
+    (S.requests||[]).slice().sort(function(a,b){return (Date.parse(a.whenISO)||0)-(Date.parse(b.whenISO)||0)}).forEach(function(r){
+      var card=document.createElement('div'); card.className='inbox-card';
+      var when=r.whenISO?new Date(r.whenISO).toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'';
+      card.innerHTML='<b>'+esc(r.name||'Ride request')+'</b>'+
+        (when?'<div class="inbox-time">'+esc(when)+'</div>':'')+
+        '<div class="inbox-route">'+esc(r.pickup||'')+(r.destination?' → '+esc(r.destination):'')+'</div>'+
+        (r.notes?'<div class="inbox-notes">'+esc(r.notes)+'</div>':'');
+      if(r.acceptUrl||r.declineUrl){
+        var acts=document.createElement('div'); acts.className='inbox-actions';
+        if(r.acceptUrl){var accept=document.createElement('button');accept.className='inbox-accept';accept.textContent='Accept';accept.onclick=function(){openDecision(r.acceptUrl)};acts.appendChild(accept);}
+        if(r.declineUrl){var decline=document.createElement('button');decline.className='inbox-decline';decline.textContent='Decline';decline.onclick=function(){openDecision(r.declineUrl)};acts.appendChild(decline);}
+        card.appendChild(acts);
+      }
+      list.appendChild(card);
     });
   }
 
@@ -465,10 +553,13 @@
     if(online){ $('obTimer').textContent=clock(S.shift.startedAt); $('obStats').innerHTML='<span class="num">$'+money(S.shift.earned)+'</span> · '+S.shift.rides+' rides · <span class="num">'+S.shift.miles.toFixed(2)+'</span> mi'; }
     showTestStrip();
     var a=S.active, st=a?a.state:'IDLE'; $('status').setAttribute('data-state',st);
-    if(!a){ $('sEyebrow').textContent=online?'On shift · waiting':'No active ride';$('sMain').textContent='Stand by';$('sSub').textContent='Tap Accept the moment you accept the ride.';$('sTimer').style.display='none'; }
-    else if(a.state==='ACCEPTED'){ $('sEyebrow').textContent=a.name?('En route · '+a.name):'En route to pickup';$('sMain').textContent=a.pickup||'Heading to pickup';$('sSub').textContent=a.dest?('Then '+a.dest):'Passenger not yet aboard.';$('sTimer').style.display='block';$('sTimer').innerHTML=clock(a.acceptedAt)+' <span>since accept</span>'; }
-    else { $('sEyebrow').textContent=a.name?('On trip · '+a.name):'On trip';$('sMain').textContent=a.dest||'Passenger aboard';$('sSub').textContent='Route is tracing. Drop off on arrival.';$('sTimer').style.display='block';$('sTimer').innerHTML=clock(a.pickedUpAt)+' <span>on trip</span>'; }
-    var q=$('queue'); if(S.queued){q.classList.add('live');$('queueTime').textContent='stacked '+ago(S.queued.acceptedAt)+' ago';}else{q.classList.remove('live');$('queueTime').textContent='none stacked';}
+    if(!a){
+      $('status').style.display=online?'none':'block';
+      $('sEyebrow').textContent='No active ride';$('sMain').textContent='Stand by';$('sSub').textContent='Tap Accept the moment you accept the ride.';$('sTimer').style.display='none';
+    }
+    else if(a.state==='ACCEPTED'){ $('status').style.display='block';$('sEyebrow').textContent=a.name?('En route · '+a.name):'En route to pickup';$('sMain').textContent=a.pickup||'Heading to pickup';$('sSub').textContent=a.dest?('Then '+a.dest):'Passenger not yet aboard.';$('sTimer').style.display='block';$('sTimer').innerHTML=clock(a.acceptedAt)+' <span>since accept</span>'; }
+    else { $('status').style.display='block';$('sEyebrow').textContent=a.name?('On trip · '+a.name):'On trip';$('sMain').textContent=a.dest||'Passenger aboard';$('sSub').textContent='Route is tracing. Drop off on arrival.';$('sTimer').style.display='block';$('sTimer').innerHTML=clock(a.pickedUpAt)+' <span>on trip</span>'; }
+    var q=$('queue'); if(S.queued){q.style.display='flex';q.classList.add('live');$('queueTime').textContent='stacked '+ago(S.queued.acceptedAt)+' ago';}else{q.style.display='none';q.classList.remove('live');}
     $('acceptHint').textContent=!S.active?'start ride':(!S.queued?'stack next':'queue full');
     var canPick=a&&a.state==='ACCEPTED', canDrop=a&&a.state==='ON_TRIP';
     $('pickupBtn').disabled=!canPick;$('dropoffBtn').disabled=!canDrop;
@@ -478,6 +569,13 @@
     syncBarPad();
   }
 
+  $('waffleBtn').onclick=toggleWaffle;
+  $('menuInbox').onclick=openInbox;$('menuLive').onclick=openLive;$('menuSettings').onclick=openSettings;
+  $('closeInboxBtn').onclick=closeInbox;
+  $('inboxOverlay').addEventListener('click',function(e){if(e.target===$('inboxOverlay'))closeInbox()});
+  $('settingsOverlay').addEventListener('click',function(e){if(e.target===$('settingsOverlay'))closeSettings()});
+  document.addEventListener('click',function(e){if(!$('waffleMenu').contains(e.target)&&!$('waffleBtn').contains(e.target))closeWaffle()});
+  document.addEventListener('visibilitychange',function(){if(!document.hidden&&$('inboxOverlay').classList.contains('show'))refreshInbox()});
   $('goBtn').onclick=goOnline;
   $('endShiftBtn').onclick=openEndShift;
   $('acceptBtn').onclick=accept;$('pickupBtn').onclick=pickedUp;$('dropoffBtn').onclick=dropOff;$('cancelActiveBtn').onclick=cancelActive;
@@ -490,7 +588,7 @@
   restoreState();
   try{initMap()}catch(e){$('mapNote').classList.add('show')}
   render(); renderSched(); syncBarPad();
-  srv('getCockpitBootstrap').then(function(b){ boot=b||{}; renderOpp(); showTestStrip(); schedFromServer(boot.reservations); if(boot.riderReadError){toast('Rider connection: '+boot.riderReadError);} }).catch(function(e){ showTestStrip(); toast((e&&e.message)?e.message:'Console bootstrap failed'); });
+  srv('getCockpitBootstrap').then(function(b){ boot=b||{}; renderOpp(); showTestStrip(); schedFromServer(boot.reservations); requestsFromServer(boot.requests); if(boot.riderReadError){toast('Rider connection: '+boot.riderReadError);} }).catch(function(e){ showTestStrip(); toast((e&&e.message)?e.message:'Console bootstrap failed'); });
 </script>
 </body>
 </html>
