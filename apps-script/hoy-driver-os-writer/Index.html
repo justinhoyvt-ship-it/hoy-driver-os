@@ -54,6 +54,14 @@
     .inbox-accept{background:linear-gradient(180deg,#8ff5c1,var(--green) 55%,#1f9c63);color:#04220f}
     .inbox-decline{background:rgba(255,102,128,.08);border:1px solid rgba(255,102,128,.38);color:var(--red)}
     .settings-sheet{height:min(62dvh,480px);background:linear-gradient(180deg,rgba(22,28,58,.98),rgba(10,15,36,.98))}
+    .rider-flow{display:none;border:1px solid rgba(69,227,148,.28);border-radius:13px;padding:10px;background:rgba(69,227,148,.055);gap:8px}
+    .rider-flow.show{display:grid}
+    .rider-flow-head{display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:var(--display);font-size:.78rem}
+    .rider-flow-head small{font-family:var(--mono);color:var(--green);font-size:.66rem}
+    .rider-flow-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .rider-flow-actions button{min-height:43px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.045);font-family:var(--display);font-weight:700;font-size:.78rem}
+    .rider-flow-actions button.primary{background:linear-gradient(180deg,#8ff5c1,var(--green) 55%,#1f9c63);color:#04220f;border:0}
+    .rider-flow-actions button:disabled{opacity:.45;cursor:default}
     .brand{display:flex;align-items:center;gap:9px;font-family:var(--display);font-weight:700;font-size:.98rem}
     .logo{width:36px;height:18px}.logo path{fill:none;stroke:url(#g);stroke-width:3;stroke-linecap:square}
     .tag{font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);border-radius:7px;padding:4px 8px;background:rgba(255,255,255,.04)}
@@ -229,6 +237,10 @@
     <div class="s-timer" id="sTimer" style="display:none"></div>
   </div>
 
+  <div class="rider-flow" id="riderFlow">
+    <div class="rider-flow-head"><span>Rider update</span><small id="riderFlowStatus">Confirmed</small></div>
+    <div class="rider-flow-actions" id="riderFlowActions"></div>
+  </div>
   <div class="queue" id="queue"><span class="q-label">Next ride</span><span class="q-time" id="queueTime">none stacked</span></div>
 </div>
 
@@ -318,6 +330,7 @@
   var LIVE=(typeof google!=='undefined' && google.script && google.script.run);
   var map=null, meMarker=null, trace={watch:null, pts:[], miles:0, line:null};
   var mockResList=[];
+  var RIDER_STATUS_SEQUENCE=['Confirmed','Leaving','On the way','Arriving soon','Arrived','Ride in progress','Complete'];
   var mockRequestList=[{requestId:'FR-PREVIEW1',name:'Preview rider',pickup:'Essex Junction',destination:'BTV Airport',whenISO:new Date(Date.now()+7200000).toISOString(),notes:'',status:'REQUESTED',acceptUrl:'',declineUrl:''}];
 
   function srv(fn){
@@ -335,6 +348,7 @@
       opportunity:{date:'Sat Jul 18',event:'SlipBizkit + Sex With Jenna',location:'Higher Ground, South Burlington',demand:'High',window:'10:00 PM-12:00 AM est.',move:'Two same-night events may create staggered exits; work the corridor, not the curb.'}};
     if(fn==='listReservations') return mockResList.slice();
     if(fn==='listRequestedRides') return {items:mockRequestList.slice(),error:''};
+    if(fn==='updateRiderStatus') return {ok:true,requestId:args[0],status:args[1],occurredAt:new Date().toISOString(),duplicate:false};
     if(fn==='addReservation'){ var r=args[0]||{}; mockResList.push({id:'r'+Date.now()+Math.floor(Math.random()*1000),name:r.name||'Ride',pickup:r.pickup||'',dest:r.dest||'',phone:r.phone||'',notes:r.notes||'',whenISO:r.whenISO,source:r.source||'manual'}); return mockResList.slice(); }
     if(fn==='removeReservation'||fn==='startReservation'){ var id=args[0]; mockResList=mockResList.filter(function(x){return x.id!==id}); return mockResList.slice(); }
     if(fn==='endShiftToSheet'){
@@ -356,7 +370,7 @@
   function persistState(){try{localStorage.setItem(STATE_KEY,JSON.stringify({shift:S.shift,active:S.active,queued:S.queued}))}catch(e){}}
   function restoreState(){try{var x=JSON.parse(localStorage.getItem(STATE_KEY)||'null');if(x&&typeof x==='object'){S.shift=x.shift||null;S.active=x.active||null;S.queued=x.queued||null}}catch(e){}}
   function navTo(address){if(!address){toast('Address unavailable');return;}var url='https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(address);window.open(url,'_blank','noopener');}
-  function scheduledTripState(s){return {state:'ACCEPTED',acceptedAt:now(),pickedUpAt:null,requestId:s.requestId||'',name:s.name||'Ride',pickup:s.pickup||'',dest:s.dest||''};}
+  function scheduledTripState(s){return {state:'ACCEPTED',acceptedAt:now(),pickedUpAt:null,requestId:s.requestId||'',name:s.name||'Ride',pickup:s.pickup||'',dest:s.dest||'',riderStatus:s.riderStatus||'Confirmed'};}
 
   function initMap(){
     map=L.map('map',{zoomControl:false,attributionControl:true,preferCanvas:true}).setView([44.49,-73.10],11);
@@ -419,7 +433,7 @@
   function cancelActive(){ if(!S.active)return; stopTrace(); if(S.queued){S.active=S.queued;S.queued=null;toast('Cancelled · next up');}else{S.active=null;toast('Ride cancelled');} render(); }
 
   /* scheduled lane — persisted server-side */
-  function schedFromServer(list){ S.scheduled=(list||[]).map(function(r){return {id:r.id,requestId:r.requestId||'',name:r.name,pickup:r.pickup||'',dest:r.dest||'',notes:r.notes||'',whenTS:Date.parse(r.whenISO),source:r.source||'manual'};}); renderSched(); }
+  function schedFromServer(list){ S.scheduled=(list||[]).map(function(r){return {id:r.id,requestId:r.requestId||'',name:r.name,pickup:r.pickup||'',dest:r.dest||'',notes:r.notes||'',whenTS:Date.parse(r.whenISO),source:r.source||'manual',riderStatus:r.riderStatus||''};}); renderSched(); }
   function saveScheduled(){
     var when=$('inSchedWhen').value; if(!when){toast('Pick a time');return;}
     var d=new Date(when); if(isNaN(d.getTime())){toast('Bad time');return;}
@@ -431,13 +445,19 @@
   function startScheduled(id){
     var s=S.scheduled.filter(function(x){return x.id===id})[0]; if(!s)return;
     if(!S.shift)goOnline();
-    var ride=scheduledTripState(s);
-    if(!S.active){ S.active=ride; }
-    else if(!S.queued){ S.queued=ride; }
-    else { toast('Finish current rides first'); return; }
-    persistState();
-    srv('startReservation',id).then(function(list){schedFromServer(list)}).catch(function(e){toast(e.message||'Could not clear scheduled ride')});
-    toast('Started: '+s.name); render();
+    function begin(){
+      var ride=scheduledTripState(s);
+      if(s.source==='rider')ride.riderStatus='Leaving';
+      if(!S.active){ S.active=ride; }
+      else if(!S.queued){ S.queued=ride; }
+      else { toast('Finish current rides first'); return; }
+      persistState();
+      srv('startReservation',id).then(function(list){schedFromServer(list)}).catch(function(e){toast(e.message||'Could not clear scheduled ride')});
+      toast('Started: '+s.name); render();
+    }
+    if(s.source==='rider'&&s.requestId){
+      srv('updateRiderStatus',s.requestId,'Leaving',s.requestId+':leaving').then(begin).catch(function(e){toast(e.message||'Could not send Leaving update')});
+    }else begin();
   }
   function renderSched(){
     var lane=$('schedList'); lane.innerHTML='';
@@ -496,6 +516,39 @@
       }
       list.appendChild(card);
     });
+  }
+
+
+  function isRiderRide_(ride){return !!(ride&&ride.requestId);}
+  function riderStatus_(ride){return (ride&&ride.riderStatus)||'Confirmed';}
+  function advanceRiderStatus_(status,after){
+    var a=S.active;if(!isRiderRide_(a))return Promise.resolve(null);
+    var key=a.requestId+':'+String(status).toLowerCase().replace(/\s+/g,'-');
+    return srv('updateRiderStatus',a.requestId,status,key).then(function(res){a.riderStatus=(res&&res.status)||status;persistState();render();if(after)after();return res;}).catch(function(e){toast(e.message||'Could not update rider');throw e;});
+  }
+  function riderActionButton_(label,primary,handler){
+    var b=document.createElement('button');b.textContent=label;if(primary)b.className='primary';b.onclick=handler;return b;
+  }
+  function renderRiderFlow(){
+    var box=$('riderFlow'),actions=$('riderFlowActions');actions.innerHTML='';
+    var a=S.active;if(!isRiderRide_(a)){box.classList.remove('show');return;}
+    box.classList.add('show');var st=riderStatus_(a);$('riderFlowStatus').textContent=st;
+    if(st==='Leaving'){
+      actions.appendChild(riderActionButton_('Navigate pickup',false,function(){advanceRiderStatus_('On the way',function(){navTo(a.pickup)})}));
+    }else if(st==='On the way'){
+      actions.appendChild(riderActionButton_('Navigate pickup',false,function(){navTo(a.pickup)}));
+      actions.appendChild(riderActionButton_('Arriving soon',true,function(){advanceRiderStatus_('Arriving soon')}));
+    }else if(st==='Arriving soon'){
+      actions.appendChild(riderActionButton_('Navigate pickup',false,function(){navTo(a.pickup)}));
+      actions.appendChild(riderActionButton_('Arrived',true,function(){advanceRiderStatus_('Arrived')}));
+    }else if(st==='Arrived'){
+      actions.appendChild(riderActionButton_('Start ride',true,function(){advanceRiderStatus_('Ride in progress',function(){a.state='ON_TRIP';a.pickedUpAt=now();startTrace();toast('Ride in progress')})}));
+    }else if(st==='Ride in progress'){
+      actions.appendChild(riderActionButton_('Navigate destination',false,function(){navTo(a.dest)}));
+      actions.appendChild(riderActionButton_('Complete ride',true,function(){advanceRiderStatus_('Complete',function(){dropOff()})}));
+    }else if(st==='Complete'){
+      actions.appendChild(riderActionButton_('Complete',false,function(){}));actions.firstChild.disabled=true;
+    }
   }
 
   /* end shift */
@@ -561,10 +614,14 @@
     else { $('status').style.display='block';$('sEyebrow').textContent=a.name?('On trip · '+a.name):'On trip';$('sMain').textContent=a.dest||'Passenger aboard';$('sSub').textContent='Route is tracing. Drop off on arrival.';$('sTimer').style.display='block';$('sTimer').innerHTML=clock(a.pickedUpAt)+' <span>on trip</span>'; }
     var q=$('queue'); if(S.queued){q.style.display='flex';q.classList.add('live');$('queueTime').textContent='stacked '+ago(S.queued.acceptedAt)+' ago';}else{q.style.display='none';q.classList.remove('live');}
     $('acceptHint').textContent=!S.active?'start ride':(!S.queued?'stack next':'queue full');
-    var canPick=a&&a.state==='ACCEPTED', canDrop=a&&a.state==='ON_TRIP';
+    $('acceptBtn').style.display=isRiderRide_(a)?'none':'';
+    var riderRide=isRiderRide_(a);
+    var canPick=a&&a.state==='ACCEPTED'&&!riderRide, canDrop=a&&a.state==='ON_TRIP'&&!riderRide;
     $('pickupBtn').disabled=!canPick;$('dropoffBtn').disabled=!canDrop;
+    $('pickupBtn').style.display=riderRide?'none':'';$('dropoffBtn').style.display=riderRide?'none':'';
     $('pickupBtn').setAttribute('data-armed',canPick?'pickup':'');$('dropoffBtn').setAttribute('data-armed',canDrop?'dropoff':'');
-    $('cancelActiveBtn').style.display=a?'block':'none';
+    $('cancelActiveBtn').style.display=(a&&!riderRide)?'block':'none';
+    renderRiderFlow();
     persistState();
     syncBarPad();
   }
