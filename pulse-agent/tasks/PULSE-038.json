@@ -1,0 +1,41 @@
+{
+  "Task ID": "PULSE-038",
+  "Created At": "2026-07-22",
+  "Priority": "HIGH",
+  "Status": "READY",
+  "Requested By": "Justin",
+  "Area": "Release Preparation",
+  "Title": "Prepare active-console rider release candidate",
+  "Problem / Request": "Current GitHub main already contains merged booking QR/mobile resilience, secure Accept/Decline, scheduled-ride start, and phone navigation work, but the Active Development Console has not been released from that source. Prepare one exact, reviewable Apps Script release candidate using the owner-confirmed shared sheet ID.",
+  "Acceptance Criteria": "Capture the current active project version/source and compare it with current main after PRs #23, #26, #27, and #29. Produce an exact module manifest, checksums, function inventory, required Script Property names, read-only preflight, and rollback source. Confirm the target is 1Hd46iUY84N2bvxdaIS4lf6l-uExxbXGIbUjxJzMF-No and that pulseRuntimeCapabilities, pulseGetFriendRides, and pulseStartScheduledRide are present. Do not merge or deploy automatically.",
+  "Assigned Agent": "Pulse Builder + Human review",
+  "Branch / Build": "Target branch: pulse/pulse-038-release-baseline",
+  "Result URL": "",
+  "Last Error": "",
+  "Updated At": "2026-07-22",
+  "": "",
+  "builder": {
+    "version": "0.5.0-proof-locked-mockup-site",
+    "patchSource": "Task Patches",
+    "aiProvider": "none",
+    "summary": "Prepare active-console rider release candidate",
+    "targets": [
+      "Code.Server"
+    ],
+    "operationCount": 3,
+    "moduleNotes": [
+      {
+        "module": "Code.Server",
+        "summary": "Applied 3 reviewed exact operations.",
+        "operations": [
+          "Add a read-only release-baseline endpoint that reports the shared sheet target, required property names by configured/not-configured state, required rider functions, source baseline, and Ride Requests availability without exposing secret values or writing data.",
+          "Advertise the release-baseline endpoint using a unique capability-list anchor that cannot also match the new pulseReleaseBaseline function inserted by operation 1.",
+          "Extend the existing read-only field preflight inventory using the unique end of the endpoints object, avoiding a short anchor that could drift or repeat."
+        ]
+      }
+    ],
+    "usage": "No AI used — exact operations staged in Task Patches",
+    "generatedAt": "2026-07-22T16:16:07.920Z",
+    "deploymentPerformed": false
+  }
+}
