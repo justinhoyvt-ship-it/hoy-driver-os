@@ -1,32 +1,53 @@
-# Hoy Driver OS writer — canonical main-app source
+# Hoy Driver OS writer
 
-This directory captures the phone-verified Hoy Driver OS writer source used by the owner-only main deployment.
+Canonical source for the owner-only Hoy Driver console.
 
-## Production identity
+## PULSE-050 scope
 
-- Apps Script project: `Hoy Driver OS writer`
-- Script ID: `1sN7MFrzEOD0GMIOc10XoA8j5IPzZwQynowIuZpXDCWuLbF2wqIDf8Zj0`
-- Verified deployment: `https://script.google.com/macros/s/AKfycbxyLcruVHrkxLBGkLcP3kxoE2EhILlJS_0SK5ybj1l5BMGPDrKIPiK_jO4P4EudXXYuBQ/exec`
-- Build marker: `hoy-rider-lane-2026-07-22.2`
+This package preserves the working console layout and ride/shift behavior while adding:
 
-## Data boundaries
+- one upper-right waffle with exactly `Inbox`, `Live`, and `Settings`
+- an Inbox that shows only `REQUESTED` rider rows
+- secure Accept and Decline links issued by the existing request app
+- the existing live-information page behind `Live`
+- an intentionally blank Settings panel
+- a restrained visual polish pass without section reordering
 
-- Hoy shift/test writes: `1Byk7-bwjhSeZQEqKemi0RxGagD_2RuYw94A8qu48tnY`
-- Rider-request reads: `1Hd46iUY84N2bvxdaIS4lf6l-uExxbXGIbUjxJzMF-No`, tab `Ride Requests`
-- Uber signals/engine remains separate: `13m_9QDnIgXSdMBdtSYMjmyIdo55wh8F5Fl3_1JaYl-w`
-- Manual reservations remain in Script Properties key `PULSE_RESERVATIONS`.
-- Started rider-request markers remain in Script Properties key `PULSE_STARTED_RIDER_REQUESTS`.
+## Locked driver behavior
 
-The Hoy Driver app reads confirmed rider requests but does not write the `Ride Requests` sheet, send rider email, or create/modify rider calendar events.
+- `GO ONLINE` starts the shift.
+- `Accept ride` remains the app-ride action.
+- Confirmed private rides remain in Scheduled.
+- Scheduled and queued sections render only when a ride exists.
+- Going online does not leave a Stand by card on screen.
+- Drop off does not force per-ride fare entry.
+- Total earnings and tips remain reconcilable at end shift.
+- Map, GPS trace, Picked up, Drop off, queue, shift timer, and Sheet writes remain unchanged.
 
-## Verified behavior
+## Request decision boundary
 
-- The blue/pink Hoy Driver console remains the main app.
-- Confirmed request `FR-0D6EBEB5` appeared once in Scheduled during validation.
-- `debugRiderLane()` returned no rider-read error, no started marker, and `writesToRideRequests: false`.
-- Start, Pickup navigation, and Drop navigation controls rendered on phone.
-- Runtime Lite is a separate reference implementation and is not this app.
+Hoy reads the shared `Ride Requests` sheet but never updates it.
 
-## Release guardrails
+Accept and Decline remain request-app operations:
 
-This source-lock commit does not merge, deploy, change Script Properties, modify the rider sheet, send email, alter Calendar, or start a scheduled ride. Future changes must preserve the current deployment as a rollback target.
+1. The Hoy server reads REQUESTED rows.
+2. It calls the request app's authenticated `driver-actions` endpoint.
+3. The endpoint returns signed Accept and Decline URLs.
+4. Opening a signed URL runs the existing request-app transition.
+5. The request app remains the only writer, email sender, and Calendar owner.
+
+Required Hoy Script Properties after review, before deployment:
+
+- `PULSE_REQUEST_APP_URL` — request app `/exec` URL
+- `PULSE_REQUEST_TOKEN` — the request app's existing `REQUEST_TOKEN`
+- `PULSE_LIVE_URL` — optional override for the existing Live page
+
+No new decision secret is introduced.
+
+## Guardrails
+
+- PR only. No automatic merge or deployment.
+- No direct Hoy writes to `Ride Requests`.
+- No automatic rider email or Calendar changes during package validation.
+- Do not touch Gina's confirmed ride or press Start during validation.
+- No additional waffle items, earnings settings, theme settings, GPS settings, or navigation settings.
