@@ -1,0 +1,21 @@
+{
+  "taskId": "PULSE-048",
+  "title": "Open the canonical Hoy Driver source PR",
+  "area": "GitHub Source Lock",
+  "acceptanceCriteria": "Add apps-script/hoy-driver-os-writer/Code.gs, Index.html, appsscript.json, README, validation evidence, source hashes, script ID, live deployment URL, and data-boundary notes. No secrets or Script Property values. Diff matches the working Apps Script source. Syntax checks pass. PR only: no merge or deployment.",
+  "buildId": "BUILD-20260722-155724",
+  "branch": "pulse/pulse-048-hoy-main-source-lock",
+  "mode": "hoy-driver-source-lock",
+  "paths": [
+    "apps-script/hoy-driver-os-writer/Code.gs",
+    "apps-script/hoy-driver-os-writer/Index.html",
+    "apps-script/hoy-driver-os-writer/appsscript.json",
+    "apps-script/hoy-driver-os-writer/README.md",
+    "apps-script/hoy-driver-os-writer/validation.json"
+  ],
+  "sourceBuild": "hoy-rider-lane-2026-07-22.2",
+  "aiProvider": "none",
+  "deploymentPerformed": false,
+  "productionTouched": false,
+  "createdAt": "2026-07-22T19:57:32.829Z"
+}

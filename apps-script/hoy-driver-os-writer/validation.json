@@ -1,0 +1,26 @@
+{
+  "taskId": "PULSE-048",
+  "capturedAt": "2026-07-22",
+  "build": "hoy-rider-lane-2026-07-22.2",
+  "scriptProjectId": "1sN7MFrzEOD0GMIOc10XoA8j5IPzZwQynowIuZpXDCWuLbF2wqIDf8Zj0",
+  "deploymentUrl": "https://script.google.com/macros/s/AKfycbxyLcruVHrkxLBGkLcP3kxoE2EhILlJS_0SK5ybj1l5BMGPDrKIPiK_jO4P4EudXXYuBQ/exec",
+  "phoneVerified": true,
+  "syntaxChecks": {
+    "Code.gs": "passed",
+    "Index.html.inlineScript": "passed"
+  },
+  "sha256": {
+    "Code.gs": "0b2efdf7f82cba9b63062e9481247e9bfcafba98c171985107212fe781ebe1ad",
+    "Index.html": "85368e2efca911a625d7d6fc00681fae105c8b13b1c1a88368679c173cca2d72",
+    "appsscript.json": "2453f8d6311d3d02408e2ce2521a088ad65e99325c87f5e3b00ffaea7ba57b72"
+  },
+  "riderLaneProof": {
+    "riderReadError": null,
+    "confirmedRequestProjected": "FR-0D6EBEB5",
+    "startedRiderIds": [],
+    "writesToRideRequests": false
+  },
+  "automaticMerge": false,
+  "deploymentPerformed": false,
+  "productionDataChanged": false
+}
