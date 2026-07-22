@@ -34,6 +34,18 @@ Do not manually create `CONFIRM_SECRET` or `REQUEST_TOKEN`; `setupRideSystem()` 
 5. Run `setupRideSystem()` again. Its result includes the private request URL.
 6. Share only the URL containing `?request=...`.
 
+## Driver Inbox decision bridge
+
+The Hoy Driver app may read REQUESTED rides directly from the shared Sheet, but it must not update those rows. To surface the existing signed decision flow inside the driver Inbox:
+
+1. Keep the request app's existing `REQUEST_TOKEN`.
+2. In the Hoy Driver Apps Script project, set `PULSE_REQUEST_APP_URL` to this request app's `/exec` URL.
+3. Set `PULSE_REQUEST_TOKEN` to the same existing request-app `REQUEST_TOKEN`.
+4. The Hoy server calls the request app's `driver-actions` endpoint and receives short-lived signed Accept and Decline URLs.
+5. Accept and Decline still execute inside this request app. The Hoy app never writes Ride Requests directly.
+
+No new decision secret is created for this bridge.
+
 ## Lifecycle
 
 - `REQUESTED` → `CONFIRMED`, `DECLINED`, or `CANCELLED`
