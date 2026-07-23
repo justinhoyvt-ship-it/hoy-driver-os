@@ -539,6 +539,12 @@ function transitionRide_(requestId, nextStatus) {
     if (!rideTransitionAllowed_(current, nextStatus)) {
       throw new Error('Cannot change a ' + current + ' ride to ' + nextStatus + '.');
     }
+    if (nextStatus === 'COMPLETED') {
+      const riderState = currentRiderStatus_(requestId, found);
+      if (!riderState || riderState.status !== 'Ride in progress') {
+        throw new Error('Complete follows Ride in progress in the approved rider sequence.');
+      }
+    }
 
     const now = new Date();
     const updates = { 'Status': nextStatus, 'Updated At': now };
