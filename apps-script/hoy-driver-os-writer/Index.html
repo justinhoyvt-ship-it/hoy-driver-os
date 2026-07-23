@@ -330,6 +330,7 @@
   var LIVE=(typeof google!=='undefined' && google.script && google.script.run);
   var map=null, meMarker=null, trace={watch:null, pts:[], miles:0, line:null};
   var mockResList=[];
+  var riderFlowBusy=false, scheduledStartBusy={};
   var RIDER_STATUS_SEQUENCE=['Confirmed','Leaving','On the way','Arriving soon','Arrived','Ride in progress','Complete'];
   var mockRequestList=[{requestId:'FR-PREVIEW1',name:'Preview rider',pickup:'Essex Junction',destination:'BTV Airport',whenISO:new Date(Date.now()+7200000).toISOString(),notes:'',status:'REQUESTED',acceptUrl:'',declineUrl:''}];
 
@@ -443,20 +444,23 @@
       .catch(function(e){toast(e.message||'Failed')}).then(function(){b.disabled=false});
   }
   function startScheduled(id){
-    var s=S.scheduled.filter(function(x){return x.id===id})[0]; if(!s)return;
+    var s=S.scheduled.filter(function(x){return x.id===id})[0]; if(!s||scheduledStartBusy[id])return;
     if(!S.shift)goOnline();
+    scheduledStartBusy[id]=true;renderSched();
+    function release(){delete scheduledStartBusy[id];renderSched();}
     function begin(){
+      if(s.requestId&&((S.active&&S.active.requestId===s.requestId)||(S.queued&&S.queued.requestId===s.requestId))){toast('Ride already started');release();return;}
       var ride=scheduledTripState(s);
       if(s.source==='rider')ride.riderStatus='Leaving';
       if(!S.active){ S.active=ride; }
       else if(!S.queued){ S.queued=ride; }
-      else { toast('Finish current rides first'); return; }
+      else { toast('Finish current rides first'); release(); return; }
       persistState();
-      srv('startReservation',id).then(function(list){schedFromServer(list)}).catch(function(e){toast(e.message||'Could not clear scheduled ride')});
+      srv('startReservation',id).then(function(list){schedFromServer(list)}).catch(function(e){toast(e.message||'Could not clear scheduled ride')}).then(release);
       toast('Started: '+s.name); render();
     }
     if(s.source==='rider'&&s.requestId){
-      srv('updateRiderStatus',s.requestId,'Leaving',s.requestId+':leaving').then(begin).catch(function(e){toast(e.message||'Could not send Leaving update')});
+      srv('updateRiderStatus',s.requestId,'Leaving',s.requestId+':leaving').then(begin).catch(function(e){release();toast(e.message||'Could not send Leaving update')});
     }else begin();
   }
   function renderSched(){
@@ -470,7 +474,7 @@
       var card=document.createElement('div'); card.className='sched-card'+(due?' due':'');
       card.innerHTML='<div class="sc-main"><b>'+esc(s.name)+'</b>'+(sub?'<small>'+esc(sub)+'</small>':'')+'</div><div class="sc-when">'+when+(due?'<em>DUE</em>':'')+'</div>';
       var acts=document.createElement('div'); acts.className='sc-acts';
-      var start=document.createElement('button'); start.className='sc-start'; start.textContent='Start'; start.onclick=function(){startScheduled(s.id)};
+      var start=document.createElement('button'); start.className='sc-start'; start.textContent='Start'; start.disabled=!!scheduledStartBusy[s.id]; start.onclick=function(){startScheduled(s.id)};
       acts.appendChild(start);
       if(s.pickup){var navP=document.createElement('button');navP.className='sc-nav';navP.textContent='Pickup';navP.onclick=function(){navTo(s.pickup)};acts.appendChild(navP);}
       if(s.dest){var navD=document.createElement('button');navD.className='sc-nav';navD.textContent='Drop';navD.onclick=function(){navTo(s.dest)};acts.appendChild(navD);}
@@ -522,19 +526,22 @@
   function isRiderRide_(ride){return !!(ride&&ride.requestId);}
   function riderStatus_(ride){return (ride&&ride.riderStatus)||'Confirmed';}
   function advanceRiderStatus_(status,after){
-    var a=S.active;if(!isRiderRide_(a))return Promise.resolve(null);
+    var a=S.active;if(!isRiderRide_(a)||riderFlowBusy)return Promise.resolve(null);
+    riderFlowBusy=true;render();
     var key=a.requestId+':'+String(status).toLowerCase().replace(/\s+/g,'-');
-    return srv('updateRiderStatus',a.requestId,status,key).then(function(res){a.riderStatus=(res&&res.status)||status;persistState();render();if(after)after();return res;}).catch(function(e){toast(e.message||'Could not update rider');throw e;});
+    return srv('updateRiderStatus',a.requestId,status,key).then(function(res){
+      a.riderStatus=(res&&res.status)||status;if(after)after();riderFlowBusy=false;persistState();render();return res;
+    }).catch(function(e){riderFlowBusy=false;render();toast(e.message||'Could not update rider');throw e;});
   }
   function riderActionButton_(label,primary,handler){
-    var b=document.createElement('button');b.textContent=label;if(primary)b.className='primary';b.onclick=handler;return b;
+    var b=document.createElement('button');b.textContent=label;if(primary)b.className='primary';b.disabled=riderFlowBusy;b.onclick=handler;return b;
   }
   function renderRiderFlow(){
     var box=$('riderFlow'),actions=$('riderFlowActions');actions.innerHTML='';
     var a=S.active;if(!isRiderRide_(a)){box.classList.remove('show');return;}
     box.classList.add('show');var st=riderStatus_(a);$('riderFlowStatus').textContent=st;
     if(st==='Leaving'){
-      actions.appendChild(riderActionButton_('Navigate pickup',false,function(){advanceRiderStatus_('On the way',function(){navTo(a.pickup)})}));
+      actions.appendChild(riderActionButton_('Navigate pickup',false,function(){advanceRiderStatus_('On the way');navTo(a.pickup)}));
     }else if(st==='On the way'){
       actions.appendChild(riderActionButton_('Navigate pickup',false,function(){navTo(a.pickup)}));
       actions.appendChild(riderActionButton_('Arriving soon',true,function(){advanceRiderStatus_('Arriving soon')}));
