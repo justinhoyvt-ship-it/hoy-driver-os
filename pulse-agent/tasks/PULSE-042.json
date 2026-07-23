@@ -1,0 +1,38 @@
+{
+  "taskId": "PULSE-042",
+  "title": "Add Ride ID and PIN access",
+  "area": "Private Rider Access",
+  "acceptanceCriteria": "Keep the original Request ID as the internal key. Store only a salted PIN verifier, not plaintext. Correct Ride ID + PIN opens only that ride; wrong credentials fail without confirming another ride exists. Confirmation sends the Ride ID, PIN, and private status link once. Existing confirmed rides have a controlled migration path without changing Request ID. No public rider list or lookup.",
+  "buildId": "BUILD-20260722-203924",
+  "branch": "pulse/pulse-042-ride-id-pin",
+  "builderVersion": "0.5.7-ride-id-pin-access",
+  "mode": "ride-id-pin-access-package",
+  "paths": [
+    "pulse-autobuild/request-app/Code.gs",
+    "pulse-autobuild/request-app/README.md"
+  ],
+  "validation": {
+    "ok": true,
+    "taskId": "PULSE-042",
+    "paths": [
+      "pulse-autobuild/request-app/Code.gs",
+      "pulse-autobuild/request-app/README.md"
+    ],
+    "totalChars": 52376,
+    "internalRequestIdPreserved": true,
+    "rideIdAndPinRequired": true,
+    "saltedPinVerifier": true,
+    "plaintextPinStored": false,
+    "genericCredentialFailure": true,
+    "confirmationDeliveryOnce": true,
+    "controlledMigration": true,
+    "publicRiderList": false,
+    "requestWriter": "request-app-only",
+    "deploymentPerformed": false,
+    "productionTouched": false
+  },
+  "aiProvider": "none",
+  "deploymentPerformed": false,
+  "productionTouched": false,
+  "generatedAt": "2026-07-23T00:39:29.499Z"
+}
