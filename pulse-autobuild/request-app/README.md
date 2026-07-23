@@ -2,46 +2,61 @@
 
 This standalone Apps Script project remains the only writer for ride requests, rider status events, rider email, and ride Calendar events.
 
-## PULSE-041 rider status progression
+## PULSE-042 private rider access
 
-The rider-facing sequence is exactly:
+A confirmed ride receives one public-facing **Ride ID** and one six-digit **PIN**. The original `Request ID` remains the internal key and is never replaced.
+
+The `Ride Requests` schema is extended in place with:
+
+- Ride ID
+- PIN Salt
+- PIN Verifier
+- Access Issued At
+- Access Email Sent At
+
+The PIN itself is never written to the Sheet or Script Properties. Only a salted, secret-peppered HMAC verifier is stored. The plaintext PIN exists only long enough to place it in the first confirmation email.
+
+## Confirmation delivery
+
+The first successful confirmation creates the Calendar event, records `Confirmed`, issues access credentials, and sends one confirmation email containing:
+
+- trip details
+- Ride ID
+- PIN
+- private status link
+
+A repeated confirmation does not send another access email once `Access Email Sent At` is present.
+
+## Private status access
+
+- `GET action=status&ride=<Ride ID>` opens the private access form and may prefill only the Ride ID.
+- `POST action=status-access` requires the correct Ride ID and PIN and renders only that ride's approved status progression.
+- `POST action=rider-status` provides the same one-ride, credential-protected rider-safe status as JSON for later site wiring.
+
+Unknown Ride IDs and wrong PINs return the same generic failure. No response confirms whether another ride exists. There is no public rider list, search, or lookup endpoint.
+
+The rider-facing sequence remains exactly:
 
 `Confirmed → Leaving → On the way → Arriving soon → Arrived → Ride in progress → Complete`
 
-Cancellation is separate.
+Cancellation remains separate. No customer contact information, pickup or destination details, driver notes, shift data, earnings, API keys, other rides, or live GPS claim is returned by the status endpoint.
 
-The app creates or verifies an append-only `Ride Status Events` tab with these columns:
+## Existing confirmed rides
 
-- Event ID
-- Request ID
-- Status
-- Occurred At
-- Source
-- Idempotency Key
+`migrateConfirmedRideAccess(requestId)` is the controlled migration path. It:
 
-The existing `REQUEST_TOKEN` authenticates server-to-server calls from Hoy Driver. No second secret is introduced.
+1. requires a specific existing internal Request ID;
+2. requires that ride to be `CONFIRMED`;
+3. preserves the Request ID;
+4. issues or safely rotates a Ride ID/PIN verifier when needed; and
+5. sends the private access email once.
 
-## Endpoints
+The Sheet menu item **Issue private access for selected confirmed ride** calls this function for the selected row. Migration is never automatic.
 
-- `GET action=driver-actions` returns signed Accept and Decline links for REQUESTED rides.
-- `POST action=driver-status` appends one authenticated status event.
-- `GET action=driver-status-state` returns only rider-safe current statuses for requested IDs.
-- `GET action=status` renders a signed rider-safe status page. PULSE-042 will add Ride ID and PIN access and control delivery of the private link.
+## Existing writer boundary
 
-Repeated status taps are idempotent. The same Request ID and status cannot be appended twice, and the same idempotency key cannot be reused for another status. Statuses cannot skip the approved sequence.
-
-## Rider-safe page
-
-The status page displays only the approved progression and last update time. It does not display customer contact information, pickup or destination details, driver notes, shift data, earnings, API keys, other rides, or a live GPS claim.
-
-## Existing lifecycle
-
-- `REQUESTED` → `CONFIRMED`, `DECLINED`, or `CANCELLED`
-- `CONFIRMED` → rider status progression or `CANCELLED`
-- `Complete` updates the main request row to `COMPLETED`
-
-Confirmation still creates the Calendar event and sends the existing confirmation email. PULSE-041 does not automatically send the status-page link; PULSE-042 owns Ride ID, PIN, and private-link delivery.
+Hoy Driver continues to read rider rows but never writes them. The request app remains the sole writer for request decisions, append-only rider status events, access credentials, email, and Calendar changes.
 
 ## Validation
 
-Run `testRideStatusProgressionPackage()` before review. It performs no Sheet, Mail, Calendar, deployment, or production operation.
+Run `testRideIdPinAccessPackage()` before review. It performs no Sheet, Mail, Calendar, credential issuance, deployment, or production operation.
