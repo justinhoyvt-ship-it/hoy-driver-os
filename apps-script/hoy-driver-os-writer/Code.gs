@@ -17,7 +17,7 @@ const HOY_SHEET_ID = '1Byk7-bwjhSeZQEqKemi0RxGagD_2RuYw94A8qu48tnY';
 const HOY_TZ = 'America/New_York';
 const HOY_DEFAULT_COST = Object.freeze({ fuelPerGal: 3.5, mpg: 25, maintPerMile: 0.10, taxRate: 0.22 });
 const HOY_DEFAULT_TEST = 'T-001';
-const HOY_BUILD = 'hoy-waffle-inbox-2026-07-22.1';
+const HOY_BUILD = 'hoy-rider-status-2026-07-22.1';
 const RIDER_SHEET_ID = '1Hd46iUY84N2bvxdaIS4lf6l-uExxbXGIbUjxJzMF-No';
 const RIDER_SHEET_NAME = 'Ride Requests';
 const PULSE_LIVE_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbyde9C6y6iIoJO8AfWxt5z-D2FxwKXXMonpypmW8xaI7BZaAwChYBXM4JO7zqYvmw7Y/exec';
@@ -69,13 +69,15 @@ function getCockpitBootstrap() {
   const rider = readRiderRequestsSafe_();
   const requested = listRequestedRides_(rider.items);
   const linked = attachRequestDecisionLinksSafe_(requested);
+  const reservations = attachRiderStatusStatesSafe_(listReservations_(rider.items));
   return {
     ok: true,
     build: HOY_BUILD,
     test: ts ? readTestSummary_(ts, HOY_DEFAULT_TEST) : null,
     cost: readCost_(ss),
     opportunity: getNextOpportunity_(ss),
-    reservations: listReservations_(rider.items),
+    reservations: reservations.items,
+    riderStatusError: reservations.error || '',
     requests: linked.items,
     requestDecisionError: linked.error || '',
     liveUrl: pulseLiveUrl_(),
@@ -225,6 +227,73 @@ function pulseLiveUrl_() {
   return String(PropertiesService.getScriptProperties().getProperty(LIVE_URL_PROPERTY) || PULSE_LIVE_URL_DEFAULT).trim();
 }
 
+
+/* ===== PULSE-041 rider-safe status bridge ===== */
+const RIDER_STATUS_SEQUENCE = Object.freeze([
+  'Confirmed','Leaving','On the way','Arriving soon','Arrived','Ride in progress','Complete'
+]);
+function normalizeRiderStatus_(value) {
+  const key = String(value || '').trim().toLowerCase().replace(/[\s_-]+/g, ' ');
+  const map = {'confirmed':'Confirmed','leaving':'Leaving','on the way':'On the way','arriving soon':'Arriving soon','arrived':'Arrived','ride in progress':'Ride in progress','complete':'Complete','completed':'Complete'};
+  return map[key] || '';
+}
+function riderStatusKey_(requestId, status) {
+  return String(requestId || '') + ':' + normalizeRiderStatus_(status).toLowerCase().replace(/\s+/g, '-');
+}
+function updateRiderStatus(requestId, status, idempotencyKey) {
+  const id = String(requestId || '').trim();
+  const label = normalizeRiderStatus_(status);
+  if (!/^FR-[A-Z0-9]+$/i.test(id)) throw new Error('Rider request ID is not valid.');
+  if (RIDER_STATUS_SEQUENCE.indexOf(label) < 0) throw new Error('Rider status is not valid.');
+  const cfg = requestDecisionBridge_();
+  if (!cfg.url || !cfg.token) throw new Error('Request decision bridge is not configured.');
+  const sep = cfg.url.indexOf('?') >= 0 ? '&' : '?';
+  const response = UrlFetchApp.fetch(cfg.url + sep + 'action=driver-status', {
+    method:'post',
+    contentType:'application/json',
+    payload:JSON.stringify({action:'driver-status',request:cfg.token,id:id,status:label,key:String(idempotencyKey || riderStatusKey_(id, label))}),
+    muteHttpExceptions:true,
+    followRedirects:true
+  });
+  const http = response.getResponseCode();
+  let payload = {};
+  try { payload = JSON.parse(response.getContentText() || '{}'); } catch (error) {}
+  if (http < 200 || http >= 300 || payload.ok !== true) {
+    throw new Error(String(payload.message || ('Rider status endpoint returned HTTP ' + http + '.')));
+  }
+  return payload;
+}
+function attachRiderStatusStatesSafe_(items) {
+  try { return {items:attachRiderStatusStates_(items), error:''}; }
+  catch (error) { return {items:(items || []).map(function(item){return Object.assign({}, item, {riderStatus:item.riderStatus || 'Confirmed'});}), error:String((error && error.message) || error)}; }
+}
+function attachRiderStatusStates_(items) {
+  items = Array.isArray(items) ? items : [];
+  const ids = items.filter(function(item){return item && item.source === 'rider' && item.requestId;}).map(function(item){return item.requestId;}).slice(0,25);
+  if (!ids.length) return items;
+  const cfg = requestDecisionBridge_();
+  if (!cfg.url || !cfg.token) throw new Error('Request decision bridge is not configured.');
+  const sep = cfg.url.indexOf('?') >= 0 ? '&' : '?';
+  const url = cfg.url + sep + 'action=driver-status-state&request=' + encodeURIComponent(cfg.token) + '&ids=' + encodeURIComponent(ids.join(','));
+  const response = UrlFetchApp.fetch(url, {method:'get',muteHttpExceptions:true,followRedirects:true});
+  const http = response.getResponseCode();
+  let payload = {};
+  try { payload = JSON.parse(response.getContentText() || '{}'); } catch (error) {}
+  if (http < 200 || http >= 300 || payload.ok !== true) throw new Error(String(payload.message || ('Rider status endpoint returned HTTP ' + http + '.')));
+  const byId = {};
+  (payload.states || []).forEach(function(state){if(state && state.requestId) byId[String(state.requestId)] = state;});
+  return items.map(function(item){
+    const state = byId[String(item.requestId)] || {};
+    return Object.assign({}, item, {riderStatus:normalizeRiderStatus_(state.status) || item.riderStatus || 'Confirmed', riderStatusAt:state.occurredAt || ''});
+  });
+}
+function testRiderStatusBridgePackage() {
+  const expected = ['Confirmed','Leaving','On the way','Arriving soon','Arrived','Ride in progress','Complete'];
+  if (JSON.stringify(RIDER_STATUS_SEQUENCE) !== JSON.stringify(expected)) throw new Error('Rider status sequence changed.');
+  if (riderStatusKey_('FR-TEST','On the way') !== 'FR-TEST:on-the-way') throw new Error('Rider status idempotency key is not deterministic.');
+  return {ok:true,taskId:'PULSE-041',sequence:expected,idempotent:true,writesPerformed:false,deploymentPerformed:false,productionTouched:false};
+}
+
 /* ===== Reservations (Scheduled lane) =====
  * Manual reservations remain in Script Properties.
  * Confirmed rider requests are read directly from the rider sheet and projected
@@ -235,7 +304,7 @@ const RES_STARTED_KEY = 'PULSE_STARTED_RIDER_REQUESTS';
 const RES_CUTOFF_MS = 6 * 3600000;
 const RES_STARTED_TTL_MS = 14 * 24 * 3600000;
 
-function listReservations() { return listReservations_(); }
+function listReservations() { return attachRiderStatusStatesSafe_(listReservations_()).items; }
 function listReservations_(knownRiderRows) {
   const manual = loadManualReservations_();
   const riderRows = Array.isArray(knownRiderRows) ? knownRiderRows : readRiderRequestsSafe_().items;
@@ -323,7 +392,7 @@ function startReservation(id) {
     if (!row) throw new Error('Rider request was not found.');
     if (row.status !== 'CONFIRMED') throw new Error('Only confirmed rider requests can be started.');
     markRiderStarted_(key);
-    return listReservations_(rider.items);
+    return attachRiderStatusStatesSafe_(listReservations_(rider.items)).items;
   } finally { lock.releaseLock(); }
 }
 

@@ -2,52 +2,41 @@
 
 Canonical source for the owner-only Hoy Driver console.
 
-## PULSE-050 scope
+## PULSE-041 scope
 
-This package preserves the working console layout and ride/shift behavior while adding:
+PULSE-041 adds rider-safe status progression for confirmed private rides while preserving the PULSE-050 waffle, Inbox, Scheduled lane, map, shift, and app-ride controls.
 
-- one upper-right waffle with exactly `Inbox`, `Live`, and `Settings`
-- an Inbox that shows only `REQUESTED` rider rows
-- secure Accept and Decline links issued by the existing request app
-- the existing live-information page behind `Live`
-- an intentionally blank Settings panel
-- a restrained visual polish pass without section reordering
+The exact rider-facing sequence is:
 
-## Locked driver behavior
+`Confirmed → Leaving → On the way → Arriving soon → Arrived → Ride in progress → Complete`
 
-- `GO ONLINE` starts the shift.
-- `Accept ride` remains the app-ride action.
-- Confirmed private rides remain in Scheduled.
-- Scheduled and queued sections render only when a ride exists.
-- Going online does not leave a Stand by card on screen.
-- Drop off does not force per-ride fare entry.
-- Total earnings and tips remain reconcilable at end shift.
-- Map, GPS trace, Picked up, Drop off, queue, shift timer, and Sheet writes remain unchanged.
+Cancellation remains a separate path.
 
-## Request decision boundary
+## Driver controls
 
-Hoy reads the shared `Ride Requests` sheet but never updates it.
+For a confirmed rider ride only:
 
-Accept and Decline remain request-app operations:
+1. `Start` records `Leaving`.
+2. `Navigate pickup` records `On the way` and opens navigation.
+3. `Arriving soon` records that exact status.
+4. `Arrived` records arrival.
+5. `Start ride` records `Ride in progress` and starts the existing local route trace.
+6. `Navigate destination` opens navigation without changing status.
+7. `Complete ride` records `Complete` and runs the existing drop-off flow.
 
-1. The Hoy server reads REQUESTED rows.
-2. It calls the request app's authenticated `driver-actions` endpoint.
-3. The endpoint returns signed Accept and Decline URLs.
-4. Opening a signed URL runs the existing request-app transition.
-5. The request app remains the only writer, email sender, and Calendar owner.
+Generic `Accept ride`, `Picked up`, and `Drop off` behavior remains available for app rides.
 
-Required Hoy Script Properties after review, before deployment:
+## Status write boundary
 
-- `PULSE_REQUEST_APP_URL` — request app `/exec` URL
-- `PULSE_REQUEST_TOKEN` — the request app's existing `REQUEST_TOKEN`
-- `PULSE_LIVE_URL` — optional override for the existing Live page
+Hoy never writes the shared rider sheets. It sends an authenticated server-to-server request to the existing request app using the existing `PULSE_REQUEST_APP_URL` and `PULSE_REQUEST_TOKEN` properties.
 
-No new decision secret is introduced.
+The request app is the sole writer to the append-only `Ride Status Events` tab. Each event has a Request ID, exact rider-safe status, timestamp, source, and idempotency key. Repeated taps return the existing event instead of appending a duplicate.
 
 ## Guardrails
 
-- PR only. No automatic merge or deployment.
-- No direct Hoy writes to `Ride Requests`.
-- No automatic rider email or Calendar changes during package validation.
-- Do not touch Gina's confirmed ride or press Start during validation.
-- No additional waffle items, earnings settings, theme settings, GPS settings, or navigation settings.
+- PR only; no automatic deployment.
+- No status event is written during package validation.
+- No rider email or Calendar event is sent during package validation.
+- No live GPS claim is added to the rider status page.
+- No shift, earnings, private notes, API keys, or other-ride data is exposed.
+- Do not press Start on Gina's confirmed ride during validation.

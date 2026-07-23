@@ -1,0 +1,52 @@
+{
+  "taskId": "PULSE-041",
+  "title": "Add exact rider-safe status progression",
+  "area": "Rider Status",
+  "acceptanceCriteria": "The rider display progression is exactly: Confirmed, Leaving, On the way, Arriving soon, Arrived, Ride in progress, Complete, with a separate cancellation path. Each action appends one event by Request ID with timestamp. Repeated taps are idempotent. Rider pages expose no shift, earnings, API key, private note, or other-ride data. No GPS/live-map claim in this task.",
+  "buildId": "BUILD-20260722-200105",
+  "branch": "pulse/pulse-041-rider-status-progression",
+  "builderVersion": "0.5.6-rider-status-hardening",
+  "mode": "rider-status-progression-package",
+  "paths": [
+    "apps-script/hoy-driver-os-writer/Code.gs",
+    "apps-script/hoy-driver-os-writer/Index.html",
+    "apps-script/hoy-driver-os-writer/README.md",
+    "pulse-autobuild/request-app/Code.gs",
+    "pulse-autobuild/request-app/README.md"
+  ],
+  "validation": {
+    "ok": true,
+    "taskId": "PULSE-041",
+    "paths": [
+      "apps-script/hoy-driver-os-writer/Code.gs",
+      "apps-script/hoy-driver-os-writer/Index.html",
+      "apps-script/hoy-driver-os-writer/README.md",
+      "pulse-autobuild/request-app/Code.gs",
+      "pulse-autobuild/request-app/README.md"
+    ],
+    "totalChars": 125845,
+    "build": "hoy-rider-status-2026-07-22.1",
+    "sequence": [
+      "Confirmed",
+      "Leaving",
+      "On the way",
+      "Arriving soon",
+      "Arrived",
+      "Ride in progress",
+      "Complete"
+    ],
+    "cancellationSeparate": true,
+    "appendOnly": true,
+    "idempotent": true,
+    "repeatTapGuarded": true,
+    "directCompletionGuarded": true,
+    "requestWriter": "request-app-only",
+    "riderSafePage": true,
+    "deploymentPerformed": false,
+    "productionTouched": false
+  },
+  "aiProvider": "none",
+  "deploymentPerformed": false,
+  "productionTouched": false,
+  "generatedAt": "2026-07-23T00:01:11.086Z"
+}
