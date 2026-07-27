@@ -350,7 +350,7 @@
 
             <button class="submit legacy-only" id="submitBtn" type="button" disabled>Checking private link…</button>
             <button class="submit experience-only" id="requestReviewBtn" type="button" disabled hidden>Request</button>
-            <p class="form-note">This sends no payment. The ride is not reserved until the driver confirms it.</p>
+            <p class="form-note" id="requestNote">This sends no payment. The ride is not reserved until the driver confirms it.</p>
 
             <div id="confirmStage" class="experience-stage experience-only" hidden>
               <div class="stage-title"><h2>6 · Confirm Ride</h2><span>Final check</span></div>
@@ -400,8 +400,10 @@
     var riderExperience=false;
     var submissionState='idle';
     var stagedRequestData=null;
+    var submittedQuote=null;
 
     function resetQuote_(){
+      if(submissionState==='submitting'||submissionState==='submitted')return;
       activeQuote=null;
       var result=$('quoteResult');
       if(result)result.classList.remove('show');
@@ -560,7 +562,8 @@
       $('requestReviewBtn').hidden=false;
       $('requestReviewBtn').textContent='Request';
       $('requestStage').appendChild($('requestReviewBtn'));
-      $('requestStage').appendChild(document.querySelector('#requestReviewBtn + .form-note') || document.createTextNode(''));
+      var note=$('requestNote');
+      if(note)$('requestStage').appendChild(note);
     }
 
     function hideRequestStage_(){
@@ -571,6 +574,7 @@
       $('requestDetails').hidden=true;
       $('requestReviewBtn').hidden=true;
       stagedRequestData=null;
+      submittedQuote=null;
       submissionState='idle';
     }
 
@@ -652,11 +656,12 @@
 
     function renderSuccess_(res,data){
       res=res||{};
+      var quote=submittedQuote||activeQuote||{};
       $('recap').innerHTML=
         '<div><small>Pickup</small><strong>'+esc(pretty(data.date,data.time))+'</strong></div>'+ 
         '<div><small>From</small><strong>'+esc(data.pickup)+'</strong></div>'+ 
         '<div><small>To</small><strong>'+esc(data.destination)+'</strong></div>'+ 
-        '<div><small>Pulse fare</small><strong>$'+Number(activeQuote.fare||0).toFixed(2)+'</strong></div>'+ 
+        '<div><small>Pulse fare</small><strong>$'+Number(quote.fare||0).toFixed(2)+'</strong></div>'+ 
         '<div><small>Status</small><strong>'+esc(res.status||'REQUESTED')+'</strong></div>';
       if(testMode){
         $('doneMsg').textContent='Test fixture accepted. No email, calendar event, or Sheet write was performed.';
@@ -671,6 +676,12 @@
 
     function submitExistingWriter_(data,button){
       if(submissionState==='submitting'||submissionState==='submitted')return;
+      if(!quoteIsCurrent_()){
+        resetQuote_();
+        showError('Your Pulse fare expired. Recalculate the fare before confirming the ride.');
+        return;
+      }
+      submittedQuote=Object.assign({},activeQuote);
       submissionState='submitting';
       button.disabled=true;
       button.textContent=testMode?'Testing…':'Confirming…';
@@ -683,6 +694,7 @@
         })
         .withFailureHandler(function(err){
           submissionState='idle';
+          submittedQuote=null;
           button.disabled=false;
           button.textContent=riderExperience?'Retry Confirm Ride':(quoteIsCurrent_()?(testMode?'Test ride request':'Request this ride'):'Get fare first');
           setExperienceState_('retry','The request was not sent. Review the message and retry.','confirm');
