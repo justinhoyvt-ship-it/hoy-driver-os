@@ -1,0 +1,36 @@
+{
+  "Task ID": "PULSE-060",
+  "Created At": "2026-07-26",
+  "Priority": "HIGH",
+  "Status": "READY",
+  "Requested By": "Justin",
+  "Area": "Shared Ride Lifecycle",
+  "Title": "Add the canonical ride lifecycle adapter",
+  "Problem / Request": "Bake service-neutral lifecycle patterns into adapters around the current request, trip, queue, and rider-status systems without replacing current writers or wording.",
+  "Acceptance Criteria": "Canonical transitions, no skipped pickup/drop-off, idempotent events and queue promotion, existing writers remain authoritative, deterministic no-write tests, no third-party SDK or production deployment.",
+  "Assigned Agent": "Pulse Builder v0.5.9",
+  "Branch / Build": "PACKAGE BUILT — PULSE-060",
+  "Result URL": "https://docs.google.com/document/d/112YI9njAJBKQ1TImY60Iumy3cPdOhB6RBP2VAbWfqZ4/edit",
+  "Last Error": "",
+  "Updated At": "2026-07-27 08:31:42",
+  "Integration Hooks": "Adapter and test patterns only; feature flag defaults OFF.",
+  "builder": {
+    "version": "0.5.9-canonical-lifecycle",
+    "mode": "deterministic-canonical-lifecycle-package",
+    "aiProvider": "none",
+    "buildId": "BUILD-20260727-083518",
+    "branch": "pulse/pulse-060-20260727-083519",
+    "targets": [
+      "pulse-autobuild/lifecycle-adapter/CanonicalRideLifecycle.gs",
+      "pulse-autobuild/lifecycle-adapter/CanonicalRideLifecyclePorts.gs",
+      "pulse-autobuild/lifecycle-adapter/README.md"
+    ],
+    "operationCount": 3,
+    "usage": "No AI used during the Builder run — PULSE-060 source and validation are embedded in Builder v0.5.9.",
+    "featureFlagDefault": false,
+    "directWriterInstalled": false,
+    "generatedAt": "2026-07-27T12:35:27.017Z",
+    "deploymentPerformed": false,
+    "productionTouched": false
+  }
+}
