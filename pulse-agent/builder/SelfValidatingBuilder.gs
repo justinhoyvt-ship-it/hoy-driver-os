@@ -59,13 +59,14 @@ function nextReadyTask_() {
 
 function runSelfValidatingBuilderLoop_() {
   requireGithubToken_();
-  enforceRunCurrentBuildContract_();
   const task = nextReadyTask_();
   if (!task) {
+    enforceRunCurrentBuildContract_();
     const empty = {ok:true, skipped:true, reason:'No dependency-satisfied staged task is ready.'};
     console.log(JSON.stringify(empty, null, 2));
     return empty;
   }
+  writeRunCurrentBuildState_(task, true);
 
   const validation = runValidationRepairLoopForTask_(task);
   let result;
@@ -232,8 +233,7 @@ function selfValidationGateNames_() {
 }
 
 function isSelfValidatingBuilderTask_(task) {
-  return String(task && task['Task ID'] || '') === SELF_VALIDATING_BUILDER.TASK_ID ||
-    String(task && task.Area || '') === 'Builder Infrastructure';
+  return String(task && task['Task ID'] || '') === SELF_VALIDATING_BUILDER.TASK_ID;
 }
 
 function runSelfValidatingBuilderPackage_(task, preflight) {
@@ -301,6 +301,8 @@ function validateSelfValidatingBuilderBundle_(files) {
     'function repairCurrentTaskArtifact_(',
     'function advanceQueueAfterPass_(',
     'function stageRollbackProof_(',
+    'function runCurrentBuildValue_(',
+    'function writeRunCurrentBuildState_(',
     'function testSelfValidatingBuilderBundle()'
   ].forEach(function(marker){
     if (code.indexOf(marker) < 0) throw new Error('SelfValidatingBuilder.gs is missing marker: ' + marker);
@@ -312,6 +314,10 @@ function validateSelfValidatingBuilderBundle_(files) {
       parsed.repair.maximumAttempts !== 3 ||
       parsed.controlContract.neverInvert !== true ||
       parsed.controlContract.oneTaskPerCommand !== true ||
+      parsed.controlContract.readyValue !== true ||
+      parsed.controlContract.runningValue !== false ||
+      parsed.controlContract.blockedValue !== false ||
+      parsed.taskClassifier !== 'TASK_ID_ONLY' ||
       parsed.production.automaticMerge !== false ||
       parsed.production.automaticDeployment !== false) {
     throw new Error('PULSE-066 contract JSON does not match the locked control contract.');
@@ -363,6 +369,10 @@ function validateSelfValidatingBuilderBundle_(files) {
     maxRepairAttempts:3,
     oneTaskPerCommand:true,
     runCurrentBuildConventionPreserved:true,
+    readyValueTrue:true,
+    runningValueFalse:true,
+    blockedValueFalse:true,
+    taskClassifierExact:true,
     noMarkCheckedStep:true,
     repositoryCiRequired:true,
     rollbackProof:true,
@@ -674,20 +684,31 @@ function findTaskById_(taskId) {
   return null;
 }
 
-function enforceRunCurrentBuildContract_() {
+function runCurrentBuildValue_(task, running) {
+  return !!task && running !== true;
+}
+
+function writeRunCurrentBuildState_(task, running) {
   const ss = SpreadsheetApp.openById(PB.CONTROL_SHEET_ID);
   const sh = ss.getSheetByName(MOBILE_CONTROL.SHEET);
   if (!sh) return {ok:false, reason:'Missing Mobile Control sheet.'};
+  const runnable = runCurrentBuildValue_(task, running);
   sh.getRange('A3').setValue(SELF_VALIDATING_BUILDER.RUN_LABEL);
-  sh.getRange('C3').setValue('Set TRUE once to run only the current validated staged task. FALSE means idle, running, or blocked.');
-  const task = nextReadyTask_();
+  sh.getRange('C3').setValue('TRUE means one validated staged task is ready. FALSE means running, idle, or blocked.');
   sh.getRange(MOBILE_CONTROL.NEXT_CELL).setValue(
     task ? String(task['Task ID']) + ' — ' + String(task.Title || '') : 'No runnable staged task'
   );
-  if (!task) {
-    sh.getRange(MOBILE_CONTROL.RUN_CELL).setValue(false);
-  }
-  return {ok:true, runnableTask:task ? String(task['Task ID'] || '') : ''};
+  sh.getRange(MOBILE_CONTROL.RUN_CELL).setValue(runnable);
+  return {
+    ok:true,
+    runnableTask:task ? String(task['Task ID'] || '') : '',
+    runCurrentBuild:runnable,
+    running:running === true
+  };
+}
+
+function enforceRunCurrentBuildContract_() {
+  return writeRunCurrentBuildState_(nextReadyTask_(), false);
 }
 
 function testSelfValidatingBuilderBundle() {
@@ -722,6 +743,19 @@ function testSelfValidatingBuilderBundle() {
   }
   if (!failClosed) throw new Error('Repair-loop fail-closed fixture failed.');
 
+  const readyFixture = { 'Task ID':'PULSE-999' };
+  if (runCurrentBuildValue_(readyFixture, false) !== true ||
+      runCurrentBuildValue_(readyFixture, true) !== false ||
+      runCurrentBuildValue_(null, false) !== false) {
+    throw new Error('RUN CURRENT BUILD state fixture failed.');
+  }
+  if (isSelfValidatingBuilderTask_({'Task ID':'PULSE-999', Area:'Builder Infrastructure'})) {
+    throw new Error('Builder task classifier is broader than PULSE-066.');
+  }
+  if (!isSelfValidatingBuilderTask_({'Task ID':'PULSE-066', Area:'Builder Infrastructure'})) {
+    throw new Error('PULSE-066 task classifier failed.');
+  }
+
   const result = {
     ok:true,
     paths:validation.paths,
@@ -732,6 +766,10 @@ function testSelfValidatingBuilderBundle() {
     failClosedAfterThree:failClosed,
     oneTaskPerCommand:true,
     runCurrentBuildConventionPreserved:true,
+    readyValueTrue:true,
+    runningValueFalse:true,
+    blockedValueFalse:true,
+    taskClassifierExact:true,
     noMarkCheckedStep:true,
     repositoryCiRequired:true,
     rollbackProof:true,
