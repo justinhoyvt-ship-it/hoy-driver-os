@@ -1,0 +1,34 @@
+{
+  "Task ID": "PULSE-059",
+  "Created At": "2026-07-24",
+  "Priority": "HIGH",
+  "Status": "READY",
+  "Requested By": "Justin",
+  "Area": "Rider Quote Workflow",
+  "Title": "Add QR instant fare quote before existing request confirmation",
+  "Problem / Request": "Preserve the working QR and request flow. Add only a compact rider-phone quote step for From where, Where to, and Pickup time. Calculate and display a Pulse fare before confirmation, then continue through the existing standalone request app and lifecycle unchanged. No new website or second backend.",
+  "Acceptance Criteria": "Quote calculation creates no request row; Confirm Ride creates exactly one request through the current writer; fare uses approved distance/time/minimum rules; competitor estimates are optional and never invented; current email, Calendar, Inbox, Scheduled, Ride ID/PIN, status, and lifecycle remain unchanged; deterministic no-write tests pass; review package and rollback are saved; no automatic deployment.",
+  "Assigned Agent": "Pulse Builder v0.5.8",
+  "Branch / Build": "PACKAGE BUILT — PULSE-059",
+  "Result URL": "https://drive.google.com/file/d/116-KZ0tO5zh4pMvvbbkqHHBKbCGjgp2p/view",
+  "Last Error": "",
+  "Updated At": "2026-07-27 01:19:48",
+  "Integration Hooks": "OSRM/Turf route-distance adapters and later Valhalla support the quote engine. Locomotion/Amit/Boomer patterns inform the compact UI; competitor fares are never invented.",
+  "builder": {
+    "version": "0.5.8-fare-quote",
+    "mode": "deterministic-fare-quote-package",
+    "aiProvider": "none",
+    "buildId": "BUILD-20260727-081458",
+    "branch": "pulse/pulse-059-20260727-081500",
+    "targets": [
+      "pulse-autobuild/request-app/FareQuote.gs",
+      "pulse-autobuild/request-app/README.md",
+      "pulse-autobuild/request-app/RequestForm.html"
+    ],
+    "operationCount": 3,
+    "usage": "No AI used during the Builder run — PULSE-059 source and validation are embedded in Builder v0.5.8.",
+    "generatedAt": "2026-07-27T12:15:08.176Z",
+    "deploymentPerformed": false,
+    "productionTouched": false
+  }
+}
