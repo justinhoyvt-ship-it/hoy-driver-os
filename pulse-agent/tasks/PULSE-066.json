@@ -9,13 +9,13 @@
   "Problem / Request": "Replace the temporary manual completion gate only after the active staged sequence is complete.",
   "Acceptance Criteria": "One task per command; Build → Validate → Repair ≤3 → Retest → Stage → Advance; never invert RUN CURRENT BUILD convention; no production deploy.",
   "Assigned Agent": "Pulse Builder + Auto Validator",
-  "Branch / Build": "PACKAGE BUILT — PULSE-066 / Builder v0.6.1",
+  "Branch / Build": "pulse/pulse-066-20260727-163207 / BUILD-20260727-163205 / Builder v0.6.1.1",
   "Result URL": "https://docs.google.com/document/d/1PN3oKcPCbdk8mcPVeg7ssCqnrg_R9O1bm_D8dkcrCdM/edit",
   "Last Error": "",
-  "Updated At": "2026-07-27",
+  "Updated At": "2026-07-27T21:39:31.310Z",
   "Integration Hooks": "PULSE-066 is always last. Controls future autonomous validation; production remains manual.",
   "builder": {
-    "version": "0.6.1-self-validating-builder",
+    "version": "0.6.1.1-self-validating-builder",
     "mode": "self-validating-builder-package",
     "aiProvider": "none",
     "buildId": "BUILD-20260727-163205",
@@ -38,7 +38,7 @@
           "pulse-agent/builder/SelfValidatingBuilder.gs",
           "pulse-agent/builder/self-validation-contract.json"
         ],
-        "totalChars": 32670,
+        "totalChars": 34589,
         "exactCommand": "runNextReadyTask",
         "loop": [
           "BUILD",
@@ -51,29 +51,26 @@
         "maxRepairAttempts": 3,
         "oneTaskPerCommand": true,
         "runCurrentBuildConventionPreserved": true,
+        "readyValueTrue": true,
+        "runningValueFalse": true,
+        "blockedValueFalse": true,
+        "taskClassifierExact": true,
         "noMarkCheckedStep": true,
         "repositoryCiRequired": true,
         "rollbackProof": true,
         "automaticMerge": false,
         "deploymentPerformed": false,
-        "productionTouched": false,
-        "gates": [
-          "acceptance criteria",
-          "exact patch integrity",
-          "source syntax",
-          "duplicate server/client handlers",
-          "protected IDs",
-          "feature flags default OFF",
-          "deterministic fixtures",
-          "dependency/license/secret exclusions",
-          "repository CI",
-          "artifact URL",
-          "rollback proof"
-        ]
+        "productionTouched": false
       },
       "validationAttempts": 1,
-      "repairAttempts": 0,
-      "repairs": [],
+      "repairAttempts": 1,
+      "repairs": [
+        {
+          "attempt": 1,
+          "scope": "RUN CURRENT BUILD ready/running/blocked state and exact PULSE-066 task classification",
+          "note": "Restores TRUE only for one runnable staged task, consumes FALSE before work, and prevents later Builder Infrastructure tasks from being misclassified."
+        }
+      ],
       "gates": [
         "acceptance criteria",
         "exact patch integrity",
@@ -95,6 +92,18 @@
     "automaticMerge": false,
     "deploymentPerformed": false,
     "productionTouched": false,
-    "generatedAt": "2026-07-27T20:32:16.217Z"
+    "generatedAt": "2026-07-27T20:32:16.217Z",
+    "reviewRepair": {
+      "sourceCommitBeforeRepair": "edf6e834584396618d96f018816f3eb901761bcf",
+      "repairVersion": "0.6.1.1-self-validating-builder",
+      "readyValueTrue": true,
+      "runningValueFalse": true,
+      "blockedValueFalse": true,
+      "taskClassifierExact": true,
+      "automaticMerge": false,
+      "deploymentPerformed": false,
+      "productionTouched": false,
+      "repairedAt": "2026-07-27T21:39:31.310Z"
+    }
   }
 }
