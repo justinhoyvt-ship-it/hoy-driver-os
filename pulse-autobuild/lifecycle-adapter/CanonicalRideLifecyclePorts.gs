@@ -102,19 +102,53 @@ function pulseValidateLifecycleProposal_(proposal) {
   if (proposal.schemaVersion !== PULSE_CANONICAL_LIFECYCLE_VERSION_) {
     throw new Error('Unsupported lifecycle proposal version.');
   }
-  if (!pulseCanonicalText_(proposal.requestId)) {
+  const requestId = pulseCanonicalText_(proposal.requestId);
+  if (!requestId) {
     throw new Error('Lifecycle proposal Request ID is required.');
   }
-  if (!pulseCanonicalText_(proposal.eventId) ||
-      !pulseCanonicalText_(proposal.idempotencyKey)) {
+  const eventId = pulseCanonicalText_(proposal.eventId);
+  const idempotencyKey = pulseCanonicalText_(proposal.idempotencyKey);
+  if (!eventId || !idempotencyKey) {
     throw new Error('Lifecycle proposal event identity is required.');
   }
   if (Number(proposal.eventCount) !== 1) {
     throw new Error('One lifecycle action must create exactly one event proposal.');
   }
-  pulseCanonicalState_(proposal.fromState);
-  pulseCanonicalState_(proposal.toState);
-  return proposal;
+
+  const fromState = pulseCanonicalState_(proposal.fromState);
+  const action = pulseCanonicalAction_(proposal.action);
+  const toState = pulseCanonicalState_(proposal.toState);
+  const expectedToState =
+    (PULSE_CANONICAL_TRANSITIONS_[fromState] || {})[action] || '';
+
+  if (!expectedToState || expectedToState !== toState) {
+    throw new Error(
+      'Lifecycle proposal transition does not match the canonical transition table.'
+    );
+  }
+
+  const expectedAuthority = pulseLifecycleAuthority_(fromState, toState);
+  if (pulseCanonicalText_(proposal.authority) !== expectedAuthority) {
+    throw new Error('Lifecycle proposal authority does not match the transition.');
+  }
+
+  const occurredAt = pulseCanonicalText_(proposal.occurredAt);
+  if (!occurredAt ||
+      occurredAt === 'CALLER_TIMESTAMP_REQUIRED' ||
+      isNaN(Date.parse(occurredAt))) {
+    throw new Error('Lifecycle proposal requires a valid occurredAt timestamp.');
+  }
+
+  return Object.assign({}, proposal, {
+    requestId: requestId,
+    eventId: eventId,
+    idempotencyKey: idempotencyKey,
+    action: action,
+    fromState: fromState,
+    toState: toState,
+    authority: expectedAuthority,
+    occurredAt: occurredAt
+  });
 }
 
 /**
@@ -198,15 +232,41 @@ function pulseRunLifecyclePortTests() {
     return {ok: true, duplicate: false, writesPerformed: false};
   }
 
-  const first = memoryWrite(proposal);
-  const second = memoryWrite(proposal);
+  const validated = pulseValidateLifecycleProposal_(proposal);
+  const forgedTransitionRejected = pulseExpectLifecycleError_(function() {
+    pulseValidateLifecycleProposal_(Object.assign({}, proposal, {
+      fromState: 'REQUESTED',
+      action: 'COMPLETE',
+      toState: 'COMPLETED',
+      authority: 'TRIP_LOG'
+    }));
+  }, 'transition does not match');
+  const authorityMismatchRejected = pulseExpectLifecycleError_(function() {
+    pulseValidateLifecycleProposal_(Object.assign({}, proposal, {
+      authority: 'STATUS_EVENTS'
+    }));
+  }, 'authority does not match');
+  const missingTimestampRejected = pulseExpectLifecycleError_(function() {
+    pulseValidateLifecycleProposal_(Object.assign({}, proposal, {
+      occurredAt: 'CALLER_TIMESTAMP_REQUIRED'
+    }));
+  }, 'valid occurredAt timestamp');
+
+  const first = memoryWrite(validated);
+  const second = memoryWrite(validated);
 
   return {
     ok: first.duplicate === false &&
       second.duplicate === true &&
-      memoryWriteCount === 1,
+      memoryWriteCount === 1 &&
+      forgedTransitionRejected &&
+      authorityMismatchRejected &&
+      missingTimestampRejected,
     memoryWriteCount: memoryWriteCount,
     repeatedEventProducedDuplicate: second.duplicate,
+    forgedTransitionRejected: forgedTransitionRejected,
+    authorityMismatchRejected: authorityMismatchRejected,
+    missingTimestampRejected: missingTimestampRejected,
     externalWritesPerformed: false,
     productionTouched: false
   };
