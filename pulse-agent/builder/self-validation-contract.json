@@ -1,0 +1,59 @@
+{
+  "taskId": "PULSE-066",
+  "name": "Self-Validating Builder and Auto-Repair Loop",
+  "version": "0.6.1-self-validating-builder",
+  "sequencePosition": "LAST",
+  "command": "runNextReadyTask",
+  "loop": [
+    "BUILD",
+    "VALIDATE",
+    "REPAIR_MAX_3",
+    "RETEST",
+    "STAGE",
+    "ADVANCE_QUEUE"
+  ],
+  "controlContract": {
+    "label": "RUN CURRENT BUILD",
+    "trueMeaning": "A dependency-satisfied staged artifact is selected for one explicit run.",
+    "falseMeaning": "No staged artifact is ready, the system is running, or the system is blocked.",
+    "neverInvert": true,
+    "oneTaskPerCommand": true
+  },
+  "validationGates": [
+    "acceptance criteria",
+    "exact patch integrity",
+    "source syntax",
+    "duplicate server/client handlers",
+    "protected IDs",
+    "feature flags default OFF",
+    "deterministic fixtures",
+    "dependency/license/secret exclusions",
+    "repository CI",
+    "artifact URL",
+    "rollback proof"
+  ],
+  "repair": {
+    "maximumAttempts": 3,
+    "scope": "only the failing validation",
+    "failClosed": true,
+    "forbidden": [
+      "broaden architecture",
+      "replace working flows",
+      "alter production",
+      "rotate secrets",
+      "activate payments",
+      "make legal/privacy decisions",
+      "mutate live rider data"
+    ]
+  },
+  "advance": {
+    "completedTaskState": "AUTO_VALIDATED_STAGED",
+    "nextTaskState": "READY_TO_RUN",
+    "finalTaskBarrier": "PULSE-066 does not auto-advance another task."
+  },
+  "production": {
+    "automaticMerge": false,
+    "automaticDeployment": false,
+    "productionMutation": false
+  }
+}
