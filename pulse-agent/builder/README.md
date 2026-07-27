@@ -28,12 +28,14 @@ Repository CI remains part of the pass gate. After CI passes, the task is marked
 
 PULSE-066 is a final-task barrier and does not automatically start or ready another lane.
 
+Only Task ID `PULSE-066` is classified as the self-validating Builder installation task; later tasks in the Builder Infrastructure area use their own staged artifacts.
+
 ## Mobile control
 
 The action label is **RUN CURRENT BUILD**.
 
-- `TRUE` is accepted only when one staged task is currently `READY`, `READY_PUBLIC`, or `READY_TO_RUN`.
-- The checkbox is consumed and returned to `FALSE` while running or when blocked.
+- `TRUE` is restored only when one staged task is currently `READY`, `READY_PUBLIC`, or `READY_TO_RUN`.
+- The value is set to `FALSE` before work begins and remains `FALSE` while running, idle, or blocked.
 - The convention is never inverted.
 - No separate MARK CHECKED step is required.
 
@@ -47,7 +49,7 @@ The Builder may create a branch, commits, rollback proof, and a pull request. It
 
 ## Installation
 
-Install the complete `Pulse_Builder_Bridge_v0_6_1_SELF_VALIDATING_READY.gs` source in the existing Builder Apps Script project. The repository module in this folder documents the orchestration layer and is not a replacement for the complete installed source.
+Install the complete `Pulse_Builder_Bridge_v0_6_1_1_SELF_VALIDATING_CONTROL_FIXED.gs` source in the existing Builder Apps Script project. The repository module in this folder documents the orchestration layer and is not a replacement for the complete installed source.
 
 ## Rollback
 
