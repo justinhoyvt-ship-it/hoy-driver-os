@@ -132,6 +132,16 @@
     .err{display:none;margin-bottom:18px;padding:11px 13px;border:1px solid var(--sky-low);color:var(--sky-low);font-family:var(--mono);font-size:.72rem;line-height:1.5}
     .err.show{display:block}
 
+    .quote-panel{margin:4px 0 18px;padding:16px;border:1px solid var(--line);background:var(--surface-2)}
+    .quote-actions{display:grid;grid-template-columns:1fr;gap:10px}
+    .quote-btn{min-height:48px;border:1px solid var(--ink);background:transparent;color:var(--ink);font-family:var(--mono);font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+    .quote-btn:hover{background:var(--ink);color:var(--paper)}
+    .quote-btn:disabled{opacity:.55;cursor:wait}
+    .quote-result{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+    .quote-result.show{display:block}
+    .quote-fare{font-family:var(--display);font-size:2rem;font-weight:700}
+    .quote-meta{margin-top:4px;color:var(--muted);font-size:.75rem}
+
     /* Success state */
     .done{display:none}
     .done.show{display:block}
@@ -248,6 +258,17 @@
               </div>
             </div>
 
+            <div class="quote-panel" id="quotePanel">
+              <div class="card-kicker"><span>Pulse fare</span><span>No request yet</span></div>
+              <div class="quote-actions">
+                <button class="quote-btn" id="quoteBtn" type="button" disabled>Checking private link…</button>
+              </div>
+              <div class="quote-result" id="quoteResult" aria-live="polite">
+                <div class="quote-fare" id="quoteFare"></div>
+                <div class="quote-meta" id="quoteMeta"></div>
+              </div>
+            </div>
+
             <div class="field">
               <label for="notes">Anything I should know?</label>
               <textarea id="notes" placeholder="Flight number, luggage, a stop on the way…"></textarea>
@@ -296,6 +317,67 @@
     var requestToken='';
     var testMode=false;
     var requestOpen=false;
+    var activeQuote=null;
+
+    function resetQuote_(){
+      activeQuote=null;
+      var result=$('quoteResult');
+      if(result)result.classList.remove('show');
+      var submit=$('submitBtn');
+      if(submit&&requestOpen){
+        submit.disabled=true;
+        submit.textContent='Get fare first';
+      }
+    }
+
+    function quotePickupAt_(){
+      return String($('date').value||'')+'T'+String($('time').value||'');
+    }
+
+    function quoteIsCurrent_(){
+      if(!activeQuote||!activeQuote.expiresAt)return false;
+      return Date.parse(activeQuote.expiresAt)>Date.now();
+    }
+
+    function requestFareQuote_(){
+      clearError();
+      var pickup=$('pickup').value.trim();
+      var destination=$('destination').value.trim();
+      var pickupAt=quotePickupAt_();
+      if(!pickup||!destination||!$('date').value||!$('time').value){
+        showError('Add pickup, destination, date, and time before requesting a fare.');
+        return;
+      }
+      var btn=$('quoteBtn');
+      btn.disabled=true;
+      btn.textContent='Calculating…';
+      google.script.run
+        .withSuccessHandler(function(res){
+          activeQuote=res||null;
+          $('quoteFare').textContent='$'+Number(res.fare||0).toFixed(2);
+          $('quoteMeta').textContent=
+            Number(res.distanceMiles||0).toFixed(1)+' miles · '+
+            Number(res.durationMinutes||0)+' minutes · valid for 15 minutes';
+          $('quoteResult').classList.add('show');
+          btn.disabled=false;
+          btn.textContent='Recalculate fare';
+          $('submitBtn').disabled=false;
+          $('submitBtn').textContent=testMode?'Test ride request':'Request this ride';
+        })
+        .withFailureHandler(function(err){
+          activeQuote=null;
+          btn.disabled=false;
+          btn.textContent='Get Pulse fare';
+          showError((err&&err.message)?err.message:'Could not calculate a fare.');
+        })
+        .pulseGetFareQuote({
+          pickup:pickup,
+          destination:destination,
+          pickupAt:pickupAt,
+          requestToken:requestToken,
+          testMode:testMode
+        });
+    }
 
     (function(){
       var root=document.documentElement;
@@ -369,8 +451,10 @@
             requestOpen=!!config.requestOpen;
             var btn=$('submitBtn');
             if(requestOpen){
-              btn.disabled=false;
-              btn.textContent=testMode?'Test ride request':'Send ride request';
+              $('quoteBtn').disabled=false;
+              $('quoteBtn').textContent='Get Pulse fare';
+              btn.disabled=true;
+              btn.textContent='Get fare first';
               if(testMode)$('err').classList.remove('show');
             }else{
               btn.disabled=true;
@@ -387,8 +471,18 @@
       });
     }
 
+    $('quoteBtn').addEventListener('click',requestFareQuote_);
+    ['pickup','destination','date','time'].forEach(function(id){
+      $(id).addEventListener('input',resetQuote_);
+    });
+
     $('submitBtn').addEventListener('click',function(){
       clearError();
+      if(!quoteIsCurrent_()){
+        resetQuote_();
+        showError('Get a current Pulse fare before requesting the ride.');
+        return;
+      }
       if(!requestOpen){showError('This private request link is not valid.');return;}
       var data=collect();
       var need=['name','phone','email','pickup','destination','date','time'];
@@ -405,6 +499,7 @@
             '<div><small>Pickup</small><strong>'+esc(pretty(data.date,data.time))+'</strong></div>'+ 
             '<div><small>From</small><strong>'+esc(data.pickup)+'</strong></div>'+ 
             '<div><small>To</small><strong>'+esc(data.destination)+'</strong></div>'+ 
+            '<div><small>Pulse fare</small><strong>$'+Number(activeQuote.fare||0).toFixed(2)+'</strong></div>'+
             '<div><small>Status</small><strong>'+esc(res.status||'REQUESTED')+'</strong></div>';
           if(testMode){
             $('doneMsg').textContent='Test fixture accepted. No email, calendar event, or Sheet write was performed.';
@@ -416,7 +511,8 @@
           window.scrollTo({top:0,behavior:'smooth'});
         })
         .withFailureHandler(function(err){
-          btn.disabled=false;btn.textContent=testMode?'Test ride request':'Send ride request';
+          btn.disabled=!quoteIsCurrent_();
+          btn.textContent=quoteIsCurrent_()?(testMode?'Test ride request':'Request this ride'):'Get fare first';
           showError((err&&err.message)?err.message:'Could not send the request. Please try again.');
         })
         .submitRideRequest(data);
