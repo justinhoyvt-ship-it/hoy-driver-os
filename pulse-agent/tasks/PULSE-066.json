@@ -1,0 +1,100 @@
+{
+  "Task ID": "PULSE-066",
+  "Created At": "2026-07-26",
+  "Priority": "CRITICAL",
+  "Status": "READY",
+  "Requested By": "Justin",
+  "Area": "Builder Infrastructure",
+  "Title": "Install the self-validating builder and auto-repair loop",
+  "Problem / Request": "Replace the temporary manual completion gate only after the active staged sequence is complete.",
+  "Acceptance Criteria": "One task per command; Build → Validate → Repair ≤3 → Retest → Stage → Advance; never invert RUN CURRENT BUILD convention; no production deploy.",
+  "Assigned Agent": "Pulse Builder + Auto Validator",
+  "Branch / Build": "PACKAGE BUILT — PULSE-066 / Builder v0.6.1",
+  "Result URL": "https://docs.google.com/document/d/1PN3oKcPCbdk8mcPVeg7ssCqnrg_R9O1bm_D8dkcrCdM/edit",
+  "Last Error": "",
+  "Updated At": "2026-07-27",
+  "Integration Hooks": "PULSE-066 is always last. Controls future autonomous validation; production remains manual.",
+  "builder": {
+    "version": "0.6.1-self-validating-builder",
+    "mode": "self-validating-builder-package",
+    "aiProvider": "none",
+    "buildId": "BUILD-20260727-163205",
+    "branch": "pulse/pulse-066-20260727-163207",
+    "targets": [
+      "pulse-agent/builder/README.md",
+      "pulse-agent/builder/ROLLBACK.md",
+      "pulse-agent/builder/SelfValidatingBuilder.gs",
+      "pulse-agent/builder/self-validation-contract.json"
+    ],
+    "operationCount": 4,
+    "localValidation": {
+      "ok": true,
+      "validation": {
+        "ok": true,
+        "taskId": "PULSE-066",
+        "paths": [
+          "pulse-agent/builder/README.md",
+          "pulse-agent/builder/ROLLBACK.md",
+          "pulse-agent/builder/SelfValidatingBuilder.gs",
+          "pulse-agent/builder/self-validation-contract.json"
+        ],
+        "totalChars": 32670,
+        "exactCommand": "runNextReadyTask",
+        "loop": [
+          "BUILD",
+          "VALIDATE",
+          "REPAIR_MAX_3",
+          "RETEST",
+          "STAGE",
+          "ADVANCE_QUEUE"
+        ],
+        "maxRepairAttempts": 3,
+        "oneTaskPerCommand": true,
+        "runCurrentBuildConventionPreserved": true,
+        "noMarkCheckedStep": true,
+        "repositoryCiRequired": true,
+        "rollbackProof": true,
+        "automaticMerge": false,
+        "deploymentPerformed": false,
+        "productionTouched": false,
+        "gates": [
+          "acceptance criteria",
+          "exact patch integrity",
+          "source syntax",
+          "duplicate server/client handlers",
+          "protected IDs",
+          "feature flags default OFF",
+          "deterministic fixtures",
+          "dependency/license/secret exclusions",
+          "repository CI",
+          "artifact URL",
+          "rollback proof"
+        ]
+      },
+      "validationAttempts": 1,
+      "repairAttempts": 0,
+      "repairs": [],
+      "gates": [
+        "acceptance criteria",
+        "exact patch integrity",
+        "source syntax",
+        "duplicate server/client handlers",
+        "protected IDs",
+        "feature flags default OFF",
+        "deterministic fixtures",
+        "dependency/license/secret exclusions",
+        "repository CI",
+        "artifact URL",
+        "rollback proof"
+      ]
+    },
+    "maxRepairAttempts": 3,
+    "exactCommand": "runNextReadyTask",
+    "oneTaskPerCommand": true,
+    "finalTaskBarrier": true,
+    "automaticMerge": false,
+    "deploymentPerformed": false,
+    "productionTouched": false,
+    "generatedAt": "2026-07-27T20:32:16.217Z"
+  }
+}
