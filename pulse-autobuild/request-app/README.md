@@ -60,3 +60,34 @@ Hoy Driver continues to read rider rows but never writes them. The request app r
 ## Validation
 
 Run `testRideIdPinAccessPackage()` before review. It performs no Sheet, Mail, Calendar, credential issuance, deployment, or production operation.
+
+## PULSE-059 instant fare quote
+
+The private request page now requires a current Pulse fare quote before the rider can send the existing ride request.
+
+The quote step uses:
+
+- pickup address
+- destination
+- pickup date and time
+- route distance and duration from the Apps Script Maps service
+- pricing values stored in Script Properties
+
+Required pricing properties:
+
+| Property | Meaning |
+|---|---|
+| `PULSE_FARE_BASE` | Base fare |
+| `PULSE_FARE_PER_MILE` | Per-mile amount |
+| `PULSE_FARE_PER_MINUTE` | Per-minute amount |
+| `PULSE_FARE_MINIMUM` | Minimum fare |
+| `PULSE_FARE_BOOKING_BUFFER` | Fixed booking buffer |
+| `PULSE_FARE_ROUNDING_INCREMENT` | Fare rounding increment, such as `0.50` |
+
+`pulseGetFareQuote()` performs no Sheet, Mail, Calendar, request, status, or production write. A quote expires after 15 minutes and is invalidated whenever pickup, destination, date, or time changes.
+
+Competitor prices are not estimated or invented. The quote result reports `comparisonStatus: UNAVAILABLE` until a verified comparison source is added later.
+
+The existing `submitRideRequest()` function remains the only request-creation path. The request app remains the only writer for ride requests and the downstream confirmation lifecycle remains unchanged.
+
+Run `pulseRunFareQuoteTests()` before review. It performs no route lookup and no write.
