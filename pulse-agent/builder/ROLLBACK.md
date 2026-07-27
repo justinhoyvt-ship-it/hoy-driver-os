@@ -1,5 +1,7 @@
 # PULSE-066 Rollback
 
+This rollback applies to the corrected v0.6.1.1 control-state installation.
+
 1. Replace the installed Builder source with the previously saved v0.6.0.1 source.
 2. Run `installMobileControlTrigger` only if the existing on-edit trigger is missing or stale.
 3. Restore the prior Mobile Control label and keep the run checkbox `FALSE` while blocked.
