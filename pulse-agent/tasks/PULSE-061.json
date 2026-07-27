@@ -1,0 +1,36 @@
+{
+  "Task ID": "PULSE-061",
+  "Created At": "2026-07-26",
+  "Priority": "HIGH",
+  "Status": "READY",
+  "Requested By": "Justin",
+  "Area": "Rider Experience",
+  "Title": "Harvest rider request and quote UI patterns",
+  "Problem / Request": "Refine the phone experience around the existing QR quote, request confirmation, and rider status pages without creating a second form, writer, or lifecycle.",
+  "Acceptance Criteria": "Locked From/To/Pickup time/Pulse fare/Request/Confirm sequence; one-thumb accessible UI; truthful loading/error states; existing downstream behavior unchanged; only license-cleared reuse.",
+  "Assigned Agent": "Pulse Builder v0.6.0",
+  "Branch / Build": "PACKAGE BUILT — PULSE-061",
+  "Result URL": "https://docs.google.com/document/d/1lc8P293oTut9pMdz9AU3XLnljK2yuj25UvKc7Kv0xcU/edit",
+  "Last Error": "",
+  "Updated At": "2026-07-27 10:15:41",
+  "Integration Hooks": "Only verified permissive source may be copied; other sources remain reference-only.",
+  "builder": {
+    "version": "0.6.0-rider-experience",
+    "mode": "deterministic-rider-experience-package",
+    "aiProvider": "none",
+    "buildId": "BUILD-20260727-155542",
+    "branch": "pulse/pulse-061-20260727-155543",
+    "targets": [
+      "pulse-autobuild/request-app/README.md",
+      "pulse-autobuild/request-app/RequestForm.html",
+      "pulse-autobuild/request-app/RiderExperience.gs"
+    ],
+    "operationCount": 3,
+    "usage": "No AI used during the Builder run — PULSE-061 source and validation are embedded in Builder v0.6.0.",
+    "generatedAt": "2026-07-27T19:55:48.437Z",
+    "featureFlagDefault": false,
+    "existingRequestWriter": "submitRideRequest",
+    "deploymentPerformed": false,
+    "productionTouched": false
+  }
+}

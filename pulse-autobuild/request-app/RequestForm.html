@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="sunrise">
+<html lang="en" data-theme="sunrise" data-rider-experience="off">
 <head>
   <base target="_top">
   <meta charset="UTF-8">
@@ -142,6 +142,46 @@
     .quote-fare{font-family:var(--display);font-size:2rem;font-weight:700}
     .quote-meta{margin-top:4px;color:var(--muted);font-size:.75rem}
 
+
+    /* PULSE-061 rider experience — inactive unless explicitly enabled */
+    .experience-only{display:none}
+    html[data-rider-experience="on"] .experience-only{display:block}
+    html[data-rider-experience="on"] .legacy-only{display:none!important}
+    .experience-progress{margin:0 0 18px;padding:0;list-style:none;display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
+    .experience-progress li{min-width:0;padding:8px 4px;border:1px solid var(--line);font-family:var(--mono);font-size:.55rem;line-height:1.2;text-align:center;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:var(--surface)}
+    .experience-progress li[aria-current="step"]{border-color:var(--signal);color:var(--ink);background:color-mix(in srgb,var(--signal) 14%,var(--surface))}
+    .experience-progress li[data-complete="true"]{border-color:var(--green);color:var(--green)}
+    .experience-status{margin:0 0 18px;padding:12px 13px;border-left:4px solid var(--signal);background:var(--surface-2);font-family:var(--mono);font-size:.7rem;line-height:1.5}
+    .experience-status[data-state="unavailable"],.experience-status[data-state="validation"],.experience-status[data-state="retry"]{border-left-color:var(--sky-low)}
+    .experience-status[data-state="quoted"],.experience-status[data-state="submitted"]{border-left-color:var(--green)}
+    .experience-stage{margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
+    .experience-stage[hidden]{display:none!important}
+    .stage-title{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:16px}
+    .stage-title h2{font-size:1.2rem}
+    .stage-title span{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+    .review-list{display:grid;gap:10px;margin:0 0 18px;padding:0;list-style:none}
+    .review-list li{display:grid;grid-template-columns:88px 1fr;gap:12px;padding-bottom:9px;border-bottom:1px solid var(--line)}
+    .review-list small{font-family:var(--mono);font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+    .review-list strong{font-size:.9rem;overflow-wrap:anywhere}
+    .secondary{width:100%;min-height:48px;margin-top:9px;border:1px solid var(--ink);background:transparent;color:var(--ink);font-family:var(--mono);font-size:.69rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+    .secondary:hover{background:var(--ink);color:var(--paper)}
+    .field-invalid input,.field-invalid textarea{border-color:var(--sky-low)}
+    .field-help{display:none;margin-top:6px;color:var(--sky-low);font-family:var(--mono);font-size:.65rem}
+    .field-invalid .field-help{display:block}
+    html[data-rider-experience="on"] .request-card{padding-bottom:26px}
+    html[data-rider-experience="on"] #routeFields{scroll-margin-top:96px}
+    html[data-rider-experience="on"] #contactFields[hidden],html[data-rider-experience="on"] #requestDetails[hidden]{display:none!important}
+    @media(max-width:650px){
+      html[data-rider-experience="on"] .wrap{width:min(100% - 24px,var(--max))}
+      html[data-rider-experience="on"] .hero-inner{padding-top:34px;gap:24px}
+      html[data-rider-experience="on"] .request-card{padding:22px 18px}
+      html[data-rider-experience="on"] .row2{grid-template-columns:1fr}
+      html[data-rider-experience="on"] .experience-progress{grid-template-columns:repeat(3,1fr)}
+      html[data-rider-experience="on"] .experience-progress li{font-size:.52rem}
+      html[data-rider-experience="on"] input,html[data-rider-experience="on"] select{height:54px}
+      html[data-rider-experience="on"] .submit,html[data-rider-experience="on"] .quote-btn,html[data-rider-experience="on"] .secondary{min-height:56px}
+    }
+
     /* Success state */
     .done{display:none}
     .done.show{display:block}
@@ -212,83 +252,122 @@
         </div>
 
         <div id="formView">
-          <div class="request-card">
+          <div class="request-card" id="requestCard">
             <div class="card-kicker"><span>New request</span><span>Pulse Vermont</span></div>
-            <div class="err" id="err"></div>
+            <ol class="experience-progress experience-only" id="experienceProgress" aria-label="Ride request steps">
+              <li data-step="pickup" aria-current="step">1 From</li>
+              <li data-step="destination">2 To</li>
+              <li data-step="time">3 Time</li>
+              <li data-step="fare">4 Fare</li>
+              <li data-step="request">5 Request</li>
+              <li data-step="confirm">6 Confirm</li>
+            </ol>
+            <div class="experience-status experience-only" id="experienceStatus" role="status" aria-live="polite" data-state="editing">Start with pickup, destination, and pickup time.</div>
+            <div class="err" id="err" role="alert" aria-live="assertive"></div>
 
-            <div class="field">
-              <label for="name">Your name <span class="req">*</span></label>
-              <input id="name" autocomplete="name" placeholder="First and last">
+            <div id="contactFields">
+              <div class="field" id="nameField">
+                <label for="name">Your name <span class="req">*</span></label>
+                <input id="name" autocomplete="name" placeholder="First and last" aria-describedby="nameHelp">
+                <span class="field-help" id="nameHelp">Enter your name.</span>
+              </div>
+
+              <div class="row2">
+                <div class="field" id="phoneField">
+                  <label for="phone">Phone <span class="req">*</span></label>
+                  <input id="phone" type="tel" autocomplete="tel" placeholder="(802) 555-0123" aria-describedby="phoneHelp">
+                  <span class="field-help" id="phoneHelp">Enter a phone number.</span>
+                </div>
+                <div class="field">
+                  <label for="passengers">Passengers</label>
+                  <input id="passengers" type="number" min="1" max="7" value="1">
+                </div>
+              </div>
+
+              <div class="field" id="emailField">
+                <label for="email">Email <span class="req">*</span></label>
+                <input id="email" type="email" autocomplete="email" placeholder="you@example.com" aria-describedby="emailHelp">
+                <span class="field-help" id="emailHelp">Enter a valid email address.</span>
+              </div>
             </div>
 
-            <div class="row2">
+            <div id="routeFields">
+              <div class="field" id="pickupField">
+                <label for="pickup"><span class="experience-only">1 · From where</span><span class="legacy-only">Pickup address</span> <span class="req">*</span></label>
+                <input id="pickup" autocomplete="street-address" placeholder="Where should I get you?" aria-describedby="pickupHelp">
+                <span class="field-help" id="pickupHelp">Enter a pickup location.</span>
+              </div>
+
+              <div class="field" id="destinationField">
+                <label for="destination"><span class="experience-only">2 · Where to</span><span class="legacy-only">Destination</span> <span class="req">*</span></label>
+                <input id="destination" placeholder="Airport, address, or place name" aria-describedby="destinationHelp">
+                <span class="field-help" id="destinationHelp">Enter a destination.</span>
+              </div>
+
+              <div class="row2" id="pickupTimeFields">
+                <div class="field" id="dateField">
+                  <label for="date"><span class="experience-only">3 · Pickup date</span><span class="legacy-only">Date</span> <span class="req">*</span></label>
+                  <input id="date" type="date" aria-describedby="dateHelp">
+                  <span class="field-help" id="dateHelp">Choose a pickup date.</span>
+                </div>
+                <div class="field" id="timeField">
+                  <label for="time"><span class="experience-only">3 · Pickup time</span><span class="legacy-only">Pickup time</span> <span class="req">*</span></label>
+                  <input id="time" type="time" aria-describedby="timeHelp">
+                  <span class="field-help" id="timeHelp">Choose a pickup time.</span>
+                </div>
+              </div>
+
+              <div class="quote-panel" id="quotePanel">
+                <div class="card-kicker"><span>4 · Pulse fare</span><span>No request yet</span></div>
+                <div class="quote-actions">
+                  <button class="quote-btn" id="quoteBtn" type="button" disabled aria-describedby="quoteState">Checking private link…</button>
+                </div>
+                <div class="quote-result" id="quoteResult" aria-live="polite">
+                  <div class="quote-fare" id="quoteFare"></div>
+                  <div class="quote-meta" id="quoteMeta"></div>
+                </div>
+                <p class="form-note" id="quoteState">Calculating a fare does not send a request.</p>
+              </div>
+            </div>
+
+            <div id="requestStage" class="experience-stage experience-only" hidden>
+              <div class="stage-title"><h2>5 · Request</h2><span>No write yet</span></div>
+              <div id="requestFieldsSlot"></div>
+            </div>
+
+            <div id="requestDetails">
               <div class="field">
-                <label for="phone">Phone <span class="req">*</span></label>
-                <input id="phone" type="tel" autocomplete="tel" placeholder="(802) 555-0123">
+                <label for="notes">Anything I should know?</label>
+                <textarea id="notes" placeholder="Flight number, luggage, a stop on the way…"></textarea>
               </div>
-              <div class="field">
-                <label for="passengers">Passengers</label>
-                <input id="passengers" type="number" min="1" max="7" value="1">
-              </div>
-            </div>
 
-            <div class="field">
-              <label for="email">Email <span class="req">*</span></label>
-              <input id="email" type="email" autocomplete="email" placeholder="you@example.com">
-            </div>
-
-            <div class="field">
-              <label for="pickup">Pickup address <span class="req">*</span></label>
-              <input id="pickup" placeholder="Where should I get you?">
-            </div>
-
-            <div class="field">
-              <label for="destination">Destination <span class="req">*</span></label>
-              <input id="destination" placeholder="Airport, address, or place name">
-            </div>
-
-            <div class="row2">
-              <div class="field">
-                <label for="date">Date <span class="req">*</span></label>
-                <input id="date" type="date">
-              </div>
-              <div class="field">
-                <label for="time">Pickup time <span class="req">*</span></label>
-                <input id="time" type="time">
+              <div class="consent" id="consentField">
+                <input id="consent" type="checkbox" aria-describedby="consentHelp">
+                <label for="consent">I consent to sharing these contact, pickup, and scheduling details with the driver for this private ride request.</label>
+                <span class="field-help" id="consentHelp">Consent is required before confirmation.</span>
               </div>
             </div>
 
-            <div class="quote-panel" id="quotePanel">
-              <div class="card-kicker"><span>Pulse fare</span><span>No request yet</span></div>
-              <div class="quote-actions">
-                <button class="quote-btn" id="quoteBtn" type="button" disabled>Checking private link…</button>
-              </div>
-              <div class="quote-result" id="quoteResult" aria-live="polite">
-                <div class="quote-fare" id="quoteFare"></div>
-                <div class="quote-meta" id="quoteMeta"></div>
-              </div>
-            </div>
+            <button class="submit legacy-only" id="submitBtn" type="button" disabled>Checking private link…</button>
+            <button class="submit experience-only" id="requestReviewBtn" type="button" disabled hidden>Request</button>
+            <p class="form-note" id="requestNote">This sends no payment. The ride is not reserved until the driver confirms it.</p>
 
-            <div class="field">
-              <label for="notes">Anything I should know?</label>
-              <textarea id="notes" placeholder="Flight number, luggage, a stop on the way…"></textarea>
+            <div id="confirmStage" class="experience-stage experience-only" hidden>
+              <div class="stage-title"><h2>6 · Confirm Ride</h2><span>Final check</span></div>
+              <ul class="review-list" id="reviewList"></ul>
+              <button class="submit" id="confirmRideBtn" type="button">Confirm Ride</button>
+              <button class="secondary" id="editRequestBtn" type="button">Edit request</button>
+              <p class="form-note">Confirm Ride calls the existing standalone request writer once.</p>
             </div>
-
-            <div class="consent">
-              <input id="consent" type="checkbox">
-              <label for="consent">I consent to sharing these contact, pickup, and scheduling details with the driver for this private ride request.</label>
-            </div>
-
-            <button class="submit" id="submitBtn" type="button" disabled>Checking private link…</button>
-            <p class="form-note">This sends a request. It does not charge you or reserve a ride until it is confirmed.</p>
           </div>
         </div>
 
         <div id="doneView" style="display:none">
           <div class="request-card done" style="display:block">
             <div class="badge">Request sent</div>
-            <h2>You are on the list.</h2>
+            <h2>Request received.</h2>
             <p id="doneMsg">Your driver has it and will confirm shortly. Watch your inbox for the confirmation.</p>
+            <div class="experience-status" id="riderStatus" role="status" aria-live="polite" data-state="submitted">Status: Requested — waiting for driver confirmation.</div>
             <div class="recap" id="recap"></div>
           </div>
         </div>
@@ -318,11 +397,20 @@
     var testMode=false;
     var requestOpen=false;
     var activeQuote=null;
+    var riderExperience=false;
+    var submissionState='idle';
+    var stagedRequestData=null;
+    var submittedQuote=null;
 
     function resetQuote_(){
+      if(submissionState==='submitting'||submissionState==='submitted')return;
       activeQuote=null;
       var result=$('quoteResult');
       if(result)result.classList.remove('show');
+      if(riderExperience){
+        hideRequestStage_();
+        setExperienceState_('editing','Route changed. Calculate a new Pulse fare.','pickup');
+      }
       var submit=$('submitBtn');
       if(submit&&requestOpen){
         submit.disabled=true;
@@ -341,16 +429,26 @@
 
     function requestFareQuote_(){
       clearError();
+      clearFieldErrors_();
       var pickup=$('pickup').value.trim();
       var destination=$('destination').value.trim();
       var pickupAt=quotePickupAt_();
-      if(!pickup||!destination||!$('date').value||!$('time').value){
+      var routeMissing=[];
+      if(!pickup)routeMissing.push('pickup');
+      if(!destination)routeMissing.push('destination');
+      if(!$('date').value)routeMissing.push('date');
+      if(!$('time').value)routeMissing.push('time');
+      if(routeMissing.length){
+        markMissingFields_(routeMissing);
+        setExperienceState_('validation','Add pickup, destination, date, and time before calculating a fare.','pickup');
         showError('Add pickup, destination, date, and time before requesting a fare.');
+        focusFirstField_(routeMissing);
         return;
       }
       var btn=$('quoteBtn');
       btn.disabled=true;
       btn.textContent='Calculating…';
+      setExperienceState_('calculating','Calculating your Pulse fare. No request is being sent.','fare');
       google.script.run
         .withSuccessHandler(function(res){
           activeQuote=res||null;
@@ -361,14 +459,20 @@
           $('quoteResult').classList.add('show');
           btn.disabled=false;
           btn.textContent='Recalculate fare';
-          $('submitBtn').disabled=false;
-          $('submitBtn').textContent=testMode?'Test ride request':'Request this ride';
+          if(riderExperience){
+            showRequestStage_();
+            setExperienceState_('quoted','Fare ready. Add contact details, then choose Request.','request');
+          }else{
+            $('submitBtn').disabled=false;
+            $('submitBtn').textContent=testMode?'Test ride request':'Request this ride';
+          }
         })
         .withFailureHandler(function(err){
           activeQuote=null;
           btn.disabled=false;
-          btn.textContent='Get Pulse fare';
-          showError((err&&err.message)?err.message:'Could not calculate a fare.');
+          btn.textContent='Retry Pulse fare';
+          setExperienceState_('unavailable','Fare unavailable. Check the route and retry; the form remains usable.','fare');
+          showError((err&&err.message)?err.message:'Could not calculate a fare. Check the route and retry.');
         })
         .pulseGetFareQuote({
           pickup:pickup,
@@ -413,6 +517,192 @@
       });
     })();
 
+    function setExperienceState_(state,message,step){
+      if(!riderExperience)return;
+      var status=$('experienceStatus');
+      if(status){status.setAttribute('data-state',state);status.textContent=message;}
+      var steps=[].slice.call(document.querySelectorAll('#experienceProgress li'));
+      var order=['pickup','destination','time','fare','request','confirm'];
+      var current=Math.max(0,order.indexOf(step));
+      steps.forEach(function(item,index){
+        item.removeAttribute('aria-current');
+        item.setAttribute('data-complete',String(index<current));
+        if(index===current)item.setAttribute('aria-current','step');
+      });
+    }
+
+    function activateRiderExperience_(){
+      riderExperience=true;
+      document.documentElement.setAttribute('data-rider-experience','on');
+      var card=$('requestCard');
+      var route=$('routeFields');
+      var contact=$('contactFields');
+      if(card&&route&&contact)card.insertBefore(route,contact);
+      $('contactFields').hidden=true;
+      $('requestDetails').hidden=true;
+      $('requestStage').hidden=true;
+      $('confirmStage').hidden=true;
+      $('requestReviewBtn').disabled=true;
+      $('requestReviewBtn').hidden=true;
+      if(quoteIsCurrent_())showRequestStage_();
+      setExperienceState_('editing','Start with pickup, destination, and pickup time.','pickup');
+    }
+
+    function showRequestStage_(){
+      if(!riderExperience)return;
+      $('requestStage').hidden=false;
+      $('contactFields').hidden=false;
+      $('requestDetails').hidden=false;
+      var slot=$('requestFieldsSlot');
+      if(slot){
+        slot.appendChild($('contactFields'));
+        slot.appendChild($('requestDetails'));
+      }
+      $('requestReviewBtn').disabled=false;
+      $('requestReviewBtn').hidden=false;
+      $('requestReviewBtn').textContent='Request';
+      $('requestStage').appendChild($('requestReviewBtn'));
+      var note=$('requestNote');
+      if(note)$('requestStage').appendChild(note);
+    }
+
+    function hideRequestStage_(){
+      if(!riderExperience)return;
+      $('requestStage').hidden=true;
+      $('confirmStage').hidden=true;
+      $('contactFields').hidden=true;
+      $('requestDetails').hidden=true;
+      $('requestReviewBtn').hidden=true;
+      stagedRequestData=null;
+      submittedQuote=null;
+      submissionState='idle';
+    }
+
+    function clearFieldErrors_(){
+      [].slice.call(document.querySelectorAll('.field-invalid')).forEach(function(el){el.classList.remove('field-invalid');});
+      [].slice.call(document.querySelectorAll('[aria-invalid="true"]')).forEach(function(el){el.removeAttribute('aria-invalid');});
+    }
+
+    function markMissingFields_(ids){
+      ids.forEach(function(id){
+        var field=$(id+'Field');
+        var input=$(id);
+        if(field)field.classList.add('field-invalid');
+        if(input)input.setAttribute('aria-invalid','true');
+      });
+    }
+
+    function focusFirstField_(ids){
+      var first=ids.length?$(ids[0]):null;
+      if(first&&typeof first.focus==='function')first.focus();
+    }
+
+    function validateRequestData_(data){
+      clearFieldErrors_();
+      var required=['name','phone','email','pickup','destination','date','time'];
+      var missing=required.filter(function(k){return !data[k];});
+      if(missing.length){
+        markMissingFields_(missing);
+        focusFirstField_(missing);
+        return 'Please fill in every field marked with a star.';
+      }
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email)){
+        markMissingFields_(['email']);focusFirstField_(['email']);return 'That email address does not look right.';
+      }
+      if(!data.consent){
+        $('consentField').classList.add('field-invalid');$('consent').setAttribute('aria-invalid','true');$('consent').focus();
+        return 'Please check the consent box before continuing.';
+      }
+      return '';
+    }
+
+    function buildReview_(data){
+      $('reviewList').innerHTML=
+        '<li><small>Pickup</small><strong>'+esc(pretty(data.date,data.time))+'</strong></li>'+ 
+        '<li><small>From</small><strong>'+esc(data.pickup)+'</strong></li>'+ 
+        '<li><small>To</small><strong>'+esc(data.destination)+'</strong></li>'+ 
+        '<li><small>Pulse fare</small><strong>$'+Number(activeQuote.fare||0).toFixed(2)+'</strong></li>'+ 
+        '<li><small>Rider</small><strong>'+esc(data.name)+'</strong></li>'+ 
+        '<li><small>Contact</small><strong>'+esc(data.phone)+' · '+esc(data.email)+'</strong></li>';
+    }
+
+    function openConfirmation_(){
+      clearError();
+      if(!quoteIsCurrent_()){
+        resetQuote_();showError('Get a current Pulse fare before continuing.');return;
+      }
+      var data=collect();
+      var validation=validateRequestData_(data);
+      if(validation){
+        setExperienceState_('validation',validation,'request');showError(validation);return;
+      }
+      stagedRequestData=data;
+      buildReview_(data);
+      $('requestStage').hidden=true;
+      $('confirmStage').hidden=false;
+      $('confirmRideBtn').disabled=false;
+      $('confirmRideBtn').textContent='Confirm Ride';
+      setExperienceState_('review','Review the details, then confirm the ride.','confirm');
+      $('confirmRideBtn').focus();
+    }
+
+    function editRequest_(){
+      if(submissionState==='submitting')return;
+      $('confirmStage').hidden=true;
+      $('requestStage').hidden=false;
+      setExperienceState_('quoted','Update details, then choose Request again.','request');
+      $('name').focus();
+    }
+
+    function renderSuccess_(res,data){
+      res=res||{};
+      var quote=submittedQuote||activeQuote||{};
+      $('recap').innerHTML=
+        '<div><small>Pickup</small><strong>'+esc(pretty(data.date,data.time))+'</strong></div>'+ 
+        '<div><small>From</small><strong>'+esc(data.pickup)+'</strong></div>'+ 
+        '<div><small>To</small><strong>'+esc(data.destination)+'</strong></div>'+ 
+        '<div><small>Pulse fare</small><strong>$'+Number(quote.fare||0).toFixed(2)+'</strong></div>'+ 
+        '<div><small>Status</small><strong>'+esc(res.status||'REQUESTED')+'</strong></div>';
+      if(testMode){
+        $('doneMsg').textContent='Test fixture accepted. No email, calendar event, or Sheet write was performed.';
+      }else if(res.driverName){
+        $('doneMsg').textContent=res.driverName+' has it and will confirm shortly. Watch your inbox for the confirmation.';
+      }
+      $('riderStatus').textContent='Status: '+esc(res.status||'REQUESTED')+' — waiting for driver confirmation.';
+      $('formView').style.display='none';
+      $('doneView').style.display='block';
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function submitExistingWriter_(data,button){
+      if(submissionState==='submitting'||submissionState==='submitted')return;
+      if(!quoteIsCurrent_()){
+        resetQuote_();
+        showError('Your Pulse fare expired. Recalculate the fare before confirming the ride.');
+        return;
+      }
+      submittedQuote=Object.assign({},activeQuote);
+      submissionState='submitting';
+      button.disabled=true;
+      button.textContent=testMode?'Testing…':'Confirming…';
+      setExperienceState_('submitting','Confirming your ride request. Please wait.','confirm');
+      google.script.run
+        .withSuccessHandler(function(res){
+          submissionState='submitted';
+          setExperienceState_('submitted','Request sent once through the existing writer.','confirm');
+          renderSuccess_(res,data);
+        })
+        .withFailureHandler(function(err){
+          submissionState='idle';
+          submittedQuote=null;
+          button.disabled=false;
+          button.textContent=riderExperience?'Retry Confirm Ride':(quoteIsCurrent_()?(testMode?'Test ride request':'Request this ride'):'Get fare first');
+          setExperienceState_('retry','The request was not sent. Review the message and retry.','confirm');
+          showError((err&&err.message)?err.message:'Could not send the request. Please try again.');
+        })
+        .submitRideRequest(data);
+    }
+
     function showError(msg){
       var e=$('err');e.textContent=msg;e.classList.add('show');
       window.scrollTo({top:0,behavior:'smooth'});
@@ -456,6 +746,20 @@
               btn.disabled=true;
               btn.textContent='Get fare first';
               if(testMode)$('err').classList.remove('show');
+              google.script.run
+                .withSuccessHandler(function(experience){
+                  experience=experience||{};
+                  if(experience.enabled)activateRiderExperience_();
+                })
+                .withFailureHandler(function(){
+                  riderExperience=false;
+                  document.documentElement.setAttribute('data-rider-experience','off');
+                })
+                .pulseGetRiderExperienceConfig({
+                  requestToken:requestToken,
+                  testMode:testMode,
+                  previewExperience:testMode&&String(params.experience||'')==='1'
+                });
             }else{
               btn.disabled=true;
               btn.textContent='Private link required';
@@ -476,6 +780,13 @@
       $(id).addEventListener('input',resetQuote_);
     });
 
+    $('requestReviewBtn').addEventListener('click',openConfirmation_);
+    $('editRequestBtn').addEventListener('click',editRequest_);
+    $('confirmRideBtn').addEventListener('click',function(){
+      if(!stagedRequestData){openConfirmation_();return;}
+      submitExistingWriter_(stagedRequestData,$('confirmRideBtn'));
+    });
+
     $('submitBtn').addEventListener('click',function(){
       clearError();
       if(!quoteIsCurrent_()){
@@ -485,37 +796,9 @@
       }
       if(!requestOpen){showError('This private request link is not valid.');return;}
       var data=collect();
-      var need=['name','phone','email','pickup','destination','date','time'];
-      var missing=need.filter(function(k){return !data[k];});
-      if(missing.length){showError('Please fill in every field marked with a star.');return;}
-      if(!data.consent){showError('Please check the consent box before sending the request.');return;}
-      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email)){showError('That email address does not look right.');return;}
-
-      var btn=$('submitBtn');btn.disabled=true;btn.textContent=testMode?'Testing…':'Sending…';
-      google.script.run
-        .withSuccessHandler(function(res){
-          res=res||{};
-          $('recap').innerHTML=
-            '<div><small>Pickup</small><strong>'+esc(pretty(data.date,data.time))+'</strong></div>'+ 
-            '<div><small>From</small><strong>'+esc(data.pickup)+'</strong></div>'+ 
-            '<div><small>To</small><strong>'+esc(data.destination)+'</strong></div>'+ 
-            '<div><small>Pulse fare</small><strong>$'+Number(activeQuote.fare||0).toFixed(2)+'</strong></div>'+
-            '<div><small>Status</small><strong>'+esc(res.status||'REQUESTED')+'</strong></div>';
-          if(testMode){
-            $('doneMsg').textContent='Test fixture accepted. No email, calendar event, or Sheet write was performed.';
-          }else if(res.driverName){
-            $('doneMsg').textContent=res.driverName+' has it and will confirm shortly. Watch your inbox for the confirmation.';
-          }
-          $('formView').style.display='none';
-          $('doneView').style.display='block';
-          window.scrollTo({top:0,behavior:'smooth'});
-        })
-        .withFailureHandler(function(err){
-          btn.disabled=!quoteIsCurrent_();
-          btn.textContent=quoteIsCurrent_()?(testMode?'Test ride request':'Request this ride'):'Get fare first';
-          showError((err&&err.message)?err.message:'Could not send the request. Please try again.');
-        })
-        .submitRideRequest(data);
+      var validation=validateRequestData_(data);
+      if(validation){showError(validation);return;}
+      submitExistingWriter_(data,$('submitBtn'));
     });
 
     initializeRoute_();

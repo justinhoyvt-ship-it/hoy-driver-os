@@ -91,3 +91,36 @@ Competitor prices are not estimated or invented. The quote result reports `compa
 The existing `submitRideRequest()` function remains the only request-creation path. The request app remains the only writer for ride requests and the downstream confirmation lifecycle remains unchanged.
 
 Run `pulseRunFareQuoteTests()` before review. It performs no route lookup and no write.
+
+## PULSE-061 rider quote and request experience
+
+The optional phone experience is controlled by `PULSE_RIDER_EXPERIENCE_V1`, which is off by default. When enabled, the rider sequence is:
+
+1. From where
+2. Where to
+3. Pickup time
+4. Pulse fare
+5. Request
+6. Confirm Ride
+
+Test mode may preview it with `&mode=test&experience=1`; test submission remains no-write.
+
+The enhanced experience:
+
+- puts route inputs and fare first in keyboard and screen-reader order;
+- provides explicit calculating, unavailable, validation, submitting, retry, and submitted states;
+- leaves route inputs usable after a quote failure;
+- keeps `pulseGetFareQuote()` no-write;
+- validates contact, route, time, and consent before opening the review screen;
+- re-checks quote expiry immediately before the existing writer is called;
+- snapshots the accepted quote for the success recap;
+- blocks route-reset and duplicate submission races while submission is in flight;
+- calls the existing `submitRideRequest(data)` writer exactly once;
+- never displays or invents Uber or Lyft fares.
+
+Run `pulseRunRiderExperienceTests()` and the Builder bundle validation before review.
+
+### PULSE-061 rollback
+
+Remove or set `PULSE_RIDER_EXPERIENCE_V1=false`. The prior quote/request presentation, standalone writer, Ride ID/PIN access, email, Calendar, Inbox, Scheduled, rider-status, and lifecycle behavior remain unchanged.
+
