@@ -1,0 +1,41 @@
+{
+  "Task ID": "PULSE-068",
+  "Created At": "2026-07-28",
+  "Priority": "HIGH",
+  "Status": "READY_TO_RUN",
+  "Requested By": "Justin",
+  "Area": "Driver Console Normal Flow",
+  "Title": "Cut Hoy Driver over to normal Shift Log and Trip Log",
+  "Problem / Request": "The deployed Hoy Driver console still targets the historical Test 001 workbook and exposes test controls. Move normal field activity to the current Driver Dashboard without changing the existing rider/request writer boundaries.",
+  "Acceptance Criteria": "Current dashboard ID; no Test T-001 boot, UI, or write path; one idempotent Trip Log row per completed ride with retry queue; End shift accepts pending earnings without false $0; Begin pickup publishes Leaving then On the way and opens pickup navigation; existing request app remains the rider-status writer; repository CI passes; no automatic merge or deployment.",
+  "Assigned Agent": "Pulse Builder + Auto Validator",
+  "Branch / Build": "Builder v0.6.2 staged",
+  "Result URL": "https://docs.google.com/document/d/1Ty-vim3HQkvEgXr1j6U6LqhzUXO3HM3IDvbiIwRuYVk/edit",
+  "Last Error": "",
+  "Updated At": "2026-07-28 17:00:00",
+  "Integration Hooks": "Current dashboard 13m_9QDn; historical Test 001 workbook preserved but not targeted. PULSE-069 follows for foreground distance-based rider updates. Apps Script release remains manual.",
+  "builder": {
+    "version": "0.6.2-normal-flow-cutover",
+    "mode": "deterministic-normal-flow-console-cutover",
+    "aiProvider": "none",
+    "buildId": "BUILD-20260728-170508",
+    "branch": "pulse/pulse-068-20260728-170510",
+    "targets": [
+      "apps-script/hoy-driver-os-writer/Code.gs",
+      "apps-script/hoy-driver-os-writer/Index.html",
+      "apps-script/hoy-driver-os-writer/README.md",
+      "pulse-autobuild/scripts/validate.mjs"
+    ],
+    "operationCount": 4,
+    "currentDashboardId": "13m_9QDnIgXSdMBdtSYMjmyIdo55wh8F5Fl3_1JaYl-w",
+    "testWorkbookTargeted": false,
+    "tripLogIdempotent": true,
+    "pendingEarningsSupported": true,
+    "beginPickupNavigation": true,
+    "existingRequestWriterPreserved": true,
+    "repositoryCiRequired": true,
+    "generatedAt": "2026-07-28T21:05:15.706Z",
+    "deploymentPerformed": false,
+    "productionTouched": false
+  }
+}
