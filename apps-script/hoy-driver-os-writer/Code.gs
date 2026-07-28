@@ -12,7 +12,7 @@
 const HOY_SHEET_ID = '13m_9QDnIgXSdMBdtSYMjmyIdo55wh8F5Fl3_1JaYl-w';
 const HOY_TZ = 'America/New_York';
 const HOY_DEFAULT_COST = Object.freeze({ fuelPerGal: 3.5, mpg: 25, maintPerMile: 0.10, taxRate: 0.22 });
-const HOY_BUILD = 'hoy-normal-flow-2026-07-28.1';
+const HOY_BUILD = 'hoy-normal-flow-2026-07-28.2';
 const RIDER_SHEET_ID = '1Hd46iUY84N2bvxdaIS4lf6l-uExxbXGIbUjxJzMF-No';
 const RIDER_SHEET_NAME = 'Ride Requests';
 const PULSE_LIVE_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbyde9C6y6iIoJO8AfWxt5z-D2FxwKXXMonpypmW8xaI7BZaAwChYBXM4JO7zqYvmw7Y/exec';
@@ -21,6 +21,7 @@ const REQUEST_APP_TOKEN_PROPERTY = 'PULSE_REQUEST_TOKEN';
 const LIVE_URL_PROPERTY = 'PULSE_LIVE_URL';
 const TRIP_LEDGER_KEY = 'PULSE_COMPLETED_TRIP_IDS_V1';
 const TRIP_LEDGER_TTL_MS = 90 * 24 * 3600000;
+const TRIP_NOTE_PREFIX = 'PULSE_RIDE_ID:';
 
 /* ===== Entry points ===== */
 function doGet() {
@@ -157,30 +158,53 @@ function endShiftToSheet(payload) {
 }
 
 /**
- * Append one completed ride to the current Trip Log. A client-generated ride ID
- * is kept in a Script Properties ledger so retries never append a second row.
+ * Append one completed ride to the current Trip Log.
+ *
+ * The ride ID is persisted twice:
+ * - Script Properties keeps the fast lookup ledger.
+ * - A cell note on the Trip Log row is the durable recovery marker.
+ *
+ * The row note is written before any row values. If a request is interrupted after
+ * a partial Sheet write or before the ledger is saved, the retry finds and repairs
+ * the same reserved row instead of appending another one.
  */
 function logCompletedTrip(payload) {
   const p = payload || {};
-  const rideId = String(p.rideId || '').trim();
+  const rideId = String(p.rideId || '').trim().slice(0, 120);
   if (!rideId) throw new Error('Completed trip needs a ride ID.');
 
   const lock = LockService.getScriptLock();
   lock.waitLock(15000);
   try {
-    const ledger = loadTripLedger_();
-    if (ledger[rideId]) {
-      return {ok:true, duplicate:true, rideId:rideId, row:ledger[rideId].row || null};
-    }
-
     const ss = openHoy_();
     const sh = tripLogSheet_(ss);
     if (!sh) throw new Error('Could not find the Trip Log tab.');
-    const row = writeTripRow_(sh, p);
+
+    const ledger = loadTripLedger_();
+    let row = Number(ledger[rideId] && ledger[rideId].row) || 0;
+    if (row > 0 && !tripRowMatchesRideId_(sh, row, rideId)) row = 0;
+    if (!row) row = findTripRowByRideId_(sh, rideId);
+
+    if (row > 0 && tripRowComplete_(sh, row)) {
+      ledger[rideId] = {row:row, at:Date.now()};
+      saveTripLedger_(ledger);
+      return {ok:true, duplicate:true, repaired:false, rideId:rideId, row:row};
+    }
+
+    if (!row) row = firstEmptyTripRow_(sh);
+    reserveTripRow_(sh, row, rideId);
+    writeTripRow_(sh, p, row, rideId);
+    SpreadsheetApp.flush();
+
     ledger[rideId] = {row:row, at:Date.now()};
     saveTripLedger_(ledger);
-    SpreadsheetApp.flush();
-    return {ok:true, duplicate:false, rideId:rideId, row:row};
+    return {
+      ok:true,
+      duplicate:false,
+      repaired:findTripRowByRideId_(sh, rideId) === row,
+      rideId:rideId,
+      row:row
+    };
   } finally {
     lock.releaseLock();
   }
@@ -205,19 +229,67 @@ function saveTripLedger_(map) {
   PropertiesService.getScriptProperties().setProperty(TRIP_LEDGER_KEY, JSON.stringify(map || {}));
 }
 
+function tripAnchorColumn_(sh) {
+  return colByHeader_(sh, 'Logged At') || colByHeader_(sh, 'Date');
+}
+
+function tripRideNote_(rideId) {
+  return TRIP_NOTE_PREFIX + String(rideId || '').trim();
+}
+
+function reserveTripRow_(sh, row, rideId) {
+  const col = tripAnchorColumn_(sh);
+  if (!col) throw new Error('Trip Log needs Logged At or Date for durable ride IDs.');
+  sh.getRange(row, col).setNote(tripRideNote_(rideId));
+}
+
+function tripRowMatchesRideId_(sh, row, rideId) {
+  const col = tripAnchorColumn_(sh);
+  if (!col || row < 2 || row > sh.getMaxRows()) return false;
+  return String(sh.getRange(row, col).getNote() || '') === tripRideNote_(rideId);
+}
+
+function findTripRowByRideId_(sh, rideId) {
+  const col = tripAnchorColumn_(sh);
+  const last = sh.getLastRow();
+  if (!col || last < 2) return 0;
+  const expected = tripRideNote_(rideId);
+  const notes = sh.getRange(2, col, last - 1, 1).getNotes();
+  for (let i = 0; i < notes.length; i++) {
+    if (String(notes[i][0] || '') === expected) return i + 2;
+  }
+  return 0;
+}
+
+function tripRowComplete_(sh, row) {
+  const names = ['Pickup Time', 'Dropoff Time', 'Miles'];
+  for (let i = 0; i < names.length; i++) {
+    const col = colByHeader_(sh, names[i]);
+    if (!col) return false;
+    const value = sh.getRange(row, col).getValue();
+    if (value === '' || value === null) return false;
+  }
+  return true;
+}
+
 function firstEmptyTripRow_(sh) {
-  const col = colByHeader_(sh, 'Logged At') || colByHeader_(sh, 'Date');
+  const col = tripAnchorColumn_(sh);
   const last = sh.getLastRow();
   if (!col || last < 2) return Math.max(last + 1, 2);
   const values = sh.getRange(2, col, last - 1, 1).getValues();
+  const notes = sh.getRange(2, col, last - 1, 1).getNotes();
   for (let i = 0; i < values.length; i++) {
-    if (values[i][0] === '' || values[i][0] === null) return i + 2;
+    const emptyValue = values[i][0] === '' || values[i][0] === null;
+    const emptyNote = String(notes[i][0] || '') === '';
+    if (emptyValue && emptyNote) return i + 2;
   }
   return last + 1;
 }
 
-function writeTripRow_(sh, p) {
-  const row = firstEmptyTripRow_(sh);
+function writeTripRow_(sh, p, row, rideId) {
+  row = Number(row) || firstEmptyTripRow_(sh);
+  reserveTripRow_(sh, row, rideId);
+
   const pickup = validDate_(p.pickedUpISO || p.acceptedISO) || new Date();
   const dropoff = validDate_(p.completedISO) || new Date();
   const minutes = Math.max(0, (dropoff.getTime() - pickup.getTime()) / 60000);
