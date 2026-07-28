@@ -1,42 +1,51 @@
 # Hoy Driver OS writer
 
-Canonical source for the owner-only Hoy Driver console.
+Canonical source for the owner-only Pulse Vermont driver console.
 
-## PULSE-041 scope
+## PULSE-068 normal-flow cutover
 
-PULSE-041 adds rider-safe status progression for confirmed private rides while preserving the PULSE-050 waffle, Inbox, Scheduled lane, map, shift, and app-ride controls.
+PULSE-068 moves the working console out of the historical Test 001 workbook and into the current **Pulse Core OS — Driver Dashboard**.
 
-The exact rider-facing sequence is:
+Runtime writes now target:
 
-`Confirmed → Leaving → On the way → Arriving soon → Arrived → Ride in progress → Complete`
+- `Shift Log` when the driver ends a shift;
+- `Trip Log` when a ride is completed;
+- the existing standalone request app for rider-status events.
 
-Cancellation remains a separate path.
+The historical workbook remains unchanged as an audit artifact and is no longer a runtime target.
 
-## Driver controls
+## Shift behavior
 
-For a confirmed rider ride only:
+Ending a shift always preserves time, mileage, ride count, request IDs, zone, and notes.
 
-1. `Start` records `Leaving`.
-2. `Navigate pickup` records `On the way` and opens navigation.
-3. `Arriving soon` records that exact status.
-4. `Arrived` records arrival.
-5. `Start ride` records `Ride in progress` and starts the existing local route trace.
-6. `Navigate destination` opens navigation without changing status.
-7. `Complete ride` records `Complete` and runs the existing drop-off flow.
+Earnings are optional. When platform totals have not settled, the console saves the shift with blank earnings rather than writing a false `$0`. Earnings can be reconciled later in the current dashboard.
 
-Generic `Accept ride`, `Picked up`, and `Drop off` behavior remains available for app rides.
+The console no longer displays a Test T-001 strip, offers a Close Test checkbox, reads Test Runs during boot, or writes test actuals.
 
-## Status write boundary
+## Trip behavior
 
-Hoy never writes the shared rider sheets. It sends an authenticated server-to-server request to the existing request app using the existing `PULSE_REQUEST_APP_URL` and `PULSE_REQUEST_TOKEN` properties.
+Each completed ride sends one idempotent `logCompletedTrip` payload to the current `Trip Log`.
 
-The request app is the sole writer to the append-only `Ride Status Events` tab. Each event has a Request ID, exact rider-safe status, timestamp, source, and idempotency key. Repeated taps return the existing event instead of appending a duplicate.
+The client keeps a pending-trip queue in local storage. A failed or interrupted write is retried when the console returns to the foreground. A Script Properties ledger prevents a retry from appending a duplicate Trip Log row.
+
+Trip rows preserve pickup/drop-off timestamps, available route labels, duration, traced mileage, and fare/tip when known. Unknown earnings remain blank.
+
+## Scheduled rider pickup
+
+The Scheduled action is **Begin pickup**.
+
+One tap:
+
+1. records `Leaving`;
+2. records `On the way`;
+3. opens phone navigation to the pickup address; and
+4. creates or restores the existing active/queued ride state.
+
+`Arriving soon` and `Arrived` remain the temporary manual fallback until the foreground distance/ETA monitor is installed in the next rider-alert task. The request app remains the only writer to rider-status events.
 
 ## Guardrails
 
-- PR only; no automatic deployment.
-- No status event is written during package validation.
-- No rider email or Calendar event is sent during package validation.
-- No live GPS claim is added to the rider status page.
-- No shift, earnings, private notes, API keys, or other-ride data is exposed.
-- Do not press Start on Gina's confirmed ride during validation.
+- Existing Inbox, Scheduled, request-app writer, Ride ID/PIN, rider-status sequence, map, queue, and completion behavior remain in place.
+- No second request writer or trip lifecycle is created.
+- No automatic merge or Apps Script deployment occurs.
+- Repository validation checks the current dashboard ID, optional earnings, idempotent Trip Log writes, removal of Test T-001 controls, and preserved rider-writer boundary.
