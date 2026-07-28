@@ -469,7 +469,7 @@
   function startScheduled(id){
     var s=S.scheduled.filter(function(x){return x.id===id})[0]; if(!s||scheduledStartBusy[id])return;
     if(s.requestId&&((S.active&&S.active.requestId===s.requestId)||(S.queued&&S.queued.requestId===s.requestId))){toast('Ride already started');return;}
-    if(S.active&&S.queued){toast('Finish current rides first');return;}
+    if(S.active||S.queued){toast('Finish current ride first');return;}
     if(!S.shift)goOnline();
     scheduledStartBusy[id]=true;renderSched();
     if(s.pickup)navTo(s.pickup);
@@ -477,9 +477,7 @@
     function begin(status){
       var ride=scheduledTripState(s);
       if(s.source==='rider')ride.riderStatus=status||'On the way';
-      if(!S.active){ S.active=ride; }
-      else if(!S.queued){ S.queued=ride; }
-      else { toast('Finish current rides first'); release(); return; }
+      S.active=ride;
       persistState();
       srv('startReservation',id).then(function(list){schedFromServer(list)}).catch(function(e){toast(e.message||'Could not clear scheduled ride')}).then(release);
       toast('Pickup started: '+s.name); render();
@@ -491,6 +489,7 @@
         .catch(function(e){release();toast(e.message||'Could not send pickup update')});
     }else begin('');
   }
+
   function renderSched(){
     var lane=$('schedList'); lane.innerHTML='';
     if(!S.scheduled.length){ return; }
@@ -502,7 +501,7 @@
       var card=document.createElement('div'); card.className='sched-card'+(due?' due':'');
       card.innerHTML='<div class="sc-main"><b>'+esc(s.name)+'</b>'+(sub?'<small>'+esc(sub)+'</small>':'')+'</div><div class="sc-when">'+when+(due?'<em>DUE</em>':'')+'</div>';
       var acts=document.createElement('div'); acts.className='sc-acts';
-      var start=document.createElement('button'); start.className='sc-start'; start.textContent='Begin pickup'; start.disabled=!!scheduledStartBusy[s.id]; start.onclick=function(){startScheduled(s.id)};
+      var start=document.createElement('button'); start.className='sc-start'; start.textContent='Begin pickup'; start.disabled=!!scheduledStartBusy[s.id]||!!S.active||!!S.queued; start.onclick=function(){startScheduled(s.id)};
       acts.appendChild(start);
       if(s.dest){var navD=document.createElement('button');navD.className='sc-nav';navD.textContent='Drop';navD.onclick=function(){navTo(s.dest)};acts.appendChild(navD);}
       if(s.source!=='rider'){var del=document.createElement('button'); del.className='sc-del'; del.innerHTML='&times;'; del.onclick=function(){ srv('removeReservation',s.id).then(function(list){schedFromServer(list)}).catch(function(){}); };acts.appendChild(del);}
