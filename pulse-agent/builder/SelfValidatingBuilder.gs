@@ -11,7 +11,8 @@ const SELF_VALIDATING_BUILDER = Object.freeze({
     'pulse-agent/builder/SelfValidatingBuilder.gs',
     'pulse-agent/builder/self-validation-contract.json',
     'pulse-agent/builder/README.md',
-    'pulse-agent/builder/ROLLBACK.md'
+    'pulse-agent/builder/ROLLBACK.md',
+    'pulse-autobuild/scripts/validate.mjs'
   ])
 });
 
@@ -289,6 +290,7 @@ function validateSelfValidatingBuilderBundle_(files) {
   const contract = String(files['pulse-agent/builder/self-validation-contract.json'] || '');
   const readme = String(files['pulse-agent/builder/README.md'] || '');
   const rollback = String(files['pulse-agent/builder/ROLLBACK.md'] || '');
+  const repositoryValidator = String(files['pulse-autobuild/scripts/validate.mjs'] || '');
   [
     'MAX_REPAIR_ATTEMPTS:3',
     "COMPLETED_STAGED_STATUS:'AUTO_VALIDATED_STAGED'",
@@ -318,6 +320,10 @@ function validateSelfValidatingBuilderBundle_(files) {
       parsed.controlContract.runningValue !== false ||
       parsed.controlContract.blockedValue !== false ||
       parsed.taskClassifier !== 'TASK_ID_ONLY' ||
+      !parsed.repositoryCi ||
+      parsed.repositoryCi.required !== true ||
+      parsed.repositoryCi.workflow !== '.github/workflows/pulse-runtime-autobuild.yml' ||
+      parsed.repositoryCi.validator !== 'pulse-autobuild/scripts/validate.mjs' ||
       parsed.production.automaticMerge !== false ||
       parsed.production.automaticDeployment !== false) {
     throw new Error('PULSE-066 contract JSON does not match the locked control contract.');
@@ -339,9 +345,20 @@ function validateSelfValidatingBuilderBundle_(files) {
   [
     'Replace the installed Builder source',
     'Preserve all Build, Task, Log',
-    'Do not deploy or merge'
+    'Do not deploy or merge',
+    'repository validator'
   ].forEach(function(marker){
     if (rollback.indexOf(marker) < 0) throw new Error('PULSE-066 rollback proof is missing marker: ' + marker);
+  });
+  [
+    "builderContract.repositoryCi?.required !== true",
+    "pulse-agent/builder/SelfValidatingBuilder.gs",
+    "PULSE-066 task snapshot lacks repository CI repair proof",
+    "if (!report.ok) process.exit(1)"
+  ].forEach(function(marker){
+    if (repositoryValidator.indexOf(marker) < 0) {
+      throw new Error('Repository CI validator is missing marker: ' + marker);
+    }
   });
 
   [
@@ -375,6 +392,8 @@ function validateSelfValidatingBuilderBundle_(files) {
     taskClassifierExact:true,
     noMarkCheckedStep:true,
     repositoryCiRequired:true,
+    repositoryCiWorkflow:'.github/workflows/pulse-runtime-autobuild.yml',
+    repositoryCiValidator:'pulse-autobuild/scripts/validate.mjs',
     rollbackProof:true,
     automaticMerge:false,
     deploymentPerformed:false,
@@ -772,6 +791,8 @@ function testSelfValidatingBuilderBundle() {
     taskClassifierExact:true,
     noMarkCheckedStep:true,
     repositoryCiRequired:true,
+    repositoryCiWorkflow:'.github/workflows/pulse-runtime-autobuild.yml',
+    repositoryCiValidator:'pulse-autobuild/scripts/validate.mjs',
     rollbackProof:true,
     automaticMerge:false,
     deploymentPerformed:false,
