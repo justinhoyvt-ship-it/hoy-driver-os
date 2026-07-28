@@ -217,8 +217,6 @@
     <button class="shift-btn end" id="endShiftBtn">End shift</button>
   </div>
 
-  <div class="test" id="testStrip"><div class="t-id" id="tId">TEST T-001 <em id="tState">active</em></div><div class="t-ref" id="tRef"></div></div>
-
   <div class="sched" id="schedLane">
     <div class="sched-head"><span>Scheduled</span><button class="sched-add" id="addSchedBtn">+ Add</button></div>
     <div id="schedList"></div>
@@ -260,21 +258,20 @@
 <div class="overlay" id="overlay">
   <div class="sheet">
     <h2>End shift</h2>
-    <p class="sub">Timer and miles are captured. Enter earnings for the block.</p>
+    <p class="sub">Time and miles are captured. Earnings can be added now or reconciled later.</p>
     <div class="result" id="result"></div>
     <div class="readouts">
       <div class="ro"><small>Online</small><b id="roOnline">0h 00m</b></div>
       <div class="ro"><small>Traced miles</small><b id="roMiles">0.00</b></div>
     </div>
     <div class="fld two">
-      <div><label for="inEarnings">Total earnings <b>*</b></label><input id="inEarnings" type="number" inputmode="decimal" min="0" step="0.01" placeholder="incl. tips"></div>
+      <div><label for="inEarnings">Total earnings</label><input id="inEarnings" type="number" inputmode="decimal" min="0" step="0.01" placeholder="optional — reconcile later"></div>
       <div><label for="inTips">Of that, tips</label><input id="inTips" type="number" inputmode="decimal" min="0" step="0.01" placeholder="optional"></div>
     </div>
     <div class="fld"><label for="inZone">Primary zone</label>
       <select id="inZone"><option value="">—</option><option>BTV Airport</option><option>Church Street / Downtown</option><option>UVM</option><option>Essex Junction</option><option>South Burlington hotels</option><option>Winooski</option><option>Waterfront</option></select>
     </div>
     <div class="fld"><label for="inNotes">Notes</label><input id="inNotes" type="text" placeholder="optional"></div>
-    <label class="t001-toggle"><input type="checkbox" id="closeT001"><span>Close Test T-001 with this shift</span></label>
     <button class="save" id="saveBtn">Save shift</button>
     <button class="cancel" id="cancelBtn">Keep driving</button>
   </div>
@@ -325,8 +322,8 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   var $=function(id){return document.getElementById(id)};
-  var S={shift:null, active:null, queued:null, scheduled:[], requests:[]};
-  var boot={test:null, cost:null, opportunity:null};
+  var S={shift:null, active:null, queued:null, scheduled:[], requests:[], pendingTrips:[]};
+  var boot={cost:null, opportunity:null, normalFlow:true};
   var LIVE=(typeof google!=='undefined' && google.script && google.script.run);
   var map=null, meMarker=null, trace={watch:null, pts:[], miles:0, line:null};
   var mockResList=[];
@@ -340,8 +337,7 @@
     return Promise.resolve(mockSrv_(fn,args));
   }
   function mockSrv_(fn,args){
-    if(fn==='getCockpitBootstrap') return {ok:true, preview:true,
-      test:{id:'T-001',status:'READY',baseline:38.44,green:45,red:34,alreadyClosed:false},
+    if(fn==='getCockpitBootstrap') return {ok:true, preview:true, normalFlow:true, testWorkbookTargeted:false,
       cost:{fuelPerGal:3.5,mpg:25,maintPerMile:0.10,taxRate:0.22},
       reservations:mockResList.slice(),
       requests:mockRequestList.slice(),
@@ -352,10 +348,10 @@
     if(fn==='updateRiderStatus') return {ok:true,requestId:args[0],status:args[1],occurredAt:new Date().toISOString(),duplicate:false};
     if(fn==='addReservation'){ var r=args[0]||{}; mockResList.push({id:'r'+Date.now()+Math.floor(Math.random()*1000),name:r.name||'Ride',pickup:r.pickup||'',dest:r.dest||'',phone:r.phone||'',notes:r.notes||'',whenISO:r.whenISO,source:r.source||'manual'}); return mockResList.slice(); }
     if(fn==='removeReservation'||fn==='startReservation'){ var id=args[0]; mockResList=mockResList.filter(function(x){return x.id!==id}); return mockResList.slice(); }
+    if(fn==='logCompletedTrip') return {ok:true,preview:true,duplicate:false,rideId:(args[0]||{}).rideId||'',row:'(preview)'};
     if(fn==='endShiftToSheet'){
-      var p=args[0]||{}, gph=p.onlineHours>0?p.earnings/p.onlineHours:0;
-      var v=gph>=45?'ABOVE TARGET':gph<34?'BELOW FLOOR':'IN RANGE';
-      return {ok:true, preview:true, shift:{row:'(preview)', grossPerHr:Math.round(gph*100)/100}, test:{closed:true, testId:'T-001', grossPerHr:Math.round(gph*100)/100, green:45, red:34, verdict:v}};
+      var p=args[0]||{}, provided=p.earnings!==''&&p.earnings!=null&&isFinite(Number(p.earnings));
+      return {ok:true, preview:true, earningsPending:!provided, shift:{row:'(preview)',grossPerHr:provided&&p.onlineHours>0?Number(p.earnings)/p.onlineHours:null}};
     }
     return {ok:false};
   }
@@ -368,10 +364,24 @@
   function ago(ms){var s=Math.max(0,Math.round((now()-ms)/1000)),m=Math.floor(s/60),r=s%60;return (m?m+'m ':'')+r+'s'}
   function money(n){return Number(n).toFixed(2)}
   var STATE_KEY='pulse-hoy-driver-state-v1';
-  function persistState(){try{localStorage.setItem(STATE_KEY,JSON.stringify({shift:S.shift,active:S.active,queued:S.queued}))}catch(e){}}
-  function restoreState(){try{var x=JSON.parse(localStorage.getItem(STATE_KEY)||'null');if(x&&typeof x==='object'){S.shift=x.shift||null;S.active=x.active||null;S.queued=x.queued||null}}catch(e){}}
+  function newRideId_(prefix){return String(prefix||'ride')+'-'+now()+'-'+Math.floor(Math.random()*1000000);}
+  function persistState(){try{localStorage.setItem(STATE_KEY,JSON.stringify({shift:S.shift,active:S.active,queued:S.queued,pendingTrips:S.pendingTrips||[]}))}catch(e){}}
+  function restoreState(){try{var x=JSON.parse(localStorage.getItem(STATE_KEY)||'null');if(x&&typeof x==='object'){S.shift=x.shift||null;S.active=x.active||null;S.queued=x.queued||null;S.pendingTrips=Array.isArray(x.pendingTrips)?x.pendingTrips:[]}}catch(e){}}
   function navTo(address){if(!address){toast('Address unavailable');return;}var url='https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(address);window.open(url,'_blank','noopener');}
-  function scheduledTripState(s){return {state:'ACCEPTED',acceptedAt:now(),pickedUpAt:null,requestId:s.requestId||'',name:s.name||'Ride',pickup:s.pickup||'',dest:s.dest||'',riderStatus:s.riderStatus||'Confirmed'};}
+  function scheduledTripState(s){return {rideId:s.requestId?('request-'+s.requestId):newRideId_('scheduled'),state:'ACCEPTED',acceptedAt:now(),pickedUpAt:null,requestId:s.requestId||'',source:s.source||'scheduled',name:s.name||'Ride',pickup:s.pickup||'',dest:s.dest||'',riderStatus:s.riderStatus||'Confirmed'};}
+  function queueTripLog_(payload){
+    if(!payload||!payload.rideId)return;
+    S.pendingTrips=S.pendingTrips||[];
+    if(!S.pendingTrips.some(function(x){return x.rideId===payload.rideId}))S.pendingTrips.push(payload);
+    persistState();flushPendingTrips_();
+  }
+  function flushPendingTrips_(){
+    if(!LIVE||!S.pendingTrips||!S.pendingTrips.length)return Promise.resolve();
+    var payload=S.pendingTrips[0];
+    return srv('logCompletedTrip',payload).then(function(){
+      S.pendingTrips.shift();persistState();return flushPendingTrips_();
+    }).catch(function(e){toast(e.message||'Trip log pending');});
+  }
 
   function initMap(){
     map=L.map('map',{zoomControl:false,attributionControl:true,preferCanvas:true}).setView([44.49,-73.10],11);
@@ -403,18 +413,31 @@
   /* ride lifecycle */
   function accept(){
     if(!S.shift)goOnline();
-    if(!S.active){ S.active={state:'ACCEPTED',acceptedAt:now(),pickedUpAt:null}; toast('Accepted'); }
-    else if(!S.queued){ S.queued={acceptedAt:now()}; toast('Next ride stacked'); }
+    if(!S.active){ S.active={rideId:newRideId_('app'),source:'app',state:'ACCEPTED',acceptedAt:now(),pickedUpAt:null,pickup:'',dest:''}; toast('Accepted'); }
+    else if(!S.queued){ S.queued={rideId:newRideId_('app'),source:'app',state:'ACCEPTED',acceptedAt:now(),pickedUpAt:null,pickup:'',dest:''}; toast('Next ride stacked'); }
     else { toast('Queue full'); }
     render();
   }
   function pickedUp(){ if(S.active&&S.active.state==='ACCEPTED'){ S.active.state='ON_TRIP'; S.active.pickedUpAt=now(); startTrace(); toast('Tracing route'); } render(); }
   function dropOff(){
     if(S.active&&S.active.state==='ON_TRIP'){
-      var miles=stopTrace();
+      var completed=S.active, completedAt=now(), miles=stopTrace();
+      queueTripLog_({
+        rideId:completed.rideId||newRideId_('completed'),
+        requestId:completed.requestId||'',
+        source:completed.source||'app',
+        acceptedISO:new Date(completed.acceptedAt||completed.pickedUpAt||completedAt).toISOString(),
+        pickedUpISO:new Date(completed.pickedUpAt||completed.acceptedAt||completedAt).toISOString(),
+        completedISO:new Date(completedAt).toISOString(),
+        pickup:completed.pickup||'',
+        destination:completed.dest||'',
+        miles:miles,
+        fare:'',
+        tip:''
+      });
       if(S.shift){
         S.shift.miles+=miles;S.shift.rides++;
-        if(S.active.requestId){S.shift.requestIds=S.shift.requestIds||[];if(S.shift.requestIds.indexOf(S.active.requestId)<0)S.shift.requestIds.push(S.active.requestId);}
+        if(completed.requestId){S.shift.requestIds=S.shift.requestIds||[];if(S.shift.requestIds.indexOf(completed.requestId)<0)S.shift.requestIds.push(completed.requestId);}
       }
       if(S.queued){ S.active=S.queued; S.queued=null; toast('Dropped · '+miles.toFixed(2)+' mi · next up'); }
       else { S.active=null; toast('Dropped · '+miles.toFixed(2)+' mi'); }
@@ -445,23 +468,28 @@
   }
   function startScheduled(id){
     var s=S.scheduled.filter(function(x){return x.id===id})[0]; if(!s||scheduledStartBusy[id])return;
+    if(s.requestId&&((S.active&&S.active.requestId===s.requestId)||(S.queued&&S.queued.requestId===s.requestId))){toast('Ride already started');return;}
+    if(S.active&&S.queued){toast('Finish current rides first');return;}
     if(!S.shift)goOnline();
     scheduledStartBusy[id]=true;renderSched();
+    if(s.pickup)navTo(s.pickup);
     function release(){delete scheduledStartBusy[id];renderSched();}
-    function begin(){
-      if(s.requestId&&((S.active&&S.active.requestId===s.requestId)||(S.queued&&S.queued.requestId===s.requestId))){toast('Ride already started');release();return;}
+    function begin(status){
       var ride=scheduledTripState(s);
-      if(s.source==='rider')ride.riderStatus='Leaving';
+      if(s.source==='rider')ride.riderStatus=status||'On the way';
       if(!S.active){ S.active=ride; }
       else if(!S.queued){ S.queued=ride; }
       else { toast('Finish current rides first'); release(); return; }
       persistState();
       srv('startReservation',id).then(function(list){schedFromServer(list)}).catch(function(e){toast(e.message||'Could not clear scheduled ride')}).then(release);
-      toast('Started: '+s.name); render();
+      toast('Pickup started: '+s.name); render();
     }
     if(s.source==='rider'&&s.requestId){
-      srv('updateRiderStatus',s.requestId,'Leaving',s.requestId+':leaving').then(begin).catch(function(e){release();toast(e.message||'Could not send Leaving update')});
-    }else begin();
+      srv('updateRiderStatus',s.requestId,'Leaving',s.requestId+':leaving')
+        .then(function(){return srv('updateRiderStatus',s.requestId,'On the way',s.requestId+':on-the-way')})
+        .then(function(){begin('On the way')})
+        .catch(function(e){release();toast(e.message||'Could not send pickup update')});
+    }else begin('');
   }
   function renderSched(){
     var lane=$('schedList'); lane.innerHTML='';
@@ -474,9 +502,8 @@
       var card=document.createElement('div'); card.className='sched-card'+(due?' due':'');
       card.innerHTML='<div class="sc-main"><b>'+esc(s.name)+'</b>'+(sub?'<small>'+esc(sub)+'</small>':'')+'</div><div class="sc-when">'+when+(due?'<em>DUE</em>':'')+'</div>';
       var acts=document.createElement('div'); acts.className='sc-acts';
-      var start=document.createElement('button'); start.className='sc-start'; start.textContent='Start'; start.disabled=!!scheduledStartBusy[s.id]; start.onclick=function(){startScheduled(s.id)};
+      var start=document.createElement('button'); start.className='sc-start'; start.textContent='Begin pickup'; start.disabled=!!scheduledStartBusy[s.id]; start.onclick=function(){startScheduled(s.id)};
       acts.appendChild(start);
-      if(s.pickup){var navP=document.createElement('button');navP.className='sc-nav';navP.textContent='Pickup';navP.onclick=function(){navTo(s.pickup)};acts.appendChild(navP);}
       if(s.dest){var navD=document.createElement('button');navD.className='sc-nav';navD.textContent='Drop';navD.onclick=function(){navTo(s.dest)};acts.appendChild(navD);}
       if(s.source!=='rider'){var del=document.createElement('button'); del.className='sc-del'; del.innerHTML='&times;'; del.onclick=function(){ srv('removeReservation',s.id).then(function(list){schedFromServer(list)}).catch(function(){}); };acts.appendChild(del);}
       card.appendChild(acts); lane.appendChild(card);
@@ -563,10 +590,12 @@
   function closeOverlay(){ $('overlay').classList.remove('show'); }
   function saveShift(){
     if(!S.shift)return;
-    var earnings=parseFloat($('inEarnings').value); if(!isFinite(earnings)||earnings<0){toast('Enter total earnings');$('inEarnings').focus();return;}
+    var rawEarnings=$('inEarnings').value.trim(), earnings=rawEarnings===''?'':parseFloat(rawEarnings);
+    if(earnings!==''&&(!isFinite(earnings)||earnings<0)){toast('Earnings must be zero or more');$('inEarnings').focus();return;}
     var onlineHours=(now()-S.shift.startedAt)/3600000, tips=parseFloat($('inTips').value); if(!isFinite(tips))tips=0;
     var requestNote=(S.shift.requestIds&&S.shift.requestIds.length)?(' · requests '+S.shift.requestIds.join(',')):'';
-    var payload={startISO:new Date(S.shift.startedAt).toISOString(), endISO:new Date().toISOString(), onlineHours:onlineHours, miles:S.shift.miles, earnings:earnings, tips:tips, zone:$('inZone').value, notes:($('inNotes').value||'')+(S.shift.rides?(' · '+S.shift.rides+' rides'):'')+requestNote, closeTest:($('closeT001').checked?'T-001':null)};
+    var pendingNote=earnings===''?' · earnings pending reconciliation':'';
+    var payload={startISO:new Date(S.shift.startedAt).toISOString(), endISO:new Date().toISOString(), onlineHours:onlineHours, miles:S.shift.miles, earnings:earnings, tips:earnings===''?'':tips, zone:$('inZone').value, notes:($('inNotes').value||'')+(S.shift.rides?(' · '+S.shift.rides+' rides'):'')+requestNote+pendingNote};
     var btn=$('saveBtn'); btn.disabled=true; btn.textContent='Saving…';
     srv('endShiftToSheet',payload).then(function(res){
       showResult(res,earnings,onlineHours);
@@ -575,16 +604,17 @@
     }).catch(function(e){toast(e.message||'Save failed')}).then(function(){btn.disabled=false;btn.textContent='Save shift'});
   }
   function showResult(res,earnings,onlineHours){
-    var t=(res&&res.test)||{}, gph=t.grossPerHr!=null?t.grossPerHr:(onlineHours>0?earnings/onlineHours:0);
-    var v=String(t.verdict||''), base=boot.test&&boot.test.baseline!=null?boot.test.baseline:38.44;
-    var cls=v==='ABOVE TARGET'?'above':v==='BELOW FLOOR'?'below':'';
-    var rowTxt=(res&&res.shift&&res.shift.row!=null)?('Shift Log row '+res.shift.row):'logged';
+    var rowTxt=(res&&res.shift&&res.shift.row!=null)?('Shift Log row '+res.shift.row):'Shift logged';
+    var pending=!!(res&&res.earningsPending);
     var pre=(res&&res.preview)?'preview — nothing written · ':'';
-    var el=$('result'); el.className='result show '+cls;
-    el.innerHTML='<div><span class="r-rate">$'+money(gph)+'</span><span class="r-status">'+(v||'')+' /hr</span></div>'+
-      '<div class="r-ref">target '+(t.green!=null?money(t.green):'—')+' · floor '+(t.red!=null?money(t.red):'—')+' · base '+money(base)+'</div>'+
-      '<div class="r-meta">'+pre+(res&&res.test&&res.test.closed?'T-001 closed · ':'')+rowTxt+'</div>';
-    toast((res&&res.preview)?'Preview only (deploy to write)':'Saved · T-001 closed');
+    var el=$('result'); el.className='result show';
+    if(pending){
+      el.innerHTML='<div><span class="r-status">Shift saved</span></div><div class="r-ref">Earnings pending reconciliation</div><div class="r-meta">'+pre+rowTxt+'</div>';
+    }else{
+      var gph=onlineHours>0?Number(earnings)/onlineHours:0;
+      el.innerHTML='<div><span class="r-rate">$'+money(gph)+'</span><span class="r-status"> /hr</span></div><div class="r-ref">Normal Shift Log write</div><div class="r-meta">'+pre+rowTxt+'</div>';
+    }
+    toast((res&&res.preview)?'Preview only':'Shift saved');
   }
 
   function renderOpp(){
@@ -595,12 +625,9 @@
     $('oppDate').textContent=o.date||''; $('oppEvent').textContent=o.event||'';
     $('oppMeta').textContent=[o.location,o.window].filter(Boolean).join(' · '); $('oppMove').textContent=o.move||'';
   }
-  function showTestStrip(){
-    var t=boot.test; $('modeTag').textContent=LIVE?'live':'preview'; $('modeTag').className='tag'+(LIVE?' live':'');
-    if(!t||!S.shift){ $('testStrip').style.display='none'; return; }
-    $('testStrip').style.display='flex';
-    $('tId').innerHTML='TEST '+(t.id||'T-001')+' <em>'+(t.alreadyClosed?'closed':'active')+'</em>';
-    $('tRef').innerHTML='TGT <b>'+(t.green!=null?money(t.green):'—')+'</b> · FLR <b>'+(t.red!=null?money(t.red):'—')+'</b> · BASE <b>'+(t.baseline!=null?money(t.baseline):'—')+'</b> /hr';
+  function syncModeTag_(){
+    $('modeTag').textContent=LIVE?'live':'preview';
+    $('modeTag').className='tag'+(LIVE?' live':'');
   }
 
   function syncBarPad(){ var b=$('actionbar'); if(b) $('app').style.paddingBottom=(b.offsetHeight+14)+'px'; }
@@ -611,7 +638,7 @@
     $('rideBar').style.display=online?'block':'none';
     $('onlineBar').style.display=online?'flex':'none';
     if(online){ $('obTimer').textContent=clock(S.shift.startedAt); $('obStats').innerHTML='<span class="num">$'+money(S.shift.earned)+'</span> · '+S.shift.rides+' rides · <span class="num">'+S.shift.miles.toFixed(2)+'</span> mi'; }
-    showTestStrip();
+    syncModeTag_();
     var a=S.active, st=a?a.state:'IDLE'; $('status').setAttribute('data-state',st);
     if(!a){
       $('status').style.display=online?'none':'block';
@@ -639,7 +666,8 @@
   $('inboxOverlay').addEventListener('click',function(e){if(e.target===$('inboxOverlay'))closeInbox()});
   $('settingsOverlay').addEventListener('click',function(e){if(e.target===$('settingsOverlay'))closeSettings()});
   document.addEventListener('click',function(e){if(!$('waffleMenu').contains(e.target)&&!$('waffleBtn').contains(e.target))closeWaffle()});
-  document.addEventListener('visibilitychange',function(){if(!document.hidden&&$('inboxOverlay').classList.contains('show'))refreshInbox()});
+  document.addEventListener('visibilitychange',function(){if(!document.hidden){flushPendingTrips_();if($('inboxOverlay').classList.contains('show'))refreshInbox()}});
+  window.addEventListener('focus',flushPendingTrips_);
   $('goBtn').onclick=goOnline;
   $('endShiftBtn').onclick=openEndShift;
   $('acceptBtn').onclick=accept;$('pickupBtn').onclick=pickedUp;$('dropoffBtn').onclick=dropOff;$('cancelActiveBtn').onclick=cancelActive;
@@ -651,8 +679,8 @@
   window.addEventListener('resize',syncBarPad);
   restoreState();
   try{initMap()}catch(e){$('mapNote').classList.add('show')}
-  render(); renderSched(); syncBarPad();
-  srv('getCockpitBootstrap').then(function(b){ boot=b||{}; renderOpp(); showTestStrip(); schedFromServer(boot.reservations); requestsFromServer(boot.requests); if(boot.riderReadError){toast('Rider connection: '+boot.riderReadError);} }).catch(function(e){ showTestStrip(); toast((e&&e.message)?e.message:'Console bootstrap failed'); });
+  render(); renderSched(); syncBarPad(); flushPendingTrips_();
+  srv('getCockpitBootstrap').then(function(b){ boot=b||{}; renderOpp(); syncModeTag_(); schedFromServer(boot.reservations); requestsFromServer(boot.requests); if(boot.riderReadError){toast('Rider connection: '+boot.riderReadError);} }).catch(function(e){ syncModeTag_(); toast((e&&e.message)?e.message:'Console bootstrap failed'); });
 </script>
 </body>
 </html>
