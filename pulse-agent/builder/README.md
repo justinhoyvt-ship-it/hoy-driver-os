@@ -24,7 +24,7 @@ One command processes one task only.
 
 The Builder validates the staged artifact before GitHub staging. A repair attempt is permitted only when a registered deterministic repair handler can address the exact failing gate. Unknown failures stop immediately with a recovery note. The Builder never asks an AI model to invent a repair.
 
-Repository CI remains part of the pass gate. After CI passes, the task is marked `AUTO_VALIDATED_STAGED`; only one dependency-satisfied successor may become `READY_TO_RUN`.
+Repository CI remains part of the pass gate. The existing `.github/workflows/pulse-runtime-autobuild.yml` workflow now runs `pulse-autobuild/scripts/validate.mjs`, which validates both the runtime and the PULSE-066 Builder control package. After CI passes, the task is marked `AUTO_VALIDATED_STAGED`; only one dependency-satisfied successor may become `READY_TO_RUN`.
 
 PULSE-066 is a final-task barrier and does not automatically start or ready another lane.
 
@@ -42,6 +42,10 @@ The action label is **RUN CURRENT BUILD**.
 ## Validation gates
 
 The control plane checks acceptance criteria, exact patch integrity, source syntax, duplicate handlers, protected identifiers, feature flags defaulting off, deterministic fixtures, dependency/license/secret exclusions, repository CI, artifact URL, and rollback proof.
+
+## Repository CI
+
+The Builder package includes `pulse-autobuild/scripts/validate.mjs`. Because that file is inside `pulse-autobuild/**`, the existing `Pulse Runtime Autobuild` pull-request workflow runs on this PR without adding a new deployment workflow. The validator checks Apps Script syntax, duplicate handlers, the locked RUN CURRENT BUILD values, exact PULSE-066 classification, contract JSON, task snapshot proof, rollback markers, and forbidden automation or secret markers.
 
 ## Safety boundary
 
