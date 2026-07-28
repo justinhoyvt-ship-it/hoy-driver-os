@@ -13,6 +13,10 @@ const builderContractPath = path.join(builderDir, 'self-validation-contract.json
 const builderReadmePath = path.join(builderDir, 'README.md');
 const builderRollbackPath = path.join(builderDir, 'ROLLBACK.md');
 const builderTaskPath = path.join(repoRoot, 'pulse-agent', 'tasks', 'PULSE-066.json');
+const driverDir = path.join(repoRoot, 'apps-script', 'hoy-driver-os-writer');
+const driverCodePath = path.join(driverDir, 'Code.gs');
+const driverIndexPath = path.join(driverDir, 'Index.html');
+const driverReadmePath = path.join(driverDir, 'README.md');
 const problems = [];
 const builderProblems = [];
 
@@ -188,7 +192,83 @@ for (const marker of [
   if (!builderRollback.includes(marker)) builderProblems.push(`Builder rollback marker missing: ${marker}`);
 }
 
-problems.push(...builderProblems);
+
+const driverProblems = [];
+for (const file of [driverCodePath, driverIndexPath, driverReadmePath]) {
+  if (!fs.existsSync(file)) driverProblems.push(`Missing Hoy Driver file: ${path.relative(repoRoot, file)}`);
+}
+const driverCode = fs.existsSync(driverCodePath) ? fs.readFileSync(driverCodePath, 'utf8') : '';
+const driverHtml = fs.existsSync(driverIndexPath) ? fs.readFileSync(driverIndexPath, 'utf8') : '';
+const driverReadme = fs.existsSync(driverReadmePath) ? fs.readFileSync(driverReadmePath, 'utf8') : '';
+
+try {
+  new vm.Script(driverCode, { filename: 'apps-script/hoy-driver-os-writer/Code.gs' });
+} catch (error) {
+  driverProblems.push(`Hoy Driver Code.gs syntax error: ${error.message}`);
+}
+const inlineScripts = [...driverHtml.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)]
+  .map((match) => match[1])
+  .filter((source) => source.trim());
+for (const [index, inlineSource] of inlineScripts.entries()) {
+  try {
+    new vm.Script(inlineSource, { filename: `apps-script/hoy-driver-os-writer/Index.inline-${index + 1}.js` });
+  } catch (error) {
+    driverProblems.push(`Hoy Driver inline script ${index + 1} syntax error: ${error.message}`);
+  }
+}
+
+for (const marker of [
+  "const HOY_SHEET_ID = '13m_9QDnIgXSdMBdtSYMjmyIdo55wh8F5Fl3_1JaYl-w';",
+  "const HOY_BUILD = 'hoy-normal-flow-2026-07-28.1';",
+  'function logCompletedTrip(payload)',
+  'function tripLogSheet_(ss)',
+  'function writeTripRow_(sh, p)',
+  'earningsPending: !earningsProvided',
+  'testWorkbookTargeted: false'
+]) {
+  if (!driverCode.includes(marker)) driverProblems.push(`Hoy Driver normal-flow marker missing: ${marker}`);
+}
+for (const forbidden of [
+  'HOY_DEFAULT_TEST',
+  'testsSheet_',
+  'closeTest_',
+  'readTestSummary_',
+  'closeT001',
+  'testStrip',
+  'T-001 closed'
+]) {
+  if (driverCode.includes(forbidden) || driverHtml.includes(forbidden)) {
+    driverProblems.push(`Legacy test marker remains in Hoy Driver: ${forbidden}`);
+  }
+}
+for (const marker of [
+  "var S={shift:null, active:null, queued:null, scheduled:[], requests:[], pendingTrips:[]};",
+  "srv('logCompletedTrip',payload)",
+  "start.textContent='Begin pickup'",
+  "'On the way',s.requestId+':on-the-way'",
+  'Earnings pending reconciliation',
+  'function flushPendingTrips_()'
+]) {
+  if (!driverHtml.includes(marker)) driverProblems.push(`Hoy Driver client marker missing: ${marker}`);
+}
+for (const marker of [
+  'PULSE-068 normal-flow cutover',
+  'Shift Log',
+  'Trip Log',
+  'earnings are optional',
+  'No automatic merge or Apps Script deployment occurs'
+]) {
+  if (!driverReadme.toLowerCase().includes(marker.toLowerCase())) {
+    driverProblems.push(`Hoy Driver README marker missing: ${marker}`);
+  }
+}
+const driverFunctionNames = [...driverCode.matchAll(/^function\s+([A-Za-z_$][\w$]*)\s*\(/gm)].map((m) => m[1]);
+const driverDuplicates = driverFunctionNames.filter((name, index) => driverFunctionNames.indexOf(name) !== index);
+if (driverDuplicates.length) {
+  driverProblems.push(`Duplicate Hoy Driver functions: ${[...new Set(driverDuplicates)].join(', ')}`);
+}
+
+problems.push(...builderProblems, ...driverProblems);
 
 const builderReport = {
   ok: builderProblems.length === 0,
@@ -217,6 +297,13 @@ const report = {
   codeBytes: Buffer.byteLength(source),
   codeSha256: crypto.createHash('sha256').update(source).digest('hex'),
   builderControl: builderReport,
+  hoyDriverNormalFlow: {
+    ok: driverProblems.length === 0,
+    build: 'hoy-normal-flow-2026-07-28.1',
+    serverFunctionCount: driverFunctionNames.length,
+    duplicateServerFunctions: [...new Set(driverDuplicates)],
+    problems: driverProblems
+  },
   problems
 };
 
