@@ -26,7 +26,7 @@ The console no longer displays a Test T-001 strip, offers a Close Test checkbox,
 
 Each completed ride sends one idempotent `logCompletedTrip` payload to the current `Trip Log`.
 
-The client keeps a pending-trip queue in local storage. A failed or interrupted write is retried when the console returns to the foreground. A Script Properties ledger prevents a retry from appending a duplicate Trip Log row.
+The client keeps a pending-trip queue in local storage. A failed or interrupted write is retried when the console returns to the foreground. A Script Properties ledger provides the fast lookup, while a durable ride-ID note on the Trip Log row lets an interrupted or partial write resume on the same row without appending a duplicate.
 
 Trip rows preserve pickup/drop-off timestamps, available route labels, duration, traced mileage, and fare/tip when known. Unknown earnings remain blank.
 
@@ -39,9 +39,9 @@ One tap:
 1. records `Leaving`;
 2. records `On the way`;
 3. opens phone navigation to the pickup address; and
-4. creates or restores the existing active/queued ride state.
+4. creates the active pickup ride only when no other active or queued ride exists.
 
-`Arriving soon` and `Arrived` remain the temporary manual fallback until the foreground distance/ETA monitor is installed in the next rider-alert task. The request app remains the only writer to rider-status events.
+`Arriving soon` and `Arrived` remain the temporary manual fallback until the foreground distance/ETA monitor is installed in the next rider-alert task. Begin pickup is blocked while another ride is active or queued, so a waiting rider is never told the driver is on the way while the driver is still completing another ride. The request app remains the only writer to rider-status events.
 
 ## Guardrails
 
