@@ -1,7 +1,7 @@
 {
   "taskId": "PULSE-066",
   "name": "Self-Validating Builder and Auto-Repair Loop",
-  "version": "0.6.1.1-self-validating-builder",
+  "version": "0.6.1.2-self-validating-builder",
   "sequencePosition": "LAST",
   "command": "runNextReadyTask",
   "loop": [
@@ -60,5 +60,11 @@
     "automaticDeployment": false,
     "productionMutation": false
   },
-  "taskClassifier": "TASK_ID_ONLY"
+  "taskClassifier": "TASK_ID_ONLY",
+  "repositoryCi": {
+    "required": true,
+    "workflow": ".github/workflows/pulse-runtime-autobuild.yml",
+    "validator": "pulse-autobuild/scripts/validate.mjs",
+    "trigger": "The validator path is inside pulse-autobuild/** so the existing pull_request workflow runs on Builder changes."
+  }
 }
