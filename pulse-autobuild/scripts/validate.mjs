@@ -219,10 +219,14 @@ for (const [index, inlineSource] of inlineScripts.entries()) {
 
 for (const marker of [
   "const HOY_SHEET_ID = '13m_9QDnIgXSdMBdtSYMjmyIdo55wh8F5Fl3_1JaYl-w';",
-  "const HOY_BUILD = 'hoy-normal-flow-2026-07-28.1';",
+  "const HOY_BUILD = 'hoy-normal-flow-2026-07-28.2';",
   'function logCompletedTrip(payload)',
   'function tripLogSheet_(ss)',
-  'function writeTripRow_(sh, p)',
+  'function writeTripRow_(sh, p, row, rideId)',
+  'function reserveTripRow_(sh, row, rideId)',
+  'function findTripRowByRideId_(sh, rideId)',
+  'function tripRowComplete_(sh, row)',
+  "const TRIP_NOTE_PREFIX = 'PULSE_RIDE_ID:';",
   'earningsPending: !earningsProvided',
   'testWorkbookTargeted: false'
 ]) {
@@ -245,11 +249,17 @@ for (const marker of [
   "var S={shift:null, active:null, queued:null, scheduled:[], requests:[], pendingTrips:[]};",
   "srv('logCompletedTrip',payload)",
   "start.textContent='Begin pickup'",
+  "if(S.active||S.queued){toast('Finish current ride first');return;}",
+  "start.disabled=!!scheduledStartBusy[s.id]||!!S.active||!!S.queued",
   "'On the way',s.requestId+':on-the-way'",
   'Earnings pending reconciliation',
   'function flushPendingTrips_()'
 ]) {
   if (!driverHtml.includes(marker)) driverProblems.push(`Hoy Driver client marker missing: ${marker}`);
+}
+
+if (driverHtml.includes("else if(!S.queued){ S.queued=ride; }")) {
+  driverProblems.push('Begin pickup must not queue a rider while another ride is active.');
 }
 for (const marker of [
   'PULSE-068 normal-flow cutover',
@@ -299,7 +309,7 @@ const report = {
   builderControl: builderReport,
   hoyDriverNormalFlow: {
     ok: driverProblems.length === 0,
-    build: 'hoy-normal-flow-2026-07-28.1',
+    build: 'hoy-normal-flow-2026-07-28.2',
     serverFunctionCount: driverFunctionNames.length,
     duplicateServerFunctions: [...new Set(driverDuplicates)],
     problems: driverProblems
