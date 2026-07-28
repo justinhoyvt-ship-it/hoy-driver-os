@@ -9,13 +9,13 @@
   "Problem / Request": "Replace the temporary manual completion gate only after the active staged sequence is complete.",
   "Acceptance Criteria": "One task per command; Build → Validate → Repair ≤3 → Retest → Stage → Advance; never invert RUN CURRENT BUILD convention; no production deploy.",
   "Assigned Agent": "Pulse Builder + Auto Validator",
-  "Branch / Build": "pulse/pulse-066-20260727-163207 / BUILD-20260727-163205 / Builder v0.6.1.1",
+  "Branch / Build": "pulse/pulse-066-20260727-163207 / BUILD-20260727-163205 / Builder v0.6.1.2",
   "Result URL": "https://docs.google.com/document/d/1PN3oKcPCbdk8mcPVeg7ssCqnrg_R9O1bm_D8dkcrCdM/edit",
   "Last Error": "",
-  "Updated At": "2026-07-27T21:39:31.310Z",
+  "Updated At": "2026-07-28T10:47:39.656Z",
   "Integration Hooks": "PULSE-066 is always last. Controls future autonomous validation; production remains manual.",
   "builder": {
-    "version": "0.6.1.1-self-validating-builder",
+    "version": "0.6.1.2-self-validating-builder",
     "mode": "self-validating-builder-package",
     "aiProvider": "none",
     "buildId": "BUILD-20260727-163205",
@@ -36,9 +36,10 @@
           "pulse-agent/builder/README.md",
           "pulse-agent/builder/ROLLBACK.md",
           "pulse-agent/builder/SelfValidatingBuilder.gs",
-          "pulse-agent/builder/self-validation-contract.json"
+          "pulse-agent/builder/self-validation-contract.json",
+          "pulse-autobuild/scripts/validate.mjs"
         ],
-        "totalChars": 34589,
+        "totalChars": 45967,
         "exactCommand": "runNextReadyTask",
         "loop": [
           "BUILD",
@@ -57,18 +58,25 @@
         "taskClassifierExact": true,
         "noMarkCheckedStep": true,
         "repositoryCiRequired": true,
+        "repositoryCiWorkflow": ".github/workflows/pulse-runtime-autobuild.yml",
+        "repositoryCiValidator": "pulse-autobuild/scripts/validate.mjs",
         "rollbackProof": true,
         "automaticMerge": false,
         "deploymentPerformed": false,
         "productionTouched": false
       },
       "validationAttempts": 1,
-      "repairAttempts": 1,
+      "repairAttempts": 2,
       "repairs": [
         {
           "attempt": 1,
           "scope": "RUN CURRENT BUILD ready/running/blocked state and exact PULSE-066 task classification",
           "note": "Restores TRUE only for one runnable staged task, consumes FALSE before work, and prevents later Builder Infrastructure tasks from being misclassified."
+        },
+        {
+          "attempt": 2,
+          "scope": "repository CI trigger and Builder control validation",
+          "note": "Extends the existing pulse-autobuild validator so PR #38 receives a real GitHub Actions validation run for the Builder control package."
         }
       ],
       "gates": [
@@ -95,15 +103,19 @@
     "generatedAt": "2026-07-27T20:32:16.217Z",
     "reviewRepair": {
       "sourceCommitBeforeRepair": "edf6e834584396618d96f018816f3eb901761bcf",
-      "repairVersion": "0.6.1.1-self-validating-builder",
+      "controlRepairCommit": "a565d001ba1d127b1cc5e7fa5a55e34923a3cb76",
+      "repairVersion": "0.6.1.2-self-validating-builder",
       "readyValueTrue": true,
       "runningValueFalse": true,
       "blockedValueFalse": true,
       "taskClassifierExact": true,
+      "repositoryCiWired": true,
+      "repositoryCiWorkflow": ".github/workflows/pulse-runtime-autobuild.yml",
+      "repositoryCiValidator": "pulse-autobuild/scripts/validate.mjs",
       "automaticMerge": false,
       "deploymentPerformed": false,
       "productionTouched": false,
-      "repairedAt": "2026-07-27T21:39:31.310Z"
+      "repairedAt": "2026-07-28T10:47:39.656Z"
     }
   }
 }
