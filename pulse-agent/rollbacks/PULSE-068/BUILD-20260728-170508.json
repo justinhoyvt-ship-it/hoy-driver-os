@@ -1,0 +1,26 @@
+{
+  "taskId": "PULSE-068",
+  "buildId": "BUILD-20260728-170508",
+  "branch": "pulse/pulse-068-20260728-170510",
+  "pullRequest": "https://github.com/justinhoyvt-ship-it/hoy-driver-os/pull/39",
+  "baseBranch": "main",
+  "baseSha": "d3b0f6d55a080bf596dd83166b225abba283c9e5",
+  "headSha": "50e7610172cbbc51e3df1d0c6cb4f719610149fe",
+  "changedPaths": [
+    "apps-script/hoy-driver-os-writer/Code.gs",
+    "apps-script/hoy-driver-os-writer/Index.html",
+    "apps-script/hoy-driver-os-writer/README.md",
+    "pulse-autobuild/scripts/validate.mjs"
+  ],
+  "rollback": [
+    "Before merge: close the pull request or reset the branch to the base SHA.",
+    "After merge: revert the merge commit through GitHub review.",
+    "For Builder infrastructure: restore the previous installed Builder source and Mobile Control mapping."
+  ],
+  "preserveRecords": true,
+  "automaticDeployment": false,
+  "productionTouched": false,
+  "validationAttempts": 1,
+  "repairAttempts": 0,
+  "generatedAt": "2026-07-28T21:05:22.909Z"
+}

@@ -1,29 +1,27 @@
 /**
- * Pulse Drive Mode -> Hoy Driver OS writer
+ * Pulse Drive Mode -> current Pulse Driver Dashboard writer
  * ------------------------------------------------------------
- * Serves the drive-mode cockpit and, on end-shift, writes into your
- * "Hoy Driver OS - v1.2 Baseline + Test 001" sheet:
- *   1. Appends one row to the Shift Log (raw inputs; leaves formula columns alone).
- *   2. Closes a test (default T-001) by writing Actual Online Hrs / Earnings / Miles.
+ * Serves the owner-only driving console and writes normal field activity to:
+ *   1. Shift Log — one row when the driver ends a shift.
+ *   2. Trip Log — one idempotent row when a ride is completed.
  *
- * Safe-by-design:
- *   - Finds tabs by their header signatures, not fixed names.
- *   - Finds the test row by matching the Test ID, and columns by header name.
- *   - Writes ONLY input cells; never overwrites your Gross/hr, Net/hr, Result formulas.
- *   - Refuses to overwrite a test that already has actuals unless force:true.
+ * PULSE-068 removes the legacy test-workbook write path. The historical workbook is
+ * preserved as an audit artifact but is no longer a runtime target.
  */
 
-const HOY_SHEET_ID = '1Byk7-bwjhSeZQEqKemi0RxGagD_2RuYw94A8qu48tnY';
+const HOY_SHEET_ID = '13m_9QDnIgXSdMBdtSYMjmyIdo55wh8F5Fl3_1JaYl-w';
 const HOY_TZ = 'America/New_York';
 const HOY_DEFAULT_COST = Object.freeze({ fuelPerGal: 3.5, mpg: 25, maintPerMile: 0.10, taxRate: 0.22 });
-const HOY_DEFAULT_TEST = 'T-001';
-const HOY_BUILD = 'hoy-rider-status-2026-07-22.1';
+const HOY_BUILD = 'hoy-normal-flow-2026-07-28.3';
 const RIDER_SHEET_ID = '1Hd46iUY84N2bvxdaIS4lf6l-uExxbXGIbUjxJzMF-No';
 const RIDER_SHEET_NAME = 'Ride Requests';
 const PULSE_LIVE_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbyde9C6y6iIoJO8AfWxt5z-D2FxwKXXMonpypmW8xaI7BZaAwChYBXM4JO7zqYvmw7Y/exec';
 const REQUEST_APP_URL_PROPERTY = 'PULSE_REQUEST_APP_URL';
 const REQUEST_APP_TOKEN_PROPERTY = 'PULSE_REQUEST_TOKEN';
 const LIVE_URL_PROPERTY = 'PULSE_LIVE_URL';
+const TRIP_LEDGER_KEY = 'PULSE_COMPLETED_TRIP_IDS_V1';
+const TRIP_LEDGER_TTL_MS = 90 * 24 * 3600000;
+const TRIP_NOTE_PREFIX = 'PULSE_RIDE_ID:';
 
 /* ===== Entry points ===== */
 function doGet() {
@@ -37,17 +35,16 @@ function doGet() {
 function checkWiring() {
   const ss = openHoy_();
   const sl = shiftLogSheet_(ss);
-  const ts = testsSheet_(ss);
+  const tl = tripLogSheet_(ss);
   const er = findSheetByHeaders_(ss, ['Event', 'Best Driver Window']);
   const cost = readCost_(ss);
-  const t = ts ? readTestSummary_(ts, HOY_DEFAULT_TEST) : null;
   const rider = readRiderRequestsSafe_();
   return {
-    ok: !!(sl && ts && t && !rider.error),
+    ok: !!(sl && tl && !rider.error),
     hoySheetId: HOY_SHEET_ID,
     riderSheetId: RIDER_SHEET_ID,
     shiftLogTab: sl ? sl.getName() : 'NOT FOUND',
-    testsTab: ts ? ts.getName() : 'NOT FOUND',
+    tripLogTab: tl ? tl.getName() : 'NOT FOUND',
     eventRadarTab: er ? er.getName() : 'NOT FOUND',
     riderRequestsTab: rider.error ? 'NOT AVAILABLE' : RIDER_SHEET_NAME,
     riderReadError: rider.error || null,
@@ -55,9 +52,10 @@ function checkWiring() {
     confirmedRides: rider.items.filter(r => r.status === 'CONFIRMED').length,
     requestDecisionBridgeConfigured: requestDecisionBridgeConfigured_(),
     nextShiftRow: sl ? firstEmptyShiftRow_(sl) : null,
-    t001: t,
+    nextTripRow: tl ? firstEmptyTripRow_(tl) : null,
     nextOpportunity: getNextOpportunity_(ss),
     costModel: cost,
+    testWorkbookTargeted: false,
     writesPerformed: false
   };
 }
@@ -65,7 +63,6 @@ function checkWiring() {
 // Called by the cockpit on load to show the live test target.
 function getCockpitBootstrap() {
   const ss = openHoy_();
-  const ts = testsSheet_(ss);
   const rider = readRiderRequestsSafe_();
   const requested = listRequestedRides_(rider.items);
   const linked = attachRequestDecisionLinksSafe_(requested);
@@ -73,7 +70,6 @@ function getCockpitBootstrap() {
   return {
     ok: true,
     build: HOY_BUILD,
-    test: ts ? readTestSummary_(ts, HOY_DEFAULT_TEST) : null,
     cost: readCost_(ss),
     opportunity: getNextOpportunity_(ss),
     reservations: reservations.items,
@@ -81,7 +77,9 @@ function getCockpitBootstrap() {
     requests: linked.items,
     requestDecisionError: linked.error || '',
     liveUrl: pulseLiveUrl_(),
-    riderReadError: rider.error || null
+    riderReadError: rider.error || null,
+    normalFlow: true,
+    testWorkbookTargeted: false
   };
 }
 
@@ -126,31 +124,221 @@ function parseEventDate_(s) {
 }
 
 /**
- * The main write. Payload from the cockpit:
- *   { startISO, endISO, onlineHours, miles, earnings, tips?, promo?,
- *     zone?, airportQueue?, weather?, notes?, closeTest?, force? }
- * earnings = total for the shift including tips.
+ * Save one normal field shift. Earnings may be blank when platform totals have
+ * not settled yet; the Shift Log row is still created with time and mileage.
  */
 function endShiftToSheet(payload) {
   const p = payload || {};
-  const online = Number(p.onlineHours), miles = Number(p.miles), earn = Number(p.earnings);
+  const online = Number(p.onlineHours);
+  const miles = Number(p.miles);
+  const earningsProvided = p.earnings !== '' && p.earnings !== null &&
+    p.earnings !== undefined && isFinite(Number(p.earnings));
   if (!isFinite(online) || online <= 0) throw new Error('Online hours must be a positive number.');
   if (!isFinite(miles) || miles < 0) throw new Error('Miles must be zero or more.');
-  if (!isFinite(earn) || earn < 0) throw new Error('Enter total earnings (0 or more).');
+  if (earningsProvided && Number(p.earnings) < 0) throw new Error('Earnings must be zero or more.');
 
   const lock = LockService.getScriptLock();
   lock.waitLock(15000);
   try {
     const ss = openHoy_();
     const cost = readCost_(ss);
-    const shift = writeShiftRow_(ss, p, cost);
-    let test = null;
-    if (p.closeTest) test = closeTest_(ss, String(p.closeTest), p, !!p.force);
+    const shift = writeShiftRow_(ss, p, cost, earningsProvided);
     SpreadsheetApp.flush();
-    return { ok: true, shift: shift, test: test, cost: cost, at: new Date().toISOString() };
+    return {
+      ok: true,
+      shift: shift,
+      earningsPending: !earningsProvided,
+      testWorkbookTargeted: false,
+      cost: cost,
+      at: new Date().toISOString()
+    };
   } finally {
     lock.releaseLock();
   }
+}
+
+/**
+ * Append one completed ride to the current Trip Log.
+ *
+ * The ride ID is persisted twice:
+ * - Script Properties keeps the fast lookup ledger.
+ * - A cell note on the Trip Log row is the durable recovery marker.
+ *
+ * The row note is written before any row values. If a request is interrupted after
+ * a partial Sheet write or before the ledger is saved, the retry finds and repairs
+ * the same reserved row instead of appending another one.
+ */
+function logCompletedTrip(payload) {
+  const p = payload || {};
+  const rideId = String(p.rideId || '').trim().slice(0, 120);
+  if (!rideId) throw new Error('Completed trip needs a ride ID.');
+
+  const lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    const ss = openHoy_();
+    const sh = tripLogSheet_(ss);
+    if (!sh) throw new Error('Could not find the Trip Log tab.');
+
+    const ledger = loadTripLedger_();
+    let row = Number(ledger[rideId] && ledger[rideId].row) || 0;
+    if (row > 0 && !tripRowMatchesRideId_(sh, row, rideId)) row = 0;
+    if (!row) row = findTripRowByRideId_(sh, rideId);
+
+    if (row > 0 && tripRowComplete_(sh, row)) {
+      ledger[rideId] = {row:row, at:Date.now()};
+      saveTripLedger_(ledger);
+      return {ok:true, duplicate:true, repaired:false, rideId:rideId, row:row};
+    }
+
+    if (!row) row = firstEmptyTripRow_(sh);
+    reserveTripRow_(sh, row, rideId);
+    writeTripRow_(sh, p, row, rideId);
+    SpreadsheetApp.flush();
+
+    ledger[rideId] = {row:row, at:Date.now()};
+    saveTripLedger_(ledger);
+    return {
+      ok:true,
+      duplicate:false,
+      repaired:findTripRowByRideId_(sh, rideId) === row,
+      rideId:rideId,
+      row:row
+    };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function loadTripLedger_() {
+  const props = PropertiesService.getScriptProperties();
+  const raw = props.getProperty(TRIP_LEDGER_KEY);
+  let map = {};
+  let changed = false;
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) map = parsed;
+      else changed = true;
+    } catch (error) {
+      changed = true;
+    }
+  }
+  const cutoff = Date.now() - TRIP_LEDGER_TTL_MS;
+  Object.keys(map).forEach(function(id) {
+    const at = Number(map[id] && map[id].at);
+    if (!isFinite(at) || at < cutoff) { delete map[id]; changed = true; }
+  });
+  if (changed) props.setProperty(TRIP_LEDGER_KEY, JSON.stringify(map));
+  return map;
+}
+
+function saveTripLedger_(map) {
+  PropertiesService.getScriptProperties().setProperty(TRIP_LEDGER_KEY, JSON.stringify(map || {}));
+}
+
+function tripAnchorColumn_(sh) {
+  return colByHeader_(sh, 'Logged At') || colByHeader_(sh, 'Date');
+}
+
+function tripRideNote_(rideId) {
+  return TRIP_NOTE_PREFIX + String(rideId || '').trim();
+}
+
+function reserveTripRow_(sh, row, rideId) {
+  const col = tripAnchorColumn_(sh);
+  if (!col) throw new Error('Trip Log needs Logged At or Date for durable ride IDs.');
+  const cell = sh.getRange(row, col);
+  cell.setNote(tripRideNote_(rideId));
+  if (cell.getValue() === '' || cell.getValue() === null) cell.setValue(new Date());
+  SpreadsheetApp.flush();
+}
+
+function tripRowMatchesRideId_(sh, row, rideId) {
+  const col = tripAnchorColumn_(sh);
+  if (!col || row < 2 || row > sh.getMaxRows()) return false;
+  return String(sh.getRange(row, col).getNote() || '') === tripRideNote_(rideId);
+}
+
+function findTripRowByRideId_(sh, rideId) {
+  const col = tripAnchorColumn_(sh);
+  const last = sh.getLastRow();
+  if (!col || last < 2) return 0;
+  const expected = tripRideNote_(rideId);
+  const notes = sh.getRange(2, col, last - 1, 1).getNotes();
+  for (let i = 0; i < notes.length; i++) {
+    if (String(notes[i][0] || '') === expected) return i + 2;
+  }
+  return 0;
+}
+
+function tripRowComplete_(sh, row) {
+  const names = ['Pickup Time', 'Dropoff Time', 'Miles'];
+  for (let i = 0; i < names.length; i++) {
+    const col = colByHeader_(sh, names[i]);
+    if (!col) return false;
+    const value = sh.getRange(row, col).getValue();
+    if (value === '' || value === null) return false;
+  }
+  return true;
+}
+
+function firstEmptyTripRow_(sh) {
+  const col = tripAnchorColumn_(sh);
+  const last = sh.getLastRow();
+  if (!col || last < 2) return Math.max(last + 1, 2);
+  const values = sh.getRange(2, col, last - 1, 1).getValues();
+  const notes = sh.getRange(2, col, last - 1, 1).getNotes();
+  for (let i = 0; i < values.length; i++) {
+    const emptyValue = values[i][0] === '' || values[i][0] === null;
+    const emptyNote = String(notes[i][0] || '') === '';
+    if (emptyValue && emptyNote) return i + 2;
+  }
+  return last + 1;
+}
+
+function writeTripRow_(sh, p, row, rideId) {
+  row = Number(row) || firstEmptyTripRow_(sh);
+  reserveTripRow_(sh, row, rideId);
+
+  const pickup = validDate_(p.pickedUpISO || p.acceptedISO) || new Date();
+  const dropoff = validDate_(p.completedISO) || new Date();
+  const minutes = Math.max(0, (dropoff.getTime() - pickup.getTime()) / 60000);
+  const miles = Math.max(0, num_(p.miles, 0));
+  const fareProvided = p.fare !== '' && p.fare !== null &&
+    p.fare !== undefined && isFinite(Number(p.fare));
+  const tipProvided = p.tip !== '' && p.tip !== null &&
+    p.tip !== undefined && isFinite(Number(p.tip));
+  const fare = fareProvided ? Math.max(0, Number(p.fare)) : null;
+  const tip = tipProvided ? Math.max(0, Number(p.tip)) : null;
+
+  function set(name, value) {
+    const col = colByHeader_(sh, name);
+    if (col > 0) sh.getRange(row, col).setValue(value);
+  }
+
+  set('Logged At', new Date());
+  set('Date', new Date(Utilities.formatDate(pickup, HOY_TZ, 'yyyy/MM/dd')));
+  set('Pickup Time', pickup);
+  set('Pickup Zone', String(p.pickup || p.source || 'Ride').slice(0, 160));
+  set('Dropoff Time', dropoff);
+  set('Dropoff Zone', String(p.destination || '').slice(0, 160));
+  set('Minutes', round2_(minutes));
+  set('Miles', round2_(miles));
+  set('Fare', fareProvided ? round2_(fare) : '');
+  set('Tip', tipProvided ? round2_(tip) : '');
+
+  const rateCol = colByHeader_(sh, '$/Hr');
+  if (rateCol > 0 && String(sh.getRange(row, rateCol).getFormula()) === '') {
+    const rate = fareProvided && minutes > 0 ? ((fare + (tip || 0)) / minutes) * 60 : '';
+    sh.getRange(row, rateCol).setValue(rate === '' ? '' : round2_(rate));
+  }
+  return row;
+}
+
+function validDate_(value) {
+  const date = value instanceof Date ? value : new Date(value || '');
+  return isNaN(date.getTime()) ? null : date;
 }
 
 
@@ -262,6 +450,32 @@ function updateRiderStatus(requestId, status, idempotencyKey) {
     throw new Error(String(payload.message || ('Rider status endpoint returned HTTP ' + http + '.')));
   }
   return payload;
+}
+
+function beginPickupRiderStatus(requestId) {
+  const id = String(requestId || '').trim();
+  if (!/^FR-[A-Z0-9]+$/i.test(id)) throw new Error('Rider request ID is not valid.');
+  const leaving = updateRiderStatus(id, 'Leaving', id + ':leaving');
+  const onTheWay = updateRiderStatus(id, 'On the way', id + ':on-the-way');
+  return {
+    ok:true,
+    requestId:id,
+    status:String((onTheWay && onTheWay.status) || 'On the way'),
+    leaving:leaving,
+    onTheWay:onTheWay
+  };
+}
+
+function beginScheduledPickup(requestId, reservationId) {
+  const id = String(requestId || '').trim();
+  const status = id ? beginPickupRiderStatus(id) : null;
+  const reservations = startReservation(String(reservationId || '').trim());
+  return {
+    ok:true,
+    requestId:id,
+    status:status ? status.status : '',
+    reservations:reservations
+  };
 }
 function attachRiderStatusStatesSafe_(items) {
   try { return {items:attachRiderStatusStates_(items), error:''}; }
@@ -480,7 +694,7 @@ function findSheetByHeaders_(ss, needed) {
   return null;
 }
 function shiftLogSheet_(ss) { return findSheetByHeaders_(ss, ['Online Hrs', 'Primary Zone']); }
-function testsSheet_(ss)    { return findSheetByHeaders_(ss, ['Test ID', 'Actual Online Hrs']); }
+function tripLogSheet_(ss)  { return findSheetByHeaders_(ss, ['Pickup Time', 'Dropoff Time', 'Miles', 'Fare']); }
 
 function colByHeader_(sh, name) {
   const lastCol = sh.getLastColumn();
@@ -524,27 +738,29 @@ function firstEmptyShiftRow_(sh) {
   return last + 1;
 }
 
-function writeShiftRow_(ss, p, cost) {
+function writeShiftRow_(ss, p, cost, earningsProvided) {
   const sh = shiftLogSheet_(ss);
   if (!sh) throw new Error('Could not find the Shift Log tab (looked for Online Hrs + Primary Zone headers).');
   const row = firstEmptyShiftRow_(sh);
 
   const start = new Date(p.startISO || (Date.now() - Number(p.onlineHours) * 3600000));
   const end = new Date(p.endISO || Date.now());
-  const total = num_(p.earnings, 0);
-  const tips = num_(p.tips, 0);
-  const promo = num_(p.promo, 0);
-  const fares = Math.max(0, total - tips - promo);
+  const total = earningsProvided ? Math.max(0, Number(p.earnings)) : null;
+  const tips = earningsProvided ? Math.max(0, num_(p.tips, 0)) : null;
+  const promo = earningsProvided ? Math.max(0, num_(p.promo, 0)) : null;
   const miles = num_(p.miles, 0);
   const online = num_(p.onlineHours, 0);
 
   const gas = cost.mpg > 0 ? (miles / cost.mpg) * cost.fuelPerGal : 0;
   const maint = miles * cost.maintPerMile;
-  const tax = total * cost.taxRate;
-  const net = total - gas - maint - tax;
-  const netPerHr = online > 0 ? net / online : 0;
+  const tax = earningsProvided ? total * cost.taxRate : null;
+  const net = earningsProvided ? total - gas - maint - tax : null;
+  const netPerHr = earningsProvided && online > 0 ? net / online : null;
 
-  function set(name, val) { const c = colByHeader_(sh, name); if (c > 0) sh.getRange(row, c).setValue(val); }
+  function set(name, val) {
+    const c = colByHeader_(sh, name);
+    if (c > 0) sh.getRange(row, c).setValue(val);
+  }
 
   set('Date', new Date(Utilities.formatDate(start, HOY_TZ, 'yyyy/MM/dd')));
   set('Day', Utilities.formatDate(start, HOY_TZ, 'EEE'));
@@ -552,99 +768,35 @@ function writeShiftRow_(ss, p, cost) {
   set('End', end);
   set('Online Hrs', round2_(online));
   set('Active Hrs', p.activeHours != null ? round2_(num_(p.activeHours, 0)) : '');
-  set('Gross', round2_(fares));
-  set('Tips', round2_(tips));
-  set('Promo/Surge', round2_(promo));
+  set('Gross', earningsProvided ? round2_(total) : '');
+  set('Tips', earningsProvided ? round2_(tips) : '');
+  set('Promo/Surge', earningsProvided ? round2_(promo) : '');
   set('Miles', round2_(miles));
   set('Primary Zone', p.zone || '');
   set('Airport Queue', p.airportQueue || '');
   set('Weather', p.weather || '');
   set('Notes', p.notes || '');
 
-  // Computed columns: only fill if the sheet has no formula there (don't fight a formula).
   const netCol = colByHeader_(sh, 'Net Profit');
   const hasFormula = netCol > 0 && String(sh.getRange(row, netCol).getFormula()) !== '';
   if (!hasFormula) {
     set('Gas Cost', round2_(gas));
     set('Maint.', round2_(maint));
-    set('Tax Set Aside', round2_(tax));
-    set('Net Profit', round2_(net));
-    set('Net $/Online Hr', round2_(netPerHr));
+    set('Tax Set Aside', earningsProvided ? round2_(tax) : '');
+    set('Net Profit', earningsProvided ? round2_(net) : '');
+    set('Net $/Online Hr', earningsProvided ? round2_(netPerHr) : '');
   }
 
   return {
     row: row,
-    grossPerHr: online > 0 ? round2_(total / online) : 0,
-    gas: round2_(gas), maint: round2_(maint), tax: round2_(tax),
-    net: round2_(net), netPerHr: round2_(netPerHr),
+    earningsPending: !earningsProvided,
+    grossPerHr: earningsProvided && online > 0 ? round2_(total / online) : null,
+    gas: round2_(gas),
+    maint: round2_(maint),
+    tax: earningsProvided ? round2_(tax) : null,
+    net: earningsProvided ? round2_(net) : null,
+    netPerHr: earningsProvided ? round2_(netPerHr) : null,
     formulaColumnsLeftAlone: hasFormula
-  };
-}
-
-/* ===== Test close ===== */
-function readTestRow_(sh, testId) {
-  const colId = colByHeader_(sh, 'Test ID');
-  if (!colId) return -1;
-  const last = sh.getLastRow();
-  const ids = sh.getRange(1, colId, last, 1).getValues();
-  const want = String(testId).trim().toLowerCase();
-  for (let r = 2; r <= last; r++) {
-    if (String(ids[r - 1][0]).trim().toLowerCase() === want) return r;
-  }
-  return -1;
-}
-
-function readTestSummary_(sh, testId) {
-  const row = readTestRow_(sh, testId);
-  if (row < 0) return null;
-  const get = name => { const c = colByHeader_(sh, name); return c ? sh.getRange(row, c).getValue() : ''; };
-  const actualOnline = get('Actual Online Hrs');
-  return {
-    id: String(get('Test ID')),
-    status: String(get('Status')),
-    hypothesis: String(get('Hypothesis')),
-    baseline: numOrNull_(get('Baseline Obs Gross/Hr')),
-    green: numOrNull_(get('Green Gross Target')),
-    red: numOrNull_(get('Red Gross Floor')),
-    alreadyClosed: !(actualOnline === '' || actualOnline === null)
-  };
-}
-
-function closeTest_(ss, testId, p, force) {
-  const sh = testsSheet_(ss);
-  if (!sh) return { closed: false, reason: 'Tests tab not found' };
-  const row = readTestRow_(sh, testId);
-  if (row < 0) return { closed: false, reason: testId + ' row not found' };
-
-  const cOnline = colByHeader_(sh, 'Actual Online Hrs');
-  const cEarn = colByHeader_(sh, 'Actual Earnings');
-  const cMiles = colByHeader_(sh, 'Actual Miles');
-  if (!cOnline || !cEarn || !cMiles) return { closed: false, reason: 'Actual Online Hrs / Earnings / Miles columns not found' };
-
-  const existing = sh.getRange(row, cOnline).getValue();
-  if (existing !== '' && existing !== null && !force) {
-    return { closed: false, reason: testId + ' already has actuals; resend with force:true to overwrite', existingOnline: existing };
-  }
-
-  const online = num_(p.onlineHours, 0);
-  const earn = num_(p.earnings, 0);
-  sh.getRange(row, cOnline).setValue(round2_(online));
-  sh.getRange(row, cEarn).setValue(round2_(earn));
-  sh.getRange(row, cMiles).setValue(round2_(num_(p.miles, 0)));
-
-  const cStatus = colByHeader_(sh, 'Status');
-  if (cStatus && String(sh.getRange(row, cStatus).getFormula()) === '') sh.getRange(row, cStatus).setValue('COMPLETE');
-
-  const green = numOrNull_(sh.getRange(row, colByHeader_(sh, 'Green Gross Target')).getValue());
-  const red = numOrNull_(sh.getRange(row, colByHeader_(sh, 'Red Gross Floor')).getValue());
-  const grossPerHr = online > 0 ? earn / online : 0;
-  let verdict = 'IN RANGE';
-  if (green != null && grossPerHr >= green) verdict = 'ABOVE TARGET';
-  else if (red != null && grossPerHr < red) verdict = 'BELOW FLOOR';
-
-  return {
-    closed: true, testId: testId, row: row,
-    grossPerHr: round2_(grossPerHr), green: green, red: red, verdict: verdict
   };
 }
 
