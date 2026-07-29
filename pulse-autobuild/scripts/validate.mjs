@@ -219,14 +219,19 @@ for (const [index, inlineSource] of inlineScripts.entries()) {
 
 for (const marker of [
   "const HOY_SHEET_ID = '13m_9QDnIgXSdMBdtSYMjmyIdo55wh8F5Fl3_1JaYl-w';",
-  "const HOY_BUILD = 'hoy-normal-flow-2026-07-28.2';",
+  "const HOY_BUILD = 'hoy-normal-flow-2026-07-28.3';",
   'function logCompletedTrip(payload)',
   'function tripLogSheet_(ss)',
   'function writeTripRow_(sh, p, row, rideId)',
   'function reserveTripRow_(sh, row, rideId)',
   'function findTripRowByRideId_(sh, rideId)',
   'function tripRowComplete_(sh, row)',
+  'function beginPickupRiderStatus(requestId)',
+  'function beginScheduledPickup(requestId, reservationId)',
   "const TRIP_NOTE_PREFIX = 'PULSE_RIDE_ID:';",
+  "if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) map = parsed;",
+  'else changed = true;',
+  'SpreadsheetApp.flush();',
   'earningsPending: !earningsProvided',
   'testWorkbookTargeted: false'
 ]) {
@@ -251,7 +256,8 @@ for (const marker of [
   "start.textContent='Begin pickup'",
   "if(S.active||S.queued){toast('Finish current ride first');return;}",
   "start.disabled=!!scheduledStartBusy[s.id]||!!S.active||!!S.queued",
-  "'On the way',s.requestId+':on-the-way'",
+  "var pickupCall=srv('beginScheduledPickup',s.requestId||'',id);",
+  "if(s.pickup)navTo(s.pickup);",
   'Earnings pending reconciliation',
   'function flushPendingTrips_()'
 ]) {
@@ -260,6 +266,15 @@ for (const marker of [
 
 if (driverHtml.includes("else if(!S.queued){ S.queued=ride; }")) {
   driverProblems.push('Begin pickup must not queue a rider while another ride is active.');
+}
+const pickupBlockStart = driverHtml.indexOf('function startScheduled(id)');
+const pickupCallIndex = driverHtml.indexOf("var pickupCall=srv('beginScheduledPickup',s.requestId||'',id);", pickupBlockStart);
+const pickupNavigationIndex = driverHtml.indexOf('if(s.pickup)navTo(s.pickup);', pickupBlockStart);
+if (pickupBlockStart < 0 || pickupCallIndex < 0 || pickupNavigationIndex < 0 || pickupCallIndex > pickupNavigationIndex) {
+  driverProblems.push('Begin pickup must initiate the server transaction before opening navigation.');
+}
+if (driverHtml.includes("srv('updateRiderStatus',s.requestId,'Leaving'")) {
+  driverProblems.push('Begin pickup must use the server-side sequential status transaction.');
 }
 for (const marker of [
   'PULSE-068 normal-flow cutover',
@@ -309,7 +324,7 @@ const report = {
   builderControl: builderReport,
   hoyDriverNormalFlow: {
     ok: driverProblems.length === 0,
-    build: 'hoy-normal-flow-2026-07-28.2',
+    build: 'hoy-normal-flow-2026-07-28.3',
     serverFunctionCount: driverFunctionNames.length,
     duplicateServerFunctions: [...new Set(driverDuplicates)],
     problems: driverProblems
