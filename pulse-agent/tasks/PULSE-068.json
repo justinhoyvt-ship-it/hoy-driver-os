@@ -9,13 +9,13 @@
   "Problem / Request": "The deployed Hoy Driver console still targets the historical Test 001 workbook and exposes test controls. Move normal field activity to the current Driver Dashboard without changing the existing rider/request writer boundaries.",
   "Acceptance Criteria": "Current dashboard ID; no Test T-001 boot, UI, or write path; one idempotent Trip Log row per completed ride with retry queue; End shift accepts pending earnings without false $0; Begin pickup publishes Leaving then On the way and opens pickup navigation; existing request app remains the rider-status writer; repository CI passes; no automatic merge or deployment.",
   "Assigned Agent": "Pulse Builder + Auto Validator",
-  "Branch / Build": "pulse/pulse-068-20260728-170510 / BUILD-20260728-170508 / Builder v0.6.2.1",
+  "Branch / Build": "pulse/pulse-068-20260728-170510 / BUILD-20260728-170508 / Builder v0.6.2.3",
   "Result URL": "https://github.com/justinhoyvt-ship-it/hoy-driver-os/pull/39",
   "Last Error": "",
-  "Updated At": "2026-07-28T21:21:53.920Z",
+  "Updated At": "2026-07-29T10:09:51.487Z",
   "Integration Hooks": "Current dashboard 13m_9QDn; historical Test 001 workbook preserved but not targeted. PULSE-069 follows for foreground distance-based rider updates. Apps Script release remains manual.",
   "builder": {
-    "version": "0.6.2.1-normal-flow-review-repair",
+    "version": "0.6.2.3-normal-flow-final-review-repair",
     "mode": "deterministic-normal-flow-console-cutover",
     "aiProvider": "none",
     "buildId": "BUILD-20260728-170508",
@@ -50,7 +50,7 @@
           "apps-script/hoy-driver-os-writer/README.md",
           "pulse-autobuild/scripts/validate.mjs"
         ],
-        "totalChars": 103711,
+        "totalChars": 106146,
         "currentDashboardId": "13m_9QDnIgXSdMBdtSYMjmyIdo55wh8F5Fl3_1JaYl-w",
         "historicalTestWorkbookPreserved": true,
         "testWorkbookTargeted": false,
@@ -58,6 +58,8 @@
         "tripLogWriter": "logCompletedTrip",
         "tripLogIdempotent": true,
         "durableTripRowReservation": true,
+        "ledgerSelfHealing": true,
+        "pickupTransactionBeforeNavigation": true,
         "activeRidePickupGuard": true,
         "pendingTripRetryQueue": true,
         "pendingEarningsSupported": true,
@@ -77,6 +79,8 @@
         "duplicate server/client handlers",
         "durable Trip Log idempotency",
         "active-ride pickup collision guard",
+        "self-healing Trip Log ledger",
+        "server transaction initiated before navigation",
         "pending earnings",
         "existing rider-writer boundary",
         "repository CI",
@@ -84,16 +88,19 @@
       ]
     },
     "reviewRepair": {
-      "sourceCommitBeforeRepair": "80dcc0dcd33ef01125988360dabc042672c9a359",
-      "repairVersion": "0.6.2.1-normal-flow-review-repair",
+      "sourceCommitBeforeRepair": "e1dc3cf76a280cd448b3aa55fba18814bc90a4c4",
+      "repairVersion": "0.6.2.3-normal-flow-final-review-repair",
       "durableRideIdNote": true,
       "partialWriteResumesSameRow": true,
       "activeRidePickupGuard": true,
       "queuedRiderStatusPrevented": true,
+      "ledgerSelfHealing": true,
+      "anchorValueFlushed": true,
+      "pickupTransactionBeforeNavigation": true,
       "automaticMerge": false,
       "deploymentPerformed": false,
       "productionTouched": false,
-      "repairedAt": "2026-07-28T21:21:53.921Z"
+      "repairedAt": "2026-07-29T10:09:51.487Z"
     }
   }
 }
