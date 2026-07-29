@@ -17,6 +17,8 @@ const driverDir = path.join(repoRoot, 'apps-script', 'hoy-driver-os-writer');
 const driverCodePath = path.join(driverDir, 'Code.gs');
 const driverIndexPath = path.join(driverDir, 'Index.html');
 const driverReadmePath = path.join(driverDir, 'README.md');
+const driverForegroundServerPath = path.join(driverDir, 'ForegroundPickup.gs');
+const driverForegroundClientPath = path.join(driverDir, 'ForegroundPickup.html');
 const problems = [];
 const builderProblems = [];
 
@@ -194,17 +196,34 @@ for (const marker of [
 
 
 const driverProblems = [];
-for (const file of [driverCodePath, driverIndexPath, driverReadmePath]) {
+for (const file of [driverCodePath, driverIndexPath, driverReadmePath, driverForegroundServerPath, driverForegroundClientPath]) {
   if (!fs.existsSync(file)) driverProblems.push(`Missing Hoy Driver file: ${path.relative(repoRoot, file)}`);
 }
 const driverCode = fs.existsSync(driverCodePath) ? fs.readFileSync(driverCodePath, 'utf8') : '';
 const driverHtml = fs.existsSync(driverIndexPath) ? fs.readFileSync(driverIndexPath, 'utf8') : '';
 const driverReadme = fs.existsSync(driverReadmePath) ? fs.readFileSync(driverReadmePath, 'utf8') : '';
+const driverForegroundServer = fs.existsSync(driverForegroundServerPath) ? fs.readFileSync(driverForegroundServerPath, 'utf8') : '';
+const driverForegroundClient = fs.existsSync(driverForegroundClientPath) ? fs.readFileSync(driverForegroundClientPath, 'utf8') : '';
 
 try {
   new vm.Script(driverCode, { filename: 'apps-script/hoy-driver-os-writer/Code.gs' });
 } catch (error) {
   driverProblems.push(`Hoy Driver Code.gs syntax error: ${error.message}`);
+}
+try {
+  new vm.Script(driverForegroundServer, { filename: 'apps-script/hoy-driver-os-writer/ForegroundPickup.gs' });
+} catch (error) {
+  driverProblems.push(`ForegroundPickup.gs syntax error: ${error.message}`);
+}
+const foregroundInlineScripts = [...driverForegroundClient.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)]
+  .map((match) => match[1])
+  .filter((inlineSource) => inlineSource.trim());
+for (const [index, inlineSource] of foregroundInlineScripts.entries()) {
+  try {
+    new vm.Script(inlineSource, { filename: `apps-script/hoy-driver-os-writer/ForegroundPickup.inline-${index + 1}.js` });
+  } catch (error) {
+    driverProblems.push(`ForegroundPickup inline script ${index + 1} syntax error: ${error.message}`);
+  }
 }
 const inlineScripts = [...driverHtml.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)]
   .map((match) => match[1])
@@ -219,7 +238,7 @@ for (const [index, inlineSource] of inlineScripts.entries()) {
 
 for (const marker of [
   "const HOY_SHEET_ID = '13m_9QDnIgXSdMBdtSYMjmyIdo55wh8F5Fl3_1JaYl-w';",
-  "const HOY_BUILD = 'hoy-normal-flow-2026-07-28.3';",
+  "const HOY_BUILD = 'hoy-normal-flow-2026-07-29.4';",
   'function logCompletedTrip(payload)',
   'function tripLogSheet_(ss)',
   'function writeTripRow_(sh, p, row, rideId)',
@@ -287,7 +306,46 @@ for (const marker of [
     driverProblems.push(`Hoy Driver README marker missing: ${marker}`);
   }
 }
-const driverFunctionNames = [...driverCode.matchAll(/^function\s+([A-Za-z_$][\w$]*)\s*\(/gm)].map((m) => m[1]);
+for (const marker of [
+  "createHtmlOutputFromFile('ForegroundPickup')",
+  "const PULSE_069_BUILD = 'p069-foreground-pickup-2026-07-29.1';",
+  'function beginForegroundPickup(requestId, reservationId, pickupAddress)',
+  'function pulse069PickupTargetSafe_(address)',
+  "movementMiles:0.08",
+  "arrivingSoonMiles:0.60",
+  "arrivedMiles:0.08",
+  "stoppedMs:20000",
+  "maxAccuracyMeters:100",
+  "srv('beginForegroundPickup',s.requestId||'',id,s.pickup||'')",
+  "document.addEventListener('visibilitychange'",
+  "advanceRiderStatus_('Ride in progress'",
+  "advanceRiderStatus_('Complete'"
+]) {
+  if (!(driverCode + driverForegroundServer + driverForegroundClient).includes(marker)) {
+    driverProblems.push(`PULSE-069 foreground marker missing: ${marker}`);
+  }
+}
+for (const forbidden of [
+  "riderActionButton_('Arriving soon'",
+  "riderActionButton_('Arrived'",
+  'serviceWorker.register',
+  'SyncManager',
+  'background geolocation'
+]) {
+  if (driverForegroundClient.includes(forbidden)) driverProblems.push(`PULSE-069 forbidden foreground marker: ${forbidden}`);
+}
+for (const marker of [
+  'PULSE-069 foreground automation review',
+  '0.08 mi',
+  '0.60 mi',
+  '20 seconds',
+  '100 meters',
+  'does not claim background or locked-screen tracking'
+]) {
+  if (!driverReadme.includes(marker)) driverProblems.push(`PULSE-069 README marker missing: ${marker}`);
+}
+const driverCombinedServer = driverCode + '\n' + driverForegroundServer;
+const driverFunctionNames = [...driverCombinedServer.matchAll(/^function\s+([A-Za-z_$][\w$]*)\s*\(/gm)].map((m) => m[1]);
 const driverDuplicates = driverFunctionNames.filter((name, index) => driverFunctionNames.indexOf(name) !== index);
 if (driverDuplicates.length) {
   driverProblems.push(`Duplicate Hoy Driver functions: ${[...new Set(driverDuplicates)].join(', ')}`);
@@ -324,7 +382,8 @@ const report = {
   builderControl: builderReport,
   hoyDriverNormalFlow: {
     ok: driverProblems.length === 0,
-    build: 'hoy-normal-flow-2026-07-28.3',
+    build: 'hoy-normal-flow-2026-07-29.4',
+    foregroundPickupAutomation: true,
     serverFunctionCount: driverFunctionNames.length,
     duplicateServerFunctions: [...new Set(driverDuplicates)],
     problems: driverProblems
