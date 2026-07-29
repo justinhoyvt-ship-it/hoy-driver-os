@@ -472,22 +472,21 @@
     if(S.active||S.queued){toast('Finish current ride first');return;}
     if(!S.shift)goOnline();
     scheduledStartBusy[id]=true;renderSched();
-    if(s.pickup)navTo(s.pickup);
     function release(){delete scheduledStartBusy[id];renderSched();}
-    function begin(status){
+    function begin(status,list){
       var ride=scheduledTripState(s);
       if(s.source==='rider')ride.riderStatus=status||'On the way';
       S.active=ride;
       persistState();
-      srv('startReservation',id).then(function(list){schedFromServer(list)}).catch(function(e){toast(e.message||'Could not clear scheduled ride')}).then(release);
+      schedFromServer(list||[]);
+      release();
       toast('Pickup started: '+s.name); render();
     }
-    if(s.source==='rider'&&s.requestId){
-      srv('updateRiderStatus',s.requestId,'Leaving',s.requestId+':leaving')
-        .then(function(){return srv('updateRiderStatus',s.requestId,'On the way',s.requestId+':on-the-way')})
-        .then(function(){begin('On the way')})
-        .catch(function(e){release();toast(e.message||'Could not send pickup update')});
-    }else begin('');
+    var pickupCall=srv('beginScheduledPickup',s.requestId||'',id);
+    if(s.pickup)navTo(s.pickup);
+    pickupCall.then(function(result){
+      begin((result&&result.status)||'',(result&&result.reservations)||[]);
+    }).catch(function(e){release();toast(e.message||'Could not begin pickup')});
   }
 
   function renderSched(){
