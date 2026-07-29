@@ -49,3 +49,9 @@ One tap:
 - No second request writer or trip lifecycle is created.
 - No automatic merge or Apps Script deployment occurs.
 - Repository validation checks the current dashboard ID, optional earnings, idempotent Trip Log writes, removal of Test T-001 controls, and preserved rider-writer boundary.
+
+### Review repair v0.6.2.3
+- Corrupt or non-object Trip Log ledgers self-heal to a valid empty JSON object; durable row notes remain the recovery source.
+- A reserved Trip Log row receives an anchor value and is flushed before row fields are written, so note-only reservations cannot disappear from the scan boundary.
+- Begin pickup starts one server-side pickup transaction before opening phone navigation. That transaction publishes Leaving then On the way through the existing request app and marks the scheduled ride started.
+
