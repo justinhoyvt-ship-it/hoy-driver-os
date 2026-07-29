@@ -12,7 +12,7 @@
 const HOY_SHEET_ID = '13m_9QDnIgXSdMBdtSYMjmyIdo55wh8F5Fl3_1JaYl-w';
 const HOY_TZ = 'America/New_York';
 const HOY_DEFAULT_COST = Object.freeze({ fuelPerGal: 3.5, mpg: 25, maintPerMile: 0.10, taxRate: 0.22 });
-const HOY_BUILD = 'hoy-normal-flow-2026-07-28.2';
+const HOY_BUILD = 'hoy-normal-flow-2026-07-28.3';
 const RIDER_SHEET_ID = '1Hd46iUY84N2bvxdaIS4lf6l-uExxbXGIbUjxJzMF-No';
 const RIDER_SHEET_NAME = 'Ride Requests';
 const PULSE_LIVE_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbyde9C6y6iIoJO8AfWxt5z-D2FxwKXXMonpypmW8xaI7BZaAwChYBXM4JO7zqYvmw7Y/exec';
@@ -214,9 +214,17 @@ function loadTripLedger_() {
   const props = PropertiesService.getScriptProperties();
   const raw = props.getProperty(TRIP_LEDGER_KEY);
   let map = {};
-  if (raw) { try { map = JSON.parse(raw) || {}; } catch (error) { map = {}; } }
-  const cutoff = Date.now() - TRIP_LEDGER_TTL_MS;
   let changed = false;
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) map = parsed;
+      else changed = true;
+    } catch (error) {
+      changed = true;
+    }
+  }
+  const cutoff = Date.now() - TRIP_LEDGER_TTL_MS;
   Object.keys(map).forEach(function(id) {
     const at = Number(map[id] && map[id].at);
     if (!isFinite(at) || at < cutoff) { delete map[id]; changed = true; }
@@ -240,7 +248,10 @@ function tripRideNote_(rideId) {
 function reserveTripRow_(sh, row, rideId) {
   const col = tripAnchorColumn_(sh);
   if (!col) throw new Error('Trip Log needs Logged At or Date for durable ride IDs.');
-  sh.getRange(row, col).setNote(tripRideNote_(rideId));
+  const cell = sh.getRange(row, col);
+  cell.setNote(tripRideNote_(rideId));
+  if (cell.getValue() === '' || cell.getValue() === null) cell.setValue(new Date());
+  SpreadsheetApp.flush();
 }
 
 function tripRowMatchesRideId_(sh, row, rideId) {
@@ -439,6 +450,32 @@ function updateRiderStatus(requestId, status, idempotencyKey) {
     throw new Error(String(payload.message || ('Rider status endpoint returned HTTP ' + http + '.')));
   }
   return payload;
+}
+
+function beginPickupRiderStatus(requestId) {
+  const id = String(requestId || '').trim();
+  if (!/^FR-[A-Z0-9]+$/i.test(id)) throw new Error('Rider request ID is not valid.');
+  const leaving = updateRiderStatus(id, 'Leaving', id + ':leaving');
+  const onTheWay = updateRiderStatus(id, 'On the way', id + ':on-the-way');
+  return {
+    ok:true,
+    requestId:id,
+    status:String((onTheWay && onTheWay.status) || 'On the way'),
+    leaving:leaving,
+    onTheWay:onTheWay
+  };
+}
+
+function beginScheduledPickup(requestId, reservationId) {
+  const id = String(requestId || '').trim();
+  const status = id ? beginPickupRiderStatus(id) : null;
+  const reservations = startReservation(String(reservationId || '').trim());
+  return {
+    ok:true,
+    requestId:id,
+    status:status ? status.status : '',
+    reservations:reservations
+  };
 }
 function attachRiderStatusStatesSafe_(items) {
   try { return {items:attachRiderStatusStates_(items), error:''}; }
