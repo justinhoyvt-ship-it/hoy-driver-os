@@ -12,7 +12,7 @@
 const HOY_SHEET_ID = '13m_9QDnIgXSdMBdtSYMjmyIdo55wh8F5Fl3_1JaYl-w';
 const HOY_TZ = 'America/New_York';
 const HOY_DEFAULT_COST = Object.freeze({ fuelPerGal: 3.5, mpg: 25, maintPerMile: 0.10, taxRate: 0.22 });
-const HOY_BUILD = 'hoy-normal-flow-2026-07-28.3';
+const HOY_BUILD = 'hoy-normal-flow-2026-07-29.4';
 const RIDER_SHEET_ID = '1Hd46iUY84N2bvxdaIS4lf6l-uExxbXGIbUjxJzMF-No';
 const RIDER_SHEET_NAME = 'Ride Requests';
 const PULSE_LIVE_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbyde9C6y6iIoJO8AfWxt5z-D2FxwKXXMonpypmW8xaI7BZaAwChYBXM4JO7zqYvmw7Y/exec';
@@ -25,7 +25,10 @@ const TRIP_NOTE_PREFIX = 'PULSE_RIDE_ID:';
 
 /* ===== Entry points ===== */
 function doGet() {
-  return HtmlService.createHtmlOutputFromFile('Index')
+  const base = HtmlService.createHtmlOutputFromFile('Index').getContent();
+  const foreground = HtmlService.createHtmlOutputFromFile('ForegroundPickup').getContent();
+  const html = base.replace('</body>', foreground + '\n</body>');
+  return HtmlService.createHtmlOutput(html)
     .setTitle('Pulse Drive Mode')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
