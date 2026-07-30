@@ -32,16 +32,19 @@ Trip rows preserve pickup/drop-off timestamps, available route labels, duration,
 
 ## Scheduled rider pickup
 
-The Scheduled action is **Begin pickup**.
+The Scheduled action remains **Begin pickup**.
 
 One tap:
 
-1. records `Leaving`;
-2. records `On the way`;
-3. opens phone navigation to the pickup address; and
-4. creates the active pickup ride only when no other active or queued ride exists.
+1. records `Leaving` through the existing standalone request app;
+2. starts one active pickup only when no active or queued ride exists;
+3. captures the best available foreground departure point;
+4. opens phone navigation to the pickup address; and
+5. resumes truthful foreground automation when the console is visible.
 
-`Arriving soon` and `Arrived` remain the temporary manual fallback until the foreground distance/ETA monitor is installed in the next rider-alert task. Begin pickup is blocked while another ride is active or queued, so a waiting rider is never told the driver is on the way while the driver is still completing another ride. The request app remains the only writer to rider-status events.
+PULSE-069 removes the routine `Leaving`, `On the way`, `Arriving soon`, and `Arrived` buttons from the normal driving surface. `On the way` publishes only after at least `0.08 mi` of observed movement. `Arriving soon` publishes at or inside `0.60 mi`. `Arrived` publishes only at or inside `0.08 mi` after the vehicle remains stopped for `20 seconds`. The stopped test uses device speed at or below `0.8 m/s`; when device speed is unavailable, a foreground sample step at or below `0.015 mi` is the reviewed fallback. Automatic transitions require GPS accuracy of `100 meters` or better.
+
+The web console pauses its location watcher whenever the document is hidden. It resumes only after the driver returns to the foreground. It does not claim background or locked-screen tracking. If GPS, geocoding, or the rider-status bridge is unavailable, the console shows a readable failure and does not guess the next status. `Start ride` and `Complete ride` remain intentional controls. The request app remains the only writer to rider-status events.
 
 ## Guardrails
 
@@ -53,5 +56,18 @@ One tap:
 ### Review repair v0.6.2.3
 - Corrupt or non-object Trip Log ledgers self-heal to a valid empty JSON object; durable row notes remain the recovery source.
 - A reserved Trip Log row receives an anchor value and is flushed before row fields are written, so note-only reservations cannot disappear from the scan boundary.
-- Begin pickup starts one server-side pickup transaction before opening phone navigation. That transaction publishes Leaving then On the way through the existing request app and marks the scheduled ride started.
+- Begin pickup starts one server-side pickup transaction before opening phone navigation. That transaction publishes Leaving through the existing request app, marks the scheduled ride started, and leaves On the way to the reviewed foreground movement gate.
 
+
+### PULSE-069 foreground automation review
+- Foreground-only watcher; hidden-page tracking is explicitly paused.
+- Stable rider-status idempotency keys remain owned by the existing bridge.
+- Straight-line pickup distance is used only for reviewed status thresholds; phone navigation remains the route authority.
+- Reviewed stopped policy: speed `≤ 0.8 m/s`; fallback sample movement `≤ 0.015 mi` only when device speed is unavailable.
+- Automated publish failures display the attempted status and the underlying bridge/API message.
+- No automatic merge or Apps Script deployment occurs.
+
+### Review repair v0.6.2.4
+- Foreground client injection fails closed unless `Index.html` contains exactly one closing body tag.
+- Documentation, task snapshot, runtime policy, PR body, and CI use the same stopped-vehicle thresholds.
+- Begin pickup publishes `Leaving`; `On the way` waits for observed foreground movement.

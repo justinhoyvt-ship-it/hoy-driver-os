@@ -1,0 +1,50 @@
+{
+  "Task ID": "PULSE-069",
+  "title": "Automate foreground pickup updates and remove status buttons from the driving surface",
+  "buildId": "BUILD-20260729-185420",
+  "branch": "pulse/pulse-069-20260729-185420",
+  "baseCommit": "3d354438e23163a5e8b04deedabfaaa5af9f8adc",
+  "sourceMode": "isolated-hoy-driver-source-bundle",
+  "thresholds": {
+    "movementMiles": 0.08,
+    "arrivingSoonMiles": 0.6,
+    "arrivedMiles": 0.08,
+    "stoppedMs": 20000,
+    "maxAccuracyMeters": 100,
+    "stationarySpeedMetersPerSecond": 0.8,
+    "stationaryMiles": 0.015
+  },
+  "boundaries": {
+    "foregroundOnly": true,
+    "backgroundTracking": false,
+    "requestAppAuthoritative": true,
+    "startRideIntentional": true,
+    "completeRideIntentional": true,
+    "automaticMerge": false,
+    "automaticDeployment": false
+  },
+  "files": [
+    "apps-script/hoy-driver-os-writer/Code.gs",
+    "apps-script/hoy-driver-os-writer/ForegroundPickup.gs",
+    "apps-script/hoy-driver-os-writer/ForegroundPickup.html",
+    "apps-script/hoy-driver-os-writer/README.md",
+    "pulse-autobuild/scripts/validate.mjs",
+    "pulse-agent/tasks/PULSE-069.json"
+  ],
+  "recovery": "Revert the PULSE-069 pull request. Preserve all Shift Log, Trip Log, Ride Requests, Ride Status Events, task, build, PR, and rollback records. Do not deploy or merge as part of rollback.",
+  "stagedAt": "2026-07-29T22:54:23.657Z",
+  "reviewRepair": {
+    "version": "0.6.2.4",
+    "findingsAddressed": [
+      "fail-closed foreground HTML injection",
+      "recorded stationary speed and fallback sample-distance thresholds",
+      "README Leaving versus On the way reconciliation",
+      "underlying rider-status publish error surfaced",
+      "repository CI gates added for all findings"
+    ],
+    "repositoryCiRequired": true,
+    "automaticMerge": false,
+    "automaticDeployment": false,
+    "repairedAt": "2026-07-30T10:27:01.272Z"
+  }
+}
