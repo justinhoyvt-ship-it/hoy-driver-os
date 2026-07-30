@@ -2,7 +2,7 @@
  * PULSE-069 foreground pickup server adapter.
  * The standalone request app remains the only rider-status writer.
  */
-const PULSE_069_BUILD = 'p069-foreground-pickup-2026-07-29.1';
+const PULSE_069_BUILD = 'p069-foreground-pickup-2026-07-29.2';
 
 function pulse069PickupTarget_(address) {
   const value = String(address || '').trim();
@@ -40,11 +40,13 @@ function beginForegroundPickup(requestId, reservationId, pickupAddress) {
 }
 
 function testForegroundPickupAutomationPackage() {
-  const policy = {movementMiles:0.08,arrivingSoonMiles:0.60,arrivedMiles:0.08,stoppedMs:20000,maxAccuracyMeters:100};
+  const policy = {movementMiles:0.08,arrivingSoonMiles:0.60,arrivedMiles:0.08,stoppedMs:20000,stationarySpeedMetersPerSecond:0.8,stationaryMiles:0.015,maxAccuracyMeters:100};
   const checks = [
     policy.movementMiles > 0,
     policy.arrivingSoonMiles > policy.arrivedMiles,
     policy.stoppedMs >= 15000,
+    policy.stationarySpeedMetersPerSecond >= 0,
+    policy.stationaryMiles > 0,
     policy.maxAccuracyMeters <= 100
   ];
   return {ok:checks.every(Boolean),taskId:'PULSE-069',policy:policy,writesPerformed:false,deploymentPerformed:false,productionTouched:false};
