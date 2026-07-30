@@ -1,6 +1,6 @@
 <script>
 (function(){
-  var PULSE069_CFG={movementMiles:0.08,arrivingSoonMiles:0.60,arrivedMiles:0.08,stoppedMs:20000,stationaryMiles:0.015,maxAccuracyMeters:100};
+  var PULSE069_CFG={movementMiles:0.08,arrivingSoonMiles:0.60,arrivedMiles:0.08,stoppedMs:20000,stationarySpeedMetersPerSecond:0.8,stationaryMiles:0.015,maxAccuracyMeters:100};
   var PULSE069={watch:null,timer:null,last:null,busy:false,error:'',paused:false};
   var p069BaseCancelActive=cancelActive;
   var p069BaseDropOff=dropOff;
@@ -48,7 +48,10 @@
       return result;
     }).catch(function(error){
       PULSE069.busy=false;
-      PULSE069.error='rider update failed';
+      var detail=error&&error.message?String(error.message):String(error||'');
+      detail=detail.trim().slice(0,180);
+      PULSE069.error='Could not publish '+status+(detail?': '+detail:'');
+      toast(PULSE069.error);
       render();
       return null;
     });
@@ -66,7 +69,7 @@
     p069PersistPoint_(a,point,position,step);
     var remaining=seg(point,target);a.pickupDistanceMiles=remaining;
     var speed=Number(position.coords.speed);
-    var stationary=isFinite(speed)&&speed>=0?speed<=0.8:step<=PULSE069_CFG.stationaryMiles;
+    var stationary=isFinite(speed)&&speed>=0?speed<=PULSE069_CFG.stationarySpeedMetersPerSecond:step<=PULSE069_CFG.stationaryMiles;
     var status=p069Status_();
     if(status==='Leaving'&&Number(a.pickupMovedMiles)>=PULSE069_CFG.movementMiles){persistState();render();p069Publish_('On the way');return;}
     if(status==='On the way'&&remaining<=PULSE069_CFG.arrivingSoonMiles){persistState();render();p069Publish_('Arriving soon');return;}
