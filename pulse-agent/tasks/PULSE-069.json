@@ -10,7 +10,9 @@
     "arrivingSoonMiles": 0.6,
     "arrivedMiles": 0.08,
     "stoppedMs": 20000,
-    "maxAccuracyMeters": 100
+    "maxAccuracyMeters": 100,
+    "stationarySpeedMetersPerSecond": 0.8,
+    "stationaryMiles": 0.015
   },
   "boundaries": {
     "foregroundOnly": true,
@@ -30,5 +32,19 @@
     "pulse-agent/tasks/PULSE-069.json"
   ],
   "recovery": "Revert the PULSE-069 pull request. Preserve all Shift Log, Trip Log, Ride Requests, Ride Status Events, task, build, PR, and rollback records. Do not deploy or merge as part of rollback.",
-  "stagedAt": "2026-07-29T22:54:23.657Z"
+  "stagedAt": "2026-07-29T22:54:23.657Z",
+  "reviewRepair": {
+    "version": "0.6.2.4",
+    "findingsAddressed": [
+      "fail-closed foreground HTML injection",
+      "recorded stationary speed and fallback sample-distance thresholds",
+      "README Leaving versus On the way reconciliation",
+      "underlying rider-status publish error surfaced",
+      "repository CI gates added for all findings"
+    ],
+    "repositoryCiRequired": true,
+    "automaticMerge": false,
+    "automaticDeployment": false,
+    "repairedAt": "2026-07-30T10:27:01.272Z"
+  }
 }
