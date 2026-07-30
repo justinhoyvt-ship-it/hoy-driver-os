@@ -12,7 +12,7 @@
 const HOY_SHEET_ID = '13m_9QDnIgXSdMBdtSYMjmyIdo55wh8F5Fl3_1JaYl-w';
 const HOY_TZ = 'America/New_York';
 const HOY_DEFAULT_COST = Object.freeze({ fuelPerGal: 3.5, mpg: 25, maintPerMile: 0.10, taxRate: 0.22 });
-const HOY_BUILD = 'hoy-normal-flow-2026-07-29.4';
+const HOY_BUILD = 'hoy-normal-flow-2026-07-29.5';
 const RIDER_SHEET_ID = '1Hd46iUY84N2bvxdaIS4lf6l-uExxbXGIbUjxJzMF-No';
 const RIDER_SHEET_NAME = 'Ride Requests';
 const PULSE_LIVE_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbyde9C6y6iIoJO8AfWxt5z-D2FxwKXXMonpypmW8xaI7BZaAwChYBXM4JO7zqYvmw7Y/exec';
@@ -24,10 +24,29 @@ const TRIP_LEDGER_TTL_MS = 90 * 24 * 3600000;
 const TRIP_NOTE_PREFIX = 'PULSE_RIDE_ID:';
 
 /* ===== Entry points ===== */
+function pulse069InjectForeground_(base, foreground) {
+  const html = String(base || '');
+  const client = String(foreground || '').trim();
+  if (!client) throw new Error('ForegroundPickup client is empty.');
+  const closingBody = /<\/body\s*>/gi;
+  let match = null;
+  let insertion = null;
+  let count = 0;
+  while ((match = closingBody.exec(html)) !== null) {
+    insertion = match.index;
+    count++;
+    if (count > 1) break;
+  }
+  if (count !== 1 || insertion === null) {
+    throw new Error('Index.html must contain exactly one closing body tag for ForegroundPickup injection; found ' + count + '.');
+  }
+  return html.slice(0, insertion) + client + '\n' + html.slice(insertion);
+}
+
 function doGet() {
   const base = HtmlService.createHtmlOutputFromFile('Index').getContent();
   const foreground = HtmlService.createHtmlOutputFromFile('ForegroundPickup').getContent();
-  const html = base.replace('</body>', foreground + '\n</body>');
+  const html = pulse069InjectForeground_(base, foreground);
   return HtmlService.createHtmlOutput(html)
     .setTitle('Pulse Drive Mode')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover')
