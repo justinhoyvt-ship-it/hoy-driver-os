@@ -1,9 +1,9 @@
 {
   "name": "pulse-forge",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "validate": "node tests/validate.mjs"
+    "validate": "node tests/validate.mjs && node tests/validate-pulse-077.mjs"
   }
 }
