@@ -1,0 +1,31 @@
+{
+  "taskId": "PULSE-076",
+  "title": "Create the permanent Pulse Forge controller foundation",
+  "status": "BOOTSTRAP_PACKAGE_READY",
+  "buildType": "REAL_CODE_PR_FROM_FORGE_BOOTSTRAP",
+  "scope": [
+    "pulse-forge/controller",
+    "pulse-forge/core",
+    "pulse-forge/templates",
+    "pulse-forge/tests",
+    ".github/workflows/pulse-forge-ci.yml"
+  ],
+  "acceptance": {
+    "oneTimeTwoFileBootstrap": true,
+    "completeProjectCreateReadWrite": true,
+    "immutablePreUpdateRollbackVersion": true,
+    "testDeploymentsOnly": true,
+    "remoteAllowlistedTests": true,
+    "engineABSlots": true,
+    "atomicGitHubTreeCommitBranchPullRequest": true,
+    "reusableCore": true,
+    "automaticMerge": false,
+    "automaticProductionDeployment": false
+  },
+  "next": [
+    "PULSE-077 Forge Engine and task-package generator",
+    "PULSE-078 import and reconcile live Pulse projects",
+    "PULSE-079 mid-ride request hold product build",
+    "PULSE-080 Phase 2A installation and controlled ride"
+  ]
+}
