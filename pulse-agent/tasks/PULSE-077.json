@@ -1,0 +1,35 @@
+{
+  "taskId": "PULSE-077",
+  "title": "Build the Forge Engine and reusable task-package generator",
+  "status": "PR_READY",
+  "buildType": "FORGE_ENGINE_REUSABLE_CORE",
+  "dependsOn": [
+    "PULSE-076"
+  ],
+  "scope": [
+    "pulse-forge/core/ForgeEngine.gs",
+    "pulse-forge/tests/validate-pulse-077.mjs",
+    "pulse-forge/tests/fixtures/task-package.json",
+    "pulse-forge/templates/reusable",
+    "pulse-forge/appsscript.json",
+    "pulse-forge/package.json"
+  ],
+  "acceptance": {
+    "deterministicTaskPackages": true,
+    "driveReadOnlyArtifactAdapter": true,
+    "sheetRangeArtifactAdapter": true,
+    "maximumRepairAttempts": 3,
+    "immutableValidationReceiptStorage": true,
+    "engineWebAppLibraryTemplates": true,
+    "deterministicFixtures": true,
+    "ciSelfTest": true,
+    "automaticMerge": false,
+    "automaticProductionDeployment": false,
+    "automaticEngineActivation": false
+  },
+  "next": [
+    "PULSE-078 import and reconcile live Pulse projects",
+    "PULSE-079 mid-ride request hold",
+    "PULSE-080 Phase 2A installation and controlled ride"
+  ]
+}

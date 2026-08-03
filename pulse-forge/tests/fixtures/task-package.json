@@ -1,0 +1,24 @@
+{
+  "taskId": "FIXTURE-001",
+  "packageId": "fixture-package",
+  "projectAlias": "ENGINE_B",
+  "requiredFunctions": [
+    "fixtureHealth"
+  ],
+  "metadata": {
+    "purpose": "deterministic-test",
+    "version": 1
+  },
+  "files": [
+    {
+      "name": "Code",
+      "type": "SERVER_JS",
+      "source": "function fixtureHealth(){return {ok:true};}\n"
+    },
+    {
+      "name": "appsscript",
+      "type": "JSON",
+      "source": "{\"runtimeVersion\":\"V8\",\"timeZone\":\"America/New_York\"}"
+    }
+  ]
+}
