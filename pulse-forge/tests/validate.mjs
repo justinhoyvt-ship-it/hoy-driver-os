@@ -3,7 +3,10 @@ import path from 'node:path';
 import vm from 'node:vm';
 import crypto from 'node:crypto';
 
-const root = path.resolve('pulse-forge');
+const cwd = process.cwd();
+const root = path.basename(cwd) === 'pulse-forge'
+  ? cwd
+  : path.resolve(cwd, 'pulse-forge');
 const gsFiles = [
   'core/ForgeCore.gs',
   'core/ForgeRegistry.gs',
