@@ -100,6 +100,33 @@ try {
   const selfTest = context.forgeEngineCoreSelfTest();
   if (!selfTest || selfTest.ok !== true) problems.push('PULSE-077 engine self-test failed.');
 
+  const installManifest = {
+    timeZone: 'America/New_York',
+    dependencies: {},
+    exceptionLogging: 'STACKDRIVER',
+    runtimeVersion: 'V8',
+    executionApi: { access: 'MYSELF' },
+    oauthScopes: [
+      'https://www.googleapis.com/auth/script.external_request',
+      'https://www.googleapis.com/auth/spreadsheets',
+      'https://www.googleapis.com/auth/drive.readonly'
+    ]
+  };
+  const installFiles = [
+    { name: 'ForgeCore', type: 'SERVER_JS', source: fs.readFileSync(files[0], 'utf8') },
+    { name: 'ForgeValidator', type: 'SERVER_JS', source: fs.readFileSync(files[1], 'utf8') },
+    { name: 'ForgeEngine', type: 'SERVER_JS', source: fs.readFileSync(files[2], 'utf8') },
+    { name: 'appsscript', type: 'JSON', source: JSON.stringify(installManifest, null, 2) }
+  ];
+  const installValidation = context.forgeValidatePackage({
+    packageId: 'PULSE-077-INSTALL',
+    files: installFiles,
+    requiredFunctions: ['forgeEngineCoreSelfTest']
+  });
+  if (!installValidation.ok) {
+    problems.push(`PULSE-077 install package validation failed: ${installValidation.problems.join(' | ')}`);
+  }
+
   if (fixture) {
     const first = context.forgeGenerateTaskPackage(fixture);
     const second = context.forgeGenerateTaskPackage(JSON.parse(JSON.stringify(fixture)));
