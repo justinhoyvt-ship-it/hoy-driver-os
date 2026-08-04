@@ -1,0 +1,342 @@
+{
+  "taskId": "PULSE-078",
+  "captureId": "20260804-183219",
+  "alias": "FORGE_CONTROLLER",
+  "scriptId": "11j6IpdCl9LjbjsLPfRQQIUBWn3-QEsZew04YvakE3S2Aiv6PjpqHoeXW",
+  "authority": "REPO",
+  "rideRequestsWriter": false,
+  "livePackageHash": "d4d8f6b12ec81ed1a6e8cdee817e171c1f72e762600ea6b62da2837514be91c4",
+  "liveInventory": [
+    {
+      "name": "appsscript",
+      "type": "JSON",
+      "bytes": 426,
+      "sha256": "ea7061115efd80474d37e11b55b7a38e9fe69910df3099b37b1871dcb61a67ca"
+    },
+    {
+      "name": "Code",
+      "type": "SERVER_JS",
+      "bytes": 84471,
+      "sha256": "81ae0fac122728ef0ee2aca5efd0cdd62972b64f52efaf8ed71ee3405b823f1d"
+    },
+    {
+      "name": "PULSE077ExecutionDeploymentRepair",
+      "type": "SERVER_JS",
+      "bytes": 12314,
+      "sha256": "b664b94089d8ca9e1cdd19d2066cef787d090c49e70d3a750b1881a4bbc5f49b"
+    },
+    {
+      "name": "PULSE077Installer",
+      "type": "SERVER_JS",
+      "bytes": 29041,
+      "sha256": "1b72210fb59702691bba132c33000998061f3b1c3e1c20813d808b4b41f4a255"
+    },
+    {
+      "name": "PULSE077PermissionProbe",
+      "type": "SERVER_JS",
+      "bytes": 2084,
+      "sha256": "f99a4be57e5058eda2fa4bd136570e5f10e79bff4318731632a394b4094245fe"
+    },
+    {
+      "name": "PULSE077RuntimeVerification",
+      "type": "SERVER_JS",
+      "bytes": 1794,
+      "sha256": "16bcc7c4668fddc74662ec6a945fb004cd76bc4913ff343548c924eb8da634d3"
+    },
+    {
+      "name": "PULSE077ValidatorRepair",
+      "type": "SERVER_JS",
+      "bytes": 13034,
+      "sha256": "3d07dfb380f9b4957d71c68fff1588b37ecd34e9ae0a91a017c3f85335e172c6"
+    },
+    {
+      "name": "PULSE078SourceReconciliationInstaller",
+      "type": "SERVER_JS",
+      "bytes": 53781,
+      "sha256": "7ab8136765b96db7811563349ee1409081290fa3c3864ba479797d4be47f5ea2"
+    }
+  ],
+  "repositoryFiles": [
+    {
+      "path": "pulse-forge/appsscript.json",
+      "name": "appsscript",
+      "type": "JSON",
+      "bytes": 427,
+      "sha256": "10f42820d8e802be6ac5b1d329a76d08c0699db477e23e29ffed530655d6f86d"
+    },
+    {
+      "path": "pulse-forge/controller/Code.gs",
+      "name": "Code",
+      "type": "SERVER_JS",
+      "bytes": 7606,
+      "sha256": "bab6c9980123e934c7189b004ddb6dec8e3ae8ebd35061d569782664b5dbbc56"
+    },
+    {
+      "path": "pulse-forge/controller/ForgeTemplates.gs",
+      "name": "ForgeTemplates",
+      "type": "SERVER_JS",
+      "bytes": 1170,
+      "sha256": "ca88e167d4c283736cb8ce169494bb4367eef888f866fa41ceff5b827f8bbd3f"
+    },
+    {
+      "path": "pulse-forge/controller/PULSE078SourceReconciliation.gs",
+      "name": "PULSE078SourceReconciliation",
+      "type": "SERVER_JS",
+      "bytes": 18189,
+      "sha256": "3283281435d1ec26065fb725f9ee38106d1c41dbdd28bea0df3a7d4d2b279e32"
+    },
+    {
+      "path": "pulse-forge/core/ForgeCore.gs",
+      "name": "ForgeCore",
+      "type": "SERVER_JS",
+      "bytes": 3827,
+      "sha256": "aaca637f4ad14441f7cc70e772ef81dac512727d321f5dfba81cb0df6732b3e5"
+    },
+    {
+      "path": "pulse-forge/core/ForgeEngine.gs",
+      "name": "ForgeEngine",
+      "type": "SERVER_JS",
+      "bytes": 14846,
+      "sha256": "86dac4cf5d13158deb6bd6feba90e78991e22815e047b0bf24decd970bc0f006"
+    },
+    {
+      "path": "pulse-forge/core/ForgeGitHub.gs",
+      "name": "ForgeGitHub",
+      "type": "SERVER_JS",
+      "bytes": 4675,
+      "sha256": "b4fc6ab30d69cff050c4045ec3c5f61eceb9fffc4d628026a538f12e9c59bfb1"
+    },
+    {
+      "path": "pulse-forge/core/ForgeProjectApi.gs",
+      "name": "ForgeProjectApi",
+      "type": "SERVER_JS",
+      "bytes": 6536,
+      "sha256": "1ff5f490a697c3fff64bf7fdd509363cbce78f76a2063ab20d7f8488e5366fc8"
+    },
+    {
+      "path": "pulse-forge/core/ForgeRegistry.gs",
+      "name": "ForgeRegistry",
+      "type": "SERVER_JS",
+      "bytes": 3379,
+      "sha256": "211e8d642a6ada2ec8764368dcdcf34913b1b79ed0dd9ecfd1589c54074a803c"
+    },
+    {
+      "path": "pulse-forge/core/ForgeValidator.gs",
+      "name": "ForgeValidator",
+      "type": "SERVER_JS",
+      "bytes": 4608,
+      "sha256": "700b835a0787abda9bbcbcb21710013aaab4c6d9ca97a579a8f40dae399df97f"
+    }
+  ],
+  "files": [
+    {
+      "key": "appsscript::JSON",
+      "name": "appsscript",
+      "type": "JSON",
+      "status": "DIFF",
+      "liveSha256": "ea7061115efd80474d37e11b55b7a38e9fe69910df3099b37b1871dcb61a67ca",
+      "repoSha256": "10f42820d8e802be6ac5b1d329a76d08c0699db477e23e29ffed530655d6f86d",
+      "repoPath": "pulse-forge/appsscript.json",
+      "liveBytes": 426,
+      "repoBytes": 427,
+      "action": "REVIEW_REPO_PREFERRED",
+      "canonicalPath": "pulse-forge/appsscript.json"
+    },
+    {
+      "key": "code::SERVER_JS",
+      "name": "Code",
+      "type": "SERVER_JS",
+      "status": "DIFF",
+      "liveSha256": "81ae0fac122728ef0ee2aca5efd0cdd62972b64f52efaf8ed71ee3405b823f1d",
+      "repoSha256": "bab6c9980123e934c7189b004ddb6dec8e3ae8ebd35061d569782664b5dbbc56",
+      "repoPath": "pulse-forge/controller/Code.gs",
+      "liveBytes": 84471,
+      "repoBytes": 7606,
+      "action": "REVIEW_REPO_PREFERRED",
+      "canonicalPath": "pulse-forge/controller/Code.gs"
+    },
+    {
+      "key": "forgecore::SERVER_JS",
+      "name": "ForgeCore",
+      "type": "SERVER_JS",
+      "status": "REPO_ONLY",
+      "liveSha256": "",
+      "repoSha256": "aaca637f4ad14441f7cc70e772ef81dac512727d321f5dfba81cb0df6732b3e5",
+      "repoPath": "pulse-forge/core/ForgeCore.gs",
+      "liveBytes": 0,
+      "repoBytes": 3827,
+      "action": "KEEP_REPO",
+      "canonicalPath": "pulse-forge/core/ForgeCore.gs"
+    },
+    {
+      "key": "forgeengine::SERVER_JS",
+      "name": "ForgeEngine",
+      "type": "SERVER_JS",
+      "status": "REPO_ONLY",
+      "liveSha256": "",
+      "repoSha256": "86dac4cf5d13158deb6bd6feba90e78991e22815e047b0bf24decd970bc0f006",
+      "repoPath": "pulse-forge/core/ForgeEngine.gs",
+      "liveBytes": 0,
+      "repoBytes": 14846,
+      "action": "KEEP_REPO",
+      "canonicalPath": "pulse-forge/core/ForgeEngine.gs"
+    },
+    {
+      "key": "forgegithub::SERVER_JS",
+      "name": "ForgeGitHub",
+      "type": "SERVER_JS",
+      "status": "REPO_ONLY",
+      "liveSha256": "",
+      "repoSha256": "b4fc6ab30d69cff050c4045ec3c5f61eceb9fffc4d628026a538f12e9c59bfb1",
+      "repoPath": "pulse-forge/core/ForgeGitHub.gs",
+      "liveBytes": 0,
+      "repoBytes": 4675,
+      "action": "KEEP_REPO",
+      "canonicalPath": "pulse-forge/core/ForgeGitHub.gs"
+    },
+    {
+      "key": "forgeprojectapi::SERVER_JS",
+      "name": "ForgeProjectApi",
+      "type": "SERVER_JS",
+      "status": "REPO_ONLY",
+      "liveSha256": "",
+      "repoSha256": "1ff5f490a697c3fff64bf7fdd509363cbce78f76a2063ab20d7f8488e5366fc8",
+      "repoPath": "pulse-forge/core/ForgeProjectApi.gs",
+      "liveBytes": 0,
+      "repoBytes": 6536,
+      "action": "KEEP_REPO",
+      "canonicalPath": "pulse-forge/core/ForgeProjectApi.gs"
+    },
+    {
+      "key": "forgeregistry::SERVER_JS",
+      "name": "ForgeRegistry",
+      "type": "SERVER_JS",
+      "status": "REPO_ONLY",
+      "liveSha256": "",
+      "repoSha256": "211e8d642a6ada2ec8764368dcdcf34913b1b79ed0dd9ecfd1589c54074a803c",
+      "repoPath": "pulse-forge/core/ForgeRegistry.gs",
+      "liveBytes": 0,
+      "repoBytes": 3379,
+      "action": "KEEP_REPO",
+      "canonicalPath": "pulse-forge/core/ForgeRegistry.gs"
+    },
+    {
+      "key": "forgetemplates::SERVER_JS",
+      "name": "ForgeTemplates",
+      "type": "SERVER_JS",
+      "status": "REPO_ONLY",
+      "liveSha256": "",
+      "repoSha256": "ca88e167d4c283736cb8ce169494bb4367eef888f866fa41ceff5b827f8bbd3f",
+      "repoPath": "pulse-forge/controller/ForgeTemplates.gs",
+      "liveBytes": 0,
+      "repoBytes": 1170,
+      "action": "KEEP_REPO",
+      "canonicalPath": "pulse-forge/controller/ForgeTemplates.gs"
+    },
+    {
+      "key": "forgevalidator::SERVER_JS",
+      "name": "ForgeValidator",
+      "type": "SERVER_JS",
+      "status": "REPO_ONLY",
+      "liveSha256": "",
+      "repoSha256": "700b835a0787abda9bbcbcb21710013aaab4c6d9ca97a579a8f40dae399df97f",
+      "repoPath": "pulse-forge/core/ForgeValidator.gs",
+      "liveBytes": 0,
+      "repoBytes": 4608,
+      "action": "KEEP_REPO",
+      "canonicalPath": "pulse-forge/core/ForgeValidator.gs"
+    },
+    {
+      "key": "pulse077executiondeploymentrepair::SERVER_JS",
+      "name": "PULSE077ExecutionDeploymentRepair",
+      "type": "SERVER_JS",
+      "status": "LIVE_ONLY",
+      "liveSha256": "b664b94089d8ca9e1cdd19d2066cef787d090c49e70d3a750b1881a4bbc5f49b",
+      "repoSha256": "",
+      "repoPath": "",
+      "liveBytes": 12314,
+      "repoBytes": 0,
+      "action": "SNAPSHOT_ONLY",
+      "canonicalPath": ""
+    },
+    {
+      "key": "pulse077installer::SERVER_JS",
+      "name": "PULSE077Installer",
+      "type": "SERVER_JS",
+      "status": "LIVE_ONLY",
+      "liveSha256": "1b72210fb59702691bba132c33000998061f3b1c3e1c20813d808b4b41f4a255",
+      "repoSha256": "",
+      "repoPath": "",
+      "liveBytes": 29041,
+      "repoBytes": 0,
+      "action": "SNAPSHOT_ONLY",
+      "canonicalPath": ""
+    },
+    {
+      "key": "pulse077permissionprobe::SERVER_JS",
+      "name": "PULSE077PermissionProbe",
+      "type": "SERVER_JS",
+      "status": "LIVE_ONLY",
+      "liveSha256": "f99a4be57e5058eda2fa4bd136570e5f10e79bff4318731632a394b4094245fe",
+      "repoSha256": "",
+      "repoPath": "",
+      "liveBytes": 2084,
+      "repoBytes": 0,
+      "action": "SNAPSHOT_ONLY",
+      "canonicalPath": ""
+    },
+    {
+      "key": "pulse077runtimeverification::SERVER_JS",
+      "name": "PULSE077RuntimeVerification",
+      "type": "SERVER_JS",
+      "status": "LIVE_ONLY",
+      "liveSha256": "16bcc7c4668fddc74662ec6a945fb004cd76bc4913ff343548c924eb8da634d3",
+      "repoSha256": "",
+      "repoPath": "",
+      "liveBytes": 1794,
+      "repoBytes": 0,
+      "action": "SNAPSHOT_ONLY",
+      "canonicalPath": ""
+    },
+    {
+      "key": "pulse077validatorrepair::SERVER_JS",
+      "name": "PULSE077ValidatorRepair",
+      "type": "SERVER_JS",
+      "status": "LIVE_ONLY",
+      "liveSha256": "3d07dfb380f9b4957d71c68fff1588b37ecd34e9ae0a91a017c3f85335e172c6",
+      "repoSha256": "",
+      "repoPath": "",
+      "liveBytes": 13034,
+      "repoBytes": 0,
+      "action": "SNAPSHOT_ONLY",
+      "canonicalPath": ""
+    },
+    {
+      "key": "pulse078sourcereconciliation::SERVER_JS",
+      "name": "PULSE078SourceReconciliation",
+      "type": "SERVER_JS",
+      "status": "REPO_ONLY",
+      "liveSha256": "",
+      "repoSha256": "3283281435d1ec26065fb725f9ee38106d1c41dbdd28bea0df3a7d4d2b279e32",
+      "repoPath": "pulse-forge/controller/PULSE078SourceReconciliation.gs",
+      "liveBytes": 0,
+      "repoBytes": 18189,
+      "action": "KEEP_REPO",
+      "canonicalPath": "pulse-forge/controller/PULSE078SourceReconciliation.gs"
+    },
+    {
+      "key": "pulse078sourcereconciliationinstaller::SERVER_JS",
+      "name": "PULSE078SourceReconciliationInstaller",
+      "type": "SERVER_JS",
+      "status": "LIVE_ONLY",
+      "liveSha256": "7ab8136765b96db7811563349ee1409081290fa3c3864ba479797d4be47f5ea2",
+      "repoSha256": "",
+      "repoPath": "",
+      "liveBytes": 53781,
+      "repoBytes": 0,
+      "action": "SNAPSHOT_ONLY",
+      "canonicalPath": ""
+    }
+  ],
+  "productionProjectMutated": false
+}
