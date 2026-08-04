@@ -100,6 +100,19 @@ if (!combined.includes("'Rollback before ' + forgeString_")) {
   problems.push('Pre-update immutable rollback version is missing.');
 }
 
+if (!combined.includes("const deploymentId = forgeString_(request.deploymentId).trim();")) {
+  problems.push('Execution API calls must require an API Executable deployment ID.');
+}
+if (!combined.includes("'/scripts/' + encodeURIComponent(deploymentId) + ':run'")) {
+  problems.push('Execution API endpoint is not using the deployment ID.');
+}
+if (combined.includes("'/scripts/' + encodeURIComponent(scriptId) + ':run'")) {
+  problems.push('Execution API must not use an Apps Script project ID as the run path ID.');
+}
+if (!combined.includes('deploymentId: request.deploymentId')) {
+  problems.push('Engine activation is not passing the deployment ID.');
+}
+
 
 const propertyStore = new Map();
 const context = {

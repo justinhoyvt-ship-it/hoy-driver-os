@@ -133,20 +133,20 @@ function forgeCreateTestDeployment(request) {
 
 function forgeRunScriptFunction(request) {
   request = request || {};
-  const scriptId = forgeString_(request.scriptId).trim();
+  const deploymentId = forgeString_(request.deploymentId).trim();
   const functionName = forgeString_(request.functionName).trim();
-  forgeAssert_(scriptId && functionName, 'scriptId and functionName are required.');
+  forgeAssert_(deploymentId && functionName, 'deploymentId and functionName are required.');
   forgeAssert_(/^forge|^test|^pulseRun|^hipJointTest/.test(functionName), 'Remote function is not on the Forge test allowlist.');
-  const result = forgeApiFetch_(FORGE_SCRIPT_API_BASE_ + '/scripts/' + encodeURIComponent(scriptId) + ':run', {
+  const result = forgeApiFetch_(FORGE_SCRIPT_API_BASE_ + '/scripts/' + encodeURIComponent(deploymentId) + ':run', {
     method: 'post',
     payload: {
       function: functionName,
       parameters: request.parameters || [],
-      devMode: request.devMode !== false
+      devMode: request.devMode === true
     }
   });
   return forgeResult_(!result.error, {
-    scriptId: scriptId,
+    deploymentId: deploymentId,
     functionName: functionName,
     response: result,
     writesPerformedByForge: false
