@@ -270,6 +270,9 @@ function forgePulse078ActionFor_(target, comparison) {
   if (comparison.status === 'LIVE_ONLY' && target.importLiveOnly !== true) {
     return 'SNAPSHOT_ONLY';
   }
+  if (target.allowCanonicalProposal !== true) {
+    return 'REVIEW_LIVE_PREFERRED';
+  }
   return 'PROPOSE_LIVE_TO_CANONICAL';
 }
 
@@ -412,9 +415,9 @@ function forgePulse078RunSourceReconciliation() {
         '- Deployments: 0',
         '- Production data changes: none',
         '',
-        'Controller drift remains repository-preferred. Live application drift is proposed',
-        'through this reviewed PR. Every complete live source file is also preserved under',
-        'the capture folder before any canonical source change is reviewed.',
+        'Controller drift remains repository-preferred. Live application drift is captured',
+        'for review and is not copied into canonical paths unless explicitly enabled.',
+        'Every complete live source file is preserved under the capture folder.',
         ''
       ].join('\n')
     );
@@ -435,7 +438,7 @@ function forgePulse078RunSourceReconciliation() {
         '- Immutable live source snapshots and SHA-256 inventories',
         '- Per-file MATCH / DIFF / LIVE_ONLY / REPO_ONLY classification',
         '- Repository-preferred controller drift handling',
-        '- Live-preferred application drift proposed through review',
+        '- Live-preferred application drift captured for explicit review',
         '- Standalone request app remains the only declared Ride Requests writer',
         '',
         '### Safety',
