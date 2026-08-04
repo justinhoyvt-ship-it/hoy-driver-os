@@ -1,0 +1,725 @@
+{
+  "taskId": "PULSE-078",
+  "captureId": "20260804-183219",
+  "capturedAt": "2026-08-04T22:32:30.420Z",
+  "repository": "justinhoyvt-ship-it/hoy-driver-os",
+  "repositoryRef": "main",
+  "writerBoundary": {
+    "ok": true,
+    "authorizedWriterAlias": "PULSE_REQUEST_APP",
+    "additionalWritersDeclared": false
+  },
+  "targets": [
+    {
+      "taskId": "PULSE-078",
+      "captureId": "20260804-183219",
+      "alias": "FORGE_CONTROLLER",
+      "scriptId": "11j6IpdCl9LjbjsLPfRQQIUBWn3-QEsZew04YvakE3S2Aiv6PjpqHoeXW",
+      "authority": "REPO",
+      "rideRequestsWriter": false,
+      "livePackageHash": "d4d8f6b12ec81ed1a6e8cdee817e171c1f72e762600ea6b62da2837514be91c4",
+      "liveInventory": [
+        {
+          "name": "appsscript",
+          "type": "JSON",
+          "bytes": 426,
+          "sha256": "ea7061115efd80474d37e11b55b7a38e9fe69910df3099b37b1871dcb61a67ca"
+        },
+        {
+          "name": "Code",
+          "type": "SERVER_JS",
+          "bytes": 84471,
+          "sha256": "81ae0fac122728ef0ee2aca5efd0cdd62972b64f52efaf8ed71ee3405b823f1d"
+        },
+        {
+          "name": "PULSE077ExecutionDeploymentRepair",
+          "type": "SERVER_JS",
+          "bytes": 12314,
+          "sha256": "b664b94089d8ca9e1cdd19d2066cef787d090c49e70d3a750b1881a4bbc5f49b"
+        },
+        {
+          "name": "PULSE077Installer",
+          "type": "SERVER_JS",
+          "bytes": 29041,
+          "sha256": "1b72210fb59702691bba132c33000998061f3b1c3e1c20813d808b4b41f4a255"
+        },
+        {
+          "name": "PULSE077PermissionProbe",
+          "type": "SERVER_JS",
+          "bytes": 2084,
+          "sha256": "f99a4be57e5058eda2fa4bd136570e5f10e79bff4318731632a394b4094245fe"
+        },
+        {
+          "name": "PULSE077RuntimeVerification",
+          "type": "SERVER_JS",
+          "bytes": 1794,
+          "sha256": "16bcc7c4668fddc74662ec6a945fb004cd76bc4913ff343548c924eb8da634d3"
+        },
+        {
+          "name": "PULSE077ValidatorRepair",
+          "type": "SERVER_JS",
+          "bytes": 13034,
+          "sha256": "3d07dfb380f9b4957d71c68fff1588b37ecd34e9ae0a91a017c3f85335e172c6"
+        },
+        {
+          "name": "PULSE078SourceReconciliationInstaller",
+          "type": "SERVER_JS",
+          "bytes": 53781,
+          "sha256": "7ab8136765b96db7811563349ee1409081290fa3c3864ba479797d4be47f5ea2"
+        }
+      ],
+      "repositoryFiles": [
+        {
+          "path": "pulse-forge/appsscript.json",
+          "name": "appsscript",
+          "type": "JSON",
+          "bytes": 427,
+          "sha256": "10f42820d8e802be6ac5b1d329a76d08c0699db477e23e29ffed530655d6f86d"
+        },
+        {
+          "path": "pulse-forge/controller/Code.gs",
+          "name": "Code",
+          "type": "SERVER_JS",
+          "bytes": 7606,
+          "sha256": "bab6c9980123e934c7189b004ddb6dec8e3ae8ebd35061d569782664b5dbbc56"
+        },
+        {
+          "path": "pulse-forge/controller/ForgeTemplates.gs",
+          "name": "ForgeTemplates",
+          "type": "SERVER_JS",
+          "bytes": 1170,
+          "sha256": "ca88e167d4c283736cb8ce169494bb4367eef888f866fa41ceff5b827f8bbd3f"
+        },
+        {
+          "path": "pulse-forge/controller/PULSE078SourceReconciliation.gs",
+          "name": "PULSE078SourceReconciliation",
+          "type": "SERVER_JS",
+          "bytes": 18189,
+          "sha256": "3283281435d1ec26065fb725f9ee38106d1c41dbdd28bea0df3a7d4d2b279e32"
+        },
+        {
+          "path": "pulse-forge/core/ForgeCore.gs",
+          "name": "ForgeCore",
+          "type": "SERVER_JS",
+          "bytes": 3827,
+          "sha256": "aaca637f4ad14441f7cc70e772ef81dac512727d321f5dfba81cb0df6732b3e5"
+        },
+        {
+          "path": "pulse-forge/core/ForgeEngine.gs",
+          "name": "ForgeEngine",
+          "type": "SERVER_JS",
+          "bytes": 14846,
+          "sha256": "86dac4cf5d13158deb6bd6feba90e78991e22815e047b0bf24decd970bc0f006"
+        },
+        {
+          "path": "pulse-forge/core/ForgeGitHub.gs",
+          "name": "ForgeGitHub",
+          "type": "SERVER_JS",
+          "bytes": 4675,
+          "sha256": "b4fc6ab30d69cff050c4045ec3c5f61eceb9fffc4d628026a538f12e9c59bfb1"
+        },
+        {
+          "path": "pulse-forge/core/ForgeProjectApi.gs",
+          "name": "ForgeProjectApi",
+          "type": "SERVER_JS",
+          "bytes": 6536,
+          "sha256": "1ff5f490a697c3fff64bf7fdd509363cbce78f76a2063ab20d7f8488e5366fc8"
+        },
+        {
+          "path": "pulse-forge/core/ForgeRegistry.gs",
+          "name": "ForgeRegistry",
+          "type": "SERVER_JS",
+          "bytes": 3379,
+          "sha256": "211e8d642a6ada2ec8764368dcdcf34913b1b79ed0dd9ecfd1589c54074a803c"
+        },
+        {
+          "path": "pulse-forge/core/ForgeValidator.gs",
+          "name": "ForgeValidator",
+          "type": "SERVER_JS",
+          "bytes": 4608,
+          "sha256": "700b835a0787abda9bbcbcb21710013aaab4c6d9ca97a579a8f40dae399df97f"
+        }
+      ],
+      "files": [
+        {
+          "key": "appsscript::JSON",
+          "name": "appsscript",
+          "type": "JSON",
+          "status": "DIFF",
+          "liveSha256": "ea7061115efd80474d37e11b55b7a38e9fe69910df3099b37b1871dcb61a67ca",
+          "repoSha256": "10f42820d8e802be6ac5b1d329a76d08c0699db477e23e29ffed530655d6f86d",
+          "repoPath": "pulse-forge/appsscript.json",
+          "liveBytes": 426,
+          "repoBytes": 427,
+          "action": "REVIEW_REPO_PREFERRED",
+          "canonicalPath": "pulse-forge/appsscript.json"
+        },
+        {
+          "key": "code::SERVER_JS",
+          "name": "Code",
+          "type": "SERVER_JS",
+          "status": "DIFF",
+          "liveSha256": "81ae0fac122728ef0ee2aca5efd0cdd62972b64f52efaf8ed71ee3405b823f1d",
+          "repoSha256": "bab6c9980123e934c7189b004ddb6dec8e3ae8ebd35061d569782664b5dbbc56",
+          "repoPath": "pulse-forge/controller/Code.gs",
+          "liveBytes": 84471,
+          "repoBytes": 7606,
+          "action": "REVIEW_REPO_PREFERRED",
+          "canonicalPath": "pulse-forge/controller/Code.gs"
+        },
+        {
+          "key": "forgecore::SERVER_JS",
+          "name": "ForgeCore",
+          "type": "SERVER_JS",
+          "status": "REPO_ONLY",
+          "liveSha256": "",
+          "repoSha256": "aaca637f4ad14441f7cc70e772ef81dac512727d321f5dfba81cb0df6732b3e5",
+          "repoPath": "pulse-forge/core/ForgeCore.gs",
+          "liveBytes": 0,
+          "repoBytes": 3827,
+          "action": "KEEP_REPO",
+          "canonicalPath": "pulse-forge/core/ForgeCore.gs"
+        },
+        {
+          "key": "forgeengine::SERVER_JS",
+          "name": "ForgeEngine",
+          "type": "SERVER_JS",
+          "status": "REPO_ONLY",
+          "liveSha256": "",
+          "repoSha256": "86dac4cf5d13158deb6bd6feba90e78991e22815e047b0bf24decd970bc0f006",
+          "repoPath": "pulse-forge/core/ForgeEngine.gs",
+          "liveBytes": 0,
+          "repoBytes": 14846,
+          "action": "KEEP_REPO",
+          "canonicalPath": "pulse-forge/core/ForgeEngine.gs"
+        },
+        {
+          "key": "forgegithub::SERVER_JS",
+          "name": "ForgeGitHub",
+          "type": "SERVER_JS",
+          "status": "REPO_ONLY",
+          "liveSha256": "",
+          "repoSha256": "b4fc6ab30d69cff050c4045ec3c5f61eceb9fffc4d628026a538f12e9c59bfb1",
+          "repoPath": "pulse-forge/core/ForgeGitHub.gs",
+          "liveBytes": 0,
+          "repoBytes": 4675,
+          "action": "KEEP_REPO",
+          "canonicalPath": "pulse-forge/core/ForgeGitHub.gs"
+        },
+        {
+          "key": "forgeprojectapi::SERVER_JS",
+          "name": "ForgeProjectApi",
+          "type": "SERVER_JS",
+          "status": "REPO_ONLY",
+          "liveSha256": "",
+          "repoSha256": "1ff5f490a697c3fff64bf7fdd509363cbce78f76a2063ab20d7f8488e5366fc8",
+          "repoPath": "pulse-forge/core/ForgeProjectApi.gs",
+          "liveBytes": 0,
+          "repoBytes": 6536,
+          "action": "KEEP_REPO",
+          "canonicalPath": "pulse-forge/core/ForgeProjectApi.gs"
+        },
+        {
+          "key": "forgeregistry::SERVER_JS",
+          "name": "ForgeRegistry",
+          "type": "SERVER_JS",
+          "status": "REPO_ONLY",
+          "liveSha256": "",
+          "repoSha256": "211e8d642a6ada2ec8764368dcdcf34913b1b79ed0dd9ecfd1589c54074a803c",
+          "repoPath": "pulse-forge/core/ForgeRegistry.gs",
+          "liveBytes": 0,
+          "repoBytes": 3379,
+          "action": "KEEP_REPO",
+          "canonicalPath": "pulse-forge/core/ForgeRegistry.gs"
+        },
+        {
+          "key": "forgetemplates::SERVER_JS",
+          "name": "ForgeTemplates",
+          "type": "SERVER_JS",
+          "status": "REPO_ONLY",
+          "liveSha256": "",
+          "repoSha256": "ca88e167d4c283736cb8ce169494bb4367eef888f866fa41ceff5b827f8bbd3f",
+          "repoPath": "pulse-forge/controller/ForgeTemplates.gs",
+          "liveBytes": 0,
+          "repoBytes": 1170,
+          "action": "KEEP_REPO",
+          "canonicalPath": "pulse-forge/controller/ForgeTemplates.gs"
+        },
+        {
+          "key": "forgevalidator::SERVER_JS",
+          "name": "ForgeValidator",
+          "type": "SERVER_JS",
+          "status": "REPO_ONLY",
+          "liveSha256": "",
+          "repoSha256": "700b835a0787abda9bbcbcb21710013aaab4c6d9ca97a579a8f40dae399df97f",
+          "repoPath": "pulse-forge/core/ForgeValidator.gs",
+          "liveBytes": 0,
+          "repoBytes": 4608,
+          "action": "KEEP_REPO",
+          "canonicalPath": "pulse-forge/core/ForgeValidator.gs"
+        },
+        {
+          "key": "pulse077executiondeploymentrepair::SERVER_JS",
+          "name": "PULSE077ExecutionDeploymentRepair",
+          "type": "SERVER_JS",
+          "status": "LIVE_ONLY",
+          "liveSha256": "b664b94089d8ca9e1cdd19d2066cef787d090c49e70d3a750b1881a4bbc5f49b",
+          "repoSha256": "",
+          "repoPath": "",
+          "liveBytes": 12314,
+          "repoBytes": 0,
+          "action": "SNAPSHOT_ONLY",
+          "canonicalPath": ""
+        },
+        {
+          "key": "pulse077installer::SERVER_JS",
+          "name": "PULSE077Installer",
+          "type": "SERVER_JS",
+          "status": "LIVE_ONLY",
+          "liveSha256": "1b72210fb59702691bba132c33000998061f3b1c3e1c20813d808b4b41f4a255",
+          "repoSha256": "",
+          "repoPath": "",
+          "liveBytes": 29041,
+          "repoBytes": 0,
+          "action": "SNAPSHOT_ONLY",
+          "canonicalPath": ""
+        },
+        {
+          "key": "pulse077permissionprobe::SERVER_JS",
+          "name": "PULSE077PermissionProbe",
+          "type": "SERVER_JS",
+          "status": "LIVE_ONLY",
+          "liveSha256": "f99a4be57e5058eda2fa4bd136570e5f10e79bff4318731632a394b4094245fe",
+          "repoSha256": "",
+          "repoPath": "",
+          "liveBytes": 2084,
+          "repoBytes": 0,
+          "action": "SNAPSHOT_ONLY",
+          "canonicalPath": ""
+        },
+        {
+          "key": "pulse077runtimeverification::SERVER_JS",
+          "name": "PULSE077RuntimeVerification",
+          "type": "SERVER_JS",
+          "status": "LIVE_ONLY",
+          "liveSha256": "16bcc7c4668fddc74662ec6a945fb004cd76bc4913ff343548c924eb8da634d3",
+          "repoSha256": "",
+          "repoPath": "",
+          "liveBytes": 1794,
+          "repoBytes": 0,
+          "action": "SNAPSHOT_ONLY",
+          "canonicalPath": ""
+        },
+        {
+          "key": "pulse077validatorrepair::SERVER_JS",
+          "name": "PULSE077ValidatorRepair",
+          "type": "SERVER_JS",
+          "status": "LIVE_ONLY",
+          "liveSha256": "3d07dfb380f9b4957d71c68fff1588b37ecd34e9ae0a91a017c3f85335e172c6",
+          "repoSha256": "",
+          "repoPath": "",
+          "liveBytes": 13034,
+          "repoBytes": 0,
+          "action": "SNAPSHOT_ONLY",
+          "canonicalPath": ""
+        },
+        {
+          "key": "pulse078sourcereconciliation::SERVER_JS",
+          "name": "PULSE078SourceReconciliation",
+          "type": "SERVER_JS",
+          "status": "REPO_ONLY",
+          "liveSha256": "",
+          "repoSha256": "3283281435d1ec26065fb725f9ee38106d1c41dbdd28bea0df3a7d4d2b279e32",
+          "repoPath": "pulse-forge/controller/PULSE078SourceReconciliation.gs",
+          "liveBytes": 0,
+          "repoBytes": 18189,
+          "action": "KEEP_REPO",
+          "canonicalPath": "pulse-forge/controller/PULSE078SourceReconciliation.gs"
+        },
+        {
+          "key": "pulse078sourcereconciliationinstaller::SERVER_JS",
+          "name": "PULSE078SourceReconciliationInstaller",
+          "type": "SERVER_JS",
+          "status": "LIVE_ONLY",
+          "liveSha256": "7ab8136765b96db7811563349ee1409081290fa3c3864ba479797d4be47f5ea2",
+          "repoSha256": "",
+          "repoPath": "",
+          "liveBytes": 53781,
+          "repoBytes": 0,
+          "action": "SNAPSHOT_ONLY",
+          "canonicalPath": ""
+        }
+      ],
+      "productionProjectMutated": false
+    },
+    {
+      "taskId": "PULSE-078",
+      "captureId": "20260804-183219",
+      "alias": "HOY_DRIVER",
+      "scriptId": "1sN7MFrzEOD0GMIOc10XoA8j5IPzZwQynowIuZpXDCWuLbF2wqIDf8Zj0",
+      "authority": "LIVE",
+      "rideRequestsWriter": false,
+      "livePackageHash": "6681df1b363a918120c71fa86b22a13a49f44d2e7f3e359582d200cb51e68c3f",
+      "liveInventory": [
+        {
+          "name": "appsscript",
+          "type": "JSON",
+          "bytes": 198,
+          "sha256": "2ce3c16abe3ad90f9dc037ba2488107683a2068a0b9a7c25c35529ebadbe6883"
+        },
+        {
+          "name": "Code",
+          "type": "SERVER_JS",
+          "bytes": 36081,
+          "sha256": "d6e25f3364afeec61a5ce1d138e04e5b4203dbf5594944c68768503624d12acf"
+        },
+        {
+          "name": "Index",
+          "type": "HTML",
+          "bytes": 58941,
+          "sha256": "40c3b14579f10ef17898e464285f2add501c99ad8e50ffd76fd17246183d7667"
+        },
+        {
+          "name": "PulseUiControls",
+          "type": "HTML",
+          "bytes": 8679,
+          "sha256": "0084214d69a4ee36006207aa4b1f17d0fd2dab46e4296f9be3e9a0eae654b445"
+        }
+      ],
+      "repositoryFiles": [
+        {
+          "path": "apps-script/hoy-driver-os-writer/Code.gs",
+          "name": "Code",
+          "type": "SERVER_JS",
+          "bytes": 34697,
+          "sha256": "9ae005fc2444e6a58758a880d1896afc83a8126d6f1c445daeed0ced1ed91b0b"
+        },
+        {
+          "path": "apps-script/hoy-driver-os-writer/ForegroundPickup.gs",
+          "name": "ForegroundPickup",
+          "type": "SERVER_JS",
+          "bytes": 2304,
+          "sha256": "0cddcdf17138507c8e884c1f8e36f855f73ecf1fc635d21a0f404c4c2d078561"
+        },
+        {
+          "path": "apps-script/hoy-driver-os-writer/ForegroundPickup.html",
+          "name": "ForegroundPickup",
+          "type": "HTML",
+          "bytes": 8558,
+          "sha256": "5dd53d9dfa8defbd9f40f86cd8301ec9cba2ed360fef9ae20ca5a135f6eda8a7"
+        },
+        {
+          "path": "apps-script/hoy-driver-os-writer/Index.html",
+          "name": "Index",
+          "type": "HTML",
+          "bytes": 54896,
+          "sha256": "537231a66e1c89fb9021c13ad4ca86c00213a51140b1b85b27f4f5e0fd9a1ae7"
+        },
+        {
+          "path": "apps-script/hoy-driver-os-writer/appsscript.json",
+          "name": "appsscript",
+          "type": "JSON",
+          "bytes": 199,
+          "sha256": "2453f8d6311d3d02408e2ce2521a088ad65e99325c87f5e3b00ffaea7ba57b72"
+        }
+      ],
+      "files": [
+        {
+          "key": "appsscript::JSON",
+          "name": "appsscript",
+          "type": "JSON",
+          "status": "DIFF",
+          "liveSha256": "2ce3c16abe3ad90f9dc037ba2488107683a2068a0b9a7c25c35529ebadbe6883",
+          "repoSha256": "2453f8d6311d3d02408e2ce2521a088ad65e99325c87f5e3b00ffaea7ba57b72",
+          "repoPath": "apps-script/hoy-driver-os-writer/appsscript.json",
+          "liveBytes": 198,
+          "repoBytes": 199,
+          "action": "PROPOSE_LIVE_TO_CANONICAL",
+          "canonicalPath": "apps-script/hoy-driver-os-writer/appsscript.json"
+        },
+        {
+          "key": "code::SERVER_JS",
+          "name": "Code",
+          "type": "SERVER_JS",
+          "status": "DIFF",
+          "liveSha256": "d6e25f3364afeec61a5ce1d138e04e5b4203dbf5594944c68768503624d12acf",
+          "repoSha256": "9ae005fc2444e6a58758a880d1896afc83a8126d6f1c445daeed0ced1ed91b0b",
+          "repoPath": "apps-script/hoy-driver-os-writer/Code.gs",
+          "liveBytes": 36081,
+          "repoBytes": 34697,
+          "action": "PROPOSE_LIVE_TO_CANONICAL",
+          "canonicalPath": "apps-script/hoy-driver-os-writer/Code.gs"
+        },
+        {
+          "key": "foregroundpickup::HTML",
+          "name": "ForegroundPickup",
+          "type": "HTML",
+          "status": "REPO_ONLY",
+          "liveSha256": "",
+          "repoSha256": "5dd53d9dfa8defbd9f40f86cd8301ec9cba2ed360fef9ae20ca5a135f6eda8a7",
+          "repoPath": "apps-script/hoy-driver-os-writer/ForegroundPickup.html",
+          "liveBytes": 0,
+          "repoBytes": 8558,
+          "action": "KEEP_REPO",
+          "canonicalPath": "apps-script/hoy-driver-os-writer/ForegroundPickup.html"
+        },
+        {
+          "key": "foregroundpickup::SERVER_JS",
+          "name": "ForegroundPickup",
+          "type": "SERVER_JS",
+          "status": "REPO_ONLY",
+          "liveSha256": "",
+          "repoSha256": "0cddcdf17138507c8e884c1f8e36f855f73ecf1fc635d21a0f404c4c2d078561",
+          "repoPath": "apps-script/hoy-driver-os-writer/ForegroundPickup.gs",
+          "liveBytes": 0,
+          "repoBytes": 2304,
+          "action": "KEEP_REPO",
+          "canonicalPath": "apps-script/hoy-driver-os-writer/ForegroundPickup.gs"
+        },
+        {
+          "key": "index::HTML",
+          "name": "Index",
+          "type": "HTML",
+          "status": "DIFF",
+          "liveSha256": "40c3b14579f10ef17898e464285f2add501c99ad8e50ffd76fd17246183d7667",
+          "repoSha256": "537231a66e1c89fb9021c13ad4ca86c00213a51140b1b85b27f4f5e0fd9a1ae7",
+          "repoPath": "apps-script/hoy-driver-os-writer/Index.html",
+          "liveBytes": 58941,
+          "repoBytes": 54896,
+          "action": "PROPOSE_LIVE_TO_CANONICAL",
+          "canonicalPath": "apps-script/hoy-driver-os-writer/Index.html"
+        },
+        {
+          "key": "pulseuicontrols::HTML",
+          "name": "PulseUiControls",
+          "type": "HTML",
+          "status": "LIVE_ONLY",
+          "liveSha256": "0084214d69a4ee36006207aa4b1f17d0fd2dab46e4296f9be3e9a0eae654b445",
+          "repoSha256": "",
+          "repoPath": "",
+          "liveBytes": 8679,
+          "repoBytes": 0,
+          "action": "PROPOSE_LIVE_TO_CANONICAL",
+          "canonicalPath": "apps-script/hoy-driver-os-writer/PulseUiControls.html"
+        }
+      ],
+      "productionProjectMutated": false
+    },
+    {
+      "taskId": "PULSE-078",
+      "captureId": "20260804-183219",
+      "alias": "PULSE_REQUEST_APP",
+      "scriptId": "1pxF-tqlu-NrINv0QD-sQZEXMGUoc408YhHOuKccoU_URCtCyOmTiaVSm",
+      "authority": "LIVE",
+      "rideRequestsWriter": true,
+      "livePackageHash": "081c9dddc24424109a425fd9aa3537249807ba57b31fdab98cddca7bb9ab173a",
+      "liveInventory": [
+        {
+          "name": "appsscript",
+          "type": "JSON",
+          "bytes": 387,
+          "sha256": "2824c8c201d7ae56907ff9d80a6e4a41c9c739f5731250e58751efa94a4ee343"
+        },
+        {
+          "name": "Code",
+          "type": "SERVER_JS",
+          "bytes": 22741,
+          "sha256": "79004f261c50b481526649fb71908ac104b406b3cf0bc3cd9442116a2034dc61"
+        },
+        {
+          "name": "RequestForm",
+          "type": "HTML",
+          "bytes": 22353,
+          "sha256": "aa5f08697397c7351a7b1e1d8f5602193d55ba488b64fb2a960d9cdc9b489849"
+        }
+      ],
+      "repositoryFiles": [
+        {
+          "path": "pulse-autobuild/request-app/Code.gs",
+          "name": "Code",
+          "type": "SERVER_JS",
+          "bytes": 49549,
+          "sha256": "1862ee4a87819a0fd2f16428e8b072f2b6d277c236fe3314aa6b8812c700ba19"
+        },
+        {
+          "path": "pulse-autobuild/request-app/FareQuote.gs",
+          "name": "FareQuote",
+          "type": "SERVER_JS",
+          "bytes": 4778,
+          "sha256": "428a90fe3426909664650abf2e9a4f8cc38a5fd7ccc8168916ee4f330e1e0f8e"
+        },
+        {
+          "path": "pulse-autobuild/request-app/RequestForm.html",
+          "name": "RequestForm",
+          "type": "HTML",
+          "bytes": 42535,
+          "sha256": "d0686968382daa15bac96774857f5b266d9d92e7c36ec77d2f27a69a22dfca69"
+        },
+        {
+          "path": "pulse-autobuild/request-app/RiderExperience.gs",
+          "name": "RiderExperience",
+          "type": "SERVER_JS",
+          "bytes": 3337,
+          "sha256": "9f816ea7aaa9a78d282a2ab20a416c353655c57f61140868e6730133ae66c3a9"
+        },
+        {
+          "path": "pulse-autobuild/request-app/appsscript.json",
+          "name": "appsscript",
+          "type": "JSON",
+          "bytes": 388,
+          "sha256": "432520c96a7b10738aeeb1158ae795e6fe71d234a79bd81e6be2c136d034fff8"
+        }
+      ],
+      "files": [
+        {
+          "key": "appsscript::JSON",
+          "name": "appsscript",
+          "type": "JSON",
+          "status": "DIFF",
+          "liveSha256": "2824c8c201d7ae56907ff9d80a6e4a41c9c739f5731250e58751efa94a4ee343",
+          "repoSha256": "432520c96a7b10738aeeb1158ae795e6fe71d234a79bd81e6be2c136d034fff8",
+          "repoPath": "pulse-autobuild/request-app/appsscript.json",
+          "liveBytes": 387,
+          "repoBytes": 388,
+          "action": "PROPOSE_LIVE_TO_CANONICAL",
+          "canonicalPath": "pulse-autobuild/request-app/appsscript.json"
+        },
+        {
+          "key": "code::SERVER_JS",
+          "name": "Code",
+          "type": "SERVER_JS",
+          "status": "DIFF",
+          "liveSha256": "79004f261c50b481526649fb71908ac104b406b3cf0bc3cd9442116a2034dc61",
+          "repoSha256": "1862ee4a87819a0fd2f16428e8b072f2b6d277c236fe3314aa6b8812c700ba19",
+          "repoPath": "pulse-autobuild/request-app/Code.gs",
+          "liveBytes": 22741,
+          "repoBytes": 49549,
+          "action": "PROPOSE_LIVE_TO_CANONICAL",
+          "canonicalPath": "pulse-autobuild/request-app/Code.gs"
+        },
+        {
+          "key": "farequote::SERVER_JS",
+          "name": "FareQuote",
+          "type": "SERVER_JS",
+          "status": "REPO_ONLY",
+          "liveSha256": "",
+          "repoSha256": "428a90fe3426909664650abf2e9a4f8cc38a5fd7ccc8168916ee4f330e1e0f8e",
+          "repoPath": "pulse-autobuild/request-app/FareQuote.gs",
+          "liveBytes": 0,
+          "repoBytes": 4778,
+          "action": "KEEP_REPO",
+          "canonicalPath": "pulse-autobuild/request-app/FareQuote.gs"
+        },
+        {
+          "key": "requestform::HTML",
+          "name": "RequestForm",
+          "type": "HTML",
+          "status": "DIFF",
+          "liveSha256": "aa5f08697397c7351a7b1e1d8f5602193d55ba488b64fb2a960d9cdc9b489849",
+          "repoSha256": "d0686968382daa15bac96774857f5b266d9d92e7c36ec77d2f27a69a22dfca69",
+          "repoPath": "pulse-autobuild/request-app/RequestForm.html",
+          "liveBytes": 22353,
+          "repoBytes": 42535,
+          "action": "PROPOSE_LIVE_TO_CANONICAL",
+          "canonicalPath": "pulse-autobuild/request-app/RequestForm.html"
+        },
+        {
+          "key": "riderexperience::SERVER_JS",
+          "name": "RiderExperience",
+          "type": "SERVER_JS",
+          "status": "REPO_ONLY",
+          "liveSha256": "",
+          "repoSha256": "9f816ea7aaa9a78d282a2ab20a416c353655c57f61140868e6730133ae66c3a9",
+          "repoPath": "pulse-autobuild/request-app/RiderExperience.gs",
+          "liveBytes": 0,
+          "repoBytes": 3337,
+          "action": "KEEP_REPO",
+          "canonicalPath": "pulse-autobuild/request-app/RiderExperience.gs"
+        }
+      ],
+      "productionProjectMutated": false
+    },
+    {
+      "taskId": "PULSE-078",
+      "captureId": "20260804-183219",
+      "alias": "RIDER_STATUS_RUNTIME",
+      "scriptId": "1cABIzv0j8poYGy3hVbcmKe-DBuJQHR9Hcj-2l9VqvXMot_kmleKnHgUf",
+      "authority": "LIVE",
+      "rideRequestsWriter": false,
+      "livePackageHash": "5f35d660c4d3ba510501614b34e5e23f7dc5ba690a2e695531c14c9f5a878b08",
+      "liveInventory": [
+        {
+          "name": "appsscript",
+          "type": "JSON",
+          "bytes": 336,
+          "sha256": "840cb825252ea73bfaf398da8b4f2a08b05600baf456c2c5514b92685d4a3c50"
+        },
+        {
+          "name": "Code",
+          "type": "SERVER_JS",
+          "bytes": 173668,
+          "sha256": "613a1c1ee0f5e141dfab9fbecb3da5aabc7dc4a18f1a81ad48af1e179a439985"
+        }
+      ],
+      "repositoryFiles": [
+        {
+          "path": "pulse-autobuild/runtime/Code.gs",
+          "name": "Code",
+          "type": "SERVER_JS",
+          "bytes": 173669,
+          "sha256": "306d4c18d11859bc972214f0a3b1beb5098661a3c1fd5394970a5e95ea12b69d"
+        },
+        {
+          "path": "pulse-autobuild/runtime/appsscript.json",
+          "name": "appsscript",
+          "type": "JSON",
+          "bytes": 337,
+          "sha256": "b300db34f9c4f514248900a7750fa2f54f35b4029ed92ec08cceb9ec537f918b"
+        }
+      ],
+      "files": [
+        {
+          "key": "appsscript::JSON",
+          "name": "appsscript",
+          "type": "JSON",
+          "status": "DIFF",
+          "liveSha256": "840cb825252ea73bfaf398da8b4f2a08b05600baf456c2c5514b92685d4a3c50",
+          "repoSha256": "b300db34f9c4f514248900a7750fa2f54f35b4029ed92ec08cceb9ec537f918b",
+          "repoPath": "pulse-autobuild/runtime/appsscript.json",
+          "liveBytes": 336,
+          "repoBytes": 337,
+          "action": "PROPOSE_LIVE_TO_CANONICAL",
+          "canonicalPath": "pulse-autobuild/runtime/appsscript.json"
+        },
+        {
+          "key": "code::SERVER_JS",
+          "name": "Code",
+          "type": "SERVER_JS",
+          "status": "DIFF",
+          "liveSha256": "613a1c1ee0f5e141dfab9fbecb3da5aabc7dc4a18f1a81ad48af1e179a439985",
+          "repoSha256": "306d4c18d11859bc972214f0a3b1beb5098661a3c1fd5394970a5e95ea12b69d",
+          "repoPath": "pulse-autobuild/runtime/Code.gs",
+          "liveBytes": 173668,
+          "repoBytes": 173669,
+          "action": "PROPOSE_LIVE_TO_CANONICAL",
+          "canonicalPath": "pulse-autobuild/runtime/Code.gs"
+        }
+      ],
+      "productionProjectMutated": false
+    }
+  ],
+  "counts": {
+    "MATCH": 0,
+    "DIFF": 10,
+    "LIVE_ONLY": 7,
+    "REPO_ONLY": 12
+  },
+  "proposedCanonicalChanges": 9,
+  "appsScriptHeadWrites": 0,
+  "deploymentsCreated": 0,
+  "engineActivations": 0,
+  "productionDataChanged": false,
+  "automaticMerge": false,
+  "productionTouched": false,
+  "reportHash": "e6f0ec4ca4013217370f49562aa9794197cd591eaf989592c6f48756157a2da6"
+}

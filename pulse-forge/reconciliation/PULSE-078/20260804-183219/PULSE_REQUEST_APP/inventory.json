@@ -1,0 +1,134 @@
+{
+  "taskId": "PULSE-078",
+  "captureId": "20260804-183219",
+  "alias": "PULSE_REQUEST_APP",
+  "scriptId": "1pxF-tqlu-NrINv0QD-sQZEXMGUoc408YhHOuKccoU_URCtCyOmTiaVSm",
+  "authority": "LIVE",
+  "rideRequestsWriter": true,
+  "livePackageHash": "081c9dddc24424109a425fd9aa3537249807ba57b31fdab98cddca7bb9ab173a",
+  "liveInventory": [
+    {
+      "name": "appsscript",
+      "type": "JSON",
+      "bytes": 387,
+      "sha256": "2824c8c201d7ae56907ff9d80a6e4a41c9c739f5731250e58751efa94a4ee343"
+    },
+    {
+      "name": "Code",
+      "type": "SERVER_JS",
+      "bytes": 22741,
+      "sha256": "79004f261c50b481526649fb71908ac104b406b3cf0bc3cd9442116a2034dc61"
+    },
+    {
+      "name": "RequestForm",
+      "type": "HTML",
+      "bytes": 22353,
+      "sha256": "aa5f08697397c7351a7b1e1d8f5602193d55ba488b64fb2a960d9cdc9b489849"
+    }
+  ],
+  "repositoryFiles": [
+    {
+      "path": "pulse-autobuild/request-app/Code.gs",
+      "name": "Code",
+      "type": "SERVER_JS",
+      "bytes": 49549,
+      "sha256": "1862ee4a87819a0fd2f16428e8b072f2b6d277c236fe3314aa6b8812c700ba19"
+    },
+    {
+      "path": "pulse-autobuild/request-app/FareQuote.gs",
+      "name": "FareQuote",
+      "type": "SERVER_JS",
+      "bytes": 4778,
+      "sha256": "428a90fe3426909664650abf2e9a4f8cc38a5fd7ccc8168916ee4f330e1e0f8e"
+    },
+    {
+      "path": "pulse-autobuild/request-app/RequestForm.html",
+      "name": "RequestForm",
+      "type": "HTML",
+      "bytes": 42535,
+      "sha256": "d0686968382daa15bac96774857f5b266d9d92e7c36ec77d2f27a69a22dfca69"
+    },
+    {
+      "path": "pulse-autobuild/request-app/RiderExperience.gs",
+      "name": "RiderExperience",
+      "type": "SERVER_JS",
+      "bytes": 3337,
+      "sha256": "9f816ea7aaa9a78d282a2ab20a416c353655c57f61140868e6730133ae66c3a9"
+    },
+    {
+      "path": "pulse-autobuild/request-app/appsscript.json",
+      "name": "appsscript",
+      "type": "JSON",
+      "bytes": 388,
+      "sha256": "432520c96a7b10738aeeb1158ae795e6fe71d234a79bd81e6be2c136d034fff8"
+    }
+  ],
+  "files": [
+    {
+      "key": "appsscript::JSON",
+      "name": "appsscript",
+      "type": "JSON",
+      "status": "DIFF",
+      "liveSha256": "2824c8c201d7ae56907ff9d80a6e4a41c9c739f5731250e58751efa94a4ee343",
+      "repoSha256": "432520c96a7b10738aeeb1158ae795e6fe71d234a79bd81e6be2c136d034fff8",
+      "repoPath": "pulse-autobuild/request-app/appsscript.json",
+      "liveBytes": 387,
+      "repoBytes": 388,
+      "action": "PROPOSE_LIVE_TO_CANONICAL",
+      "canonicalPath": "pulse-autobuild/request-app/appsscript.json"
+    },
+    {
+      "key": "code::SERVER_JS",
+      "name": "Code",
+      "type": "SERVER_JS",
+      "status": "DIFF",
+      "liveSha256": "79004f261c50b481526649fb71908ac104b406b3cf0bc3cd9442116a2034dc61",
+      "repoSha256": "1862ee4a87819a0fd2f16428e8b072f2b6d277c236fe3314aa6b8812c700ba19",
+      "repoPath": "pulse-autobuild/request-app/Code.gs",
+      "liveBytes": 22741,
+      "repoBytes": 49549,
+      "action": "PROPOSE_LIVE_TO_CANONICAL",
+      "canonicalPath": "pulse-autobuild/request-app/Code.gs"
+    },
+    {
+      "key": "farequote::SERVER_JS",
+      "name": "FareQuote",
+      "type": "SERVER_JS",
+      "status": "REPO_ONLY",
+      "liveSha256": "",
+      "repoSha256": "428a90fe3426909664650abf2e9a4f8cc38a5fd7ccc8168916ee4f330e1e0f8e",
+      "repoPath": "pulse-autobuild/request-app/FareQuote.gs",
+      "liveBytes": 0,
+      "repoBytes": 4778,
+      "action": "KEEP_REPO",
+      "canonicalPath": "pulse-autobuild/request-app/FareQuote.gs"
+    },
+    {
+      "key": "requestform::HTML",
+      "name": "RequestForm",
+      "type": "HTML",
+      "status": "DIFF",
+      "liveSha256": "aa5f08697397c7351a7b1e1d8f5602193d55ba488b64fb2a960d9cdc9b489849",
+      "repoSha256": "d0686968382daa15bac96774857f5b266d9d92e7c36ec77d2f27a69a22dfca69",
+      "repoPath": "pulse-autobuild/request-app/RequestForm.html",
+      "liveBytes": 22353,
+      "repoBytes": 42535,
+      "action": "PROPOSE_LIVE_TO_CANONICAL",
+      "canonicalPath": "pulse-autobuild/request-app/RequestForm.html"
+    },
+    {
+      "key": "riderexperience::SERVER_JS",
+      "name": "RiderExperience",
+      "type": "SERVER_JS",
+      "status": "REPO_ONLY",
+      "liveSha256": "",
+      "repoSha256": "9f816ea7aaa9a78d282a2ab20a416c353655c57f61140868e6730133ae66c3a9",
+      "repoPath": "pulse-autobuild/request-app/RiderExperience.gs",
+      "liveBytes": 0,
+      "repoBytes": 3337,
+      "action": "KEEP_REPO",
+      "canonicalPath": "pulse-autobuild/request-app/RiderExperience.gs"
+    }
+  ],
+  "productionProjectMutated": false
+}

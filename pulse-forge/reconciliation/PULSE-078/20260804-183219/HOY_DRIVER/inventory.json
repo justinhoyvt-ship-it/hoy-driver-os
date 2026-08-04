@@ -1,0 +1,153 @@
+{
+  "taskId": "PULSE-078",
+  "captureId": "20260804-183219",
+  "alias": "HOY_DRIVER",
+  "scriptId": "1sN7MFrzEOD0GMIOc10XoA8j5IPzZwQynowIuZpXDCWuLbF2wqIDf8Zj0",
+  "authority": "LIVE",
+  "rideRequestsWriter": false,
+  "livePackageHash": "6681df1b363a918120c71fa86b22a13a49f44d2e7f3e359582d200cb51e68c3f",
+  "liveInventory": [
+    {
+      "name": "appsscript",
+      "type": "JSON",
+      "bytes": 198,
+      "sha256": "2ce3c16abe3ad90f9dc037ba2488107683a2068a0b9a7c25c35529ebadbe6883"
+    },
+    {
+      "name": "Code",
+      "type": "SERVER_JS",
+      "bytes": 36081,
+      "sha256": "d6e25f3364afeec61a5ce1d138e04e5b4203dbf5594944c68768503624d12acf"
+    },
+    {
+      "name": "Index",
+      "type": "HTML",
+      "bytes": 58941,
+      "sha256": "40c3b14579f10ef17898e464285f2add501c99ad8e50ffd76fd17246183d7667"
+    },
+    {
+      "name": "PulseUiControls",
+      "type": "HTML",
+      "bytes": 8679,
+      "sha256": "0084214d69a4ee36006207aa4b1f17d0fd2dab46e4296f9be3e9a0eae654b445"
+    }
+  ],
+  "repositoryFiles": [
+    {
+      "path": "apps-script/hoy-driver-os-writer/Code.gs",
+      "name": "Code",
+      "type": "SERVER_JS",
+      "bytes": 34697,
+      "sha256": "9ae005fc2444e6a58758a880d1896afc83a8126d6f1c445daeed0ced1ed91b0b"
+    },
+    {
+      "path": "apps-script/hoy-driver-os-writer/ForegroundPickup.gs",
+      "name": "ForegroundPickup",
+      "type": "SERVER_JS",
+      "bytes": 2304,
+      "sha256": "0cddcdf17138507c8e884c1f8e36f855f73ecf1fc635d21a0f404c4c2d078561"
+    },
+    {
+      "path": "apps-script/hoy-driver-os-writer/ForegroundPickup.html",
+      "name": "ForegroundPickup",
+      "type": "HTML",
+      "bytes": 8558,
+      "sha256": "5dd53d9dfa8defbd9f40f86cd8301ec9cba2ed360fef9ae20ca5a135f6eda8a7"
+    },
+    {
+      "path": "apps-script/hoy-driver-os-writer/Index.html",
+      "name": "Index",
+      "type": "HTML",
+      "bytes": 54896,
+      "sha256": "537231a66e1c89fb9021c13ad4ca86c00213a51140b1b85b27f4f5e0fd9a1ae7"
+    },
+    {
+      "path": "apps-script/hoy-driver-os-writer/appsscript.json",
+      "name": "appsscript",
+      "type": "JSON",
+      "bytes": 199,
+      "sha256": "2453f8d6311d3d02408e2ce2521a088ad65e99325c87f5e3b00ffaea7ba57b72"
+    }
+  ],
+  "files": [
+    {
+      "key": "appsscript::JSON",
+      "name": "appsscript",
+      "type": "JSON",
+      "status": "DIFF",
+      "liveSha256": "2ce3c16abe3ad90f9dc037ba2488107683a2068a0b9a7c25c35529ebadbe6883",
+      "repoSha256": "2453f8d6311d3d02408e2ce2521a088ad65e99325c87f5e3b00ffaea7ba57b72",
+      "repoPath": "apps-script/hoy-driver-os-writer/appsscript.json",
+      "liveBytes": 198,
+      "repoBytes": 199,
+      "action": "PROPOSE_LIVE_TO_CANONICAL",
+      "canonicalPath": "apps-script/hoy-driver-os-writer/appsscript.json"
+    },
+    {
+      "key": "code::SERVER_JS",
+      "name": "Code",
+      "type": "SERVER_JS",
+      "status": "DIFF",
+      "liveSha256": "d6e25f3364afeec61a5ce1d138e04e5b4203dbf5594944c68768503624d12acf",
+      "repoSha256": "9ae005fc2444e6a58758a880d1896afc83a8126d6f1c445daeed0ced1ed91b0b",
+      "repoPath": "apps-script/hoy-driver-os-writer/Code.gs",
+      "liveBytes": 36081,
+      "repoBytes": 34697,
+      "action": "PROPOSE_LIVE_TO_CANONICAL",
+      "canonicalPath": "apps-script/hoy-driver-os-writer/Code.gs"
+    },
+    {
+      "key": "foregroundpickup::HTML",
+      "name": "ForegroundPickup",
+      "type": "HTML",
+      "status": "REPO_ONLY",
+      "liveSha256": "",
+      "repoSha256": "5dd53d9dfa8defbd9f40f86cd8301ec9cba2ed360fef9ae20ca5a135f6eda8a7",
+      "repoPath": "apps-script/hoy-driver-os-writer/ForegroundPickup.html",
+      "liveBytes": 0,
+      "repoBytes": 8558,
+      "action": "KEEP_REPO",
+      "canonicalPath": "apps-script/hoy-driver-os-writer/ForegroundPickup.html"
+    },
+    {
+      "key": "foregroundpickup::SERVER_JS",
+      "name": "ForegroundPickup",
+      "type": "SERVER_JS",
+      "status": "REPO_ONLY",
+      "liveSha256": "",
+      "repoSha256": "0cddcdf17138507c8e884c1f8e36f855f73ecf1fc635d21a0f404c4c2d078561",
+      "repoPath": "apps-script/hoy-driver-os-writer/ForegroundPickup.gs",
+      "liveBytes": 0,
+      "repoBytes": 2304,
+      "action": "KEEP_REPO",
+      "canonicalPath": "apps-script/hoy-driver-os-writer/ForegroundPickup.gs"
+    },
+    {
+      "key": "index::HTML",
+      "name": "Index",
+      "type": "HTML",
+      "status": "DIFF",
+      "liveSha256": "40c3b14579f10ef17898e464285f2add501c99ad8e50ffd76fd17246183d7667",
+      "repoSha256": "537231a66e1c89fb9021c13ad4ca86c00213a51140b1b85b27f4f5e0fd9a1ae7",
+      "repoPath": "apps-script/hoy-driver-os-writer/Index.html",
+      "liveBytes": 58941,
+      "repoBytes": 54896,
+      "action": "PROPOSE_LIVE_TO_CANONICAL",
+      "canonicalPath": "apps-script/hoy-driver-os-writer/Index.html"
+    },
+    {
+      "key": "pulseuicontrols::HTML",
+      "name": "PulseUiControls",
+      "type": "HTML",
+      "status": "LIVE_ONLY",
+      "liveSha256": "0084214d69a4ee36006207aa4b1f17d0fd2dab46e4296f9be3e9a0eae654b445",
+      "repoSha256": "",
+      "repoPath": "",
+      "liveBytes": 8679,
+      "repoBytes": 0,
+      "action": "PROPOSE_LIVE_TO_CANONICAL",
+      "canonicalPath": "apps-script/hoy-driver-os-writer/PulseUiControls.html"
+    }
+  ],
+  "productionProjectMutated": false
+}

@@ -1,0 +1,68 @@
+{
+  "taskId": "PULSE-078",
+  "captureId": "20260804-183219",
+  "alias": "RIDER_STATUS_RUNTIME",
+  "scriptId": "1cABIzv0j8poYGy3hVbcmKe-DBuJQHR9Hcj-2l9VqvXMot_kmleKnHgUf",
+  "authority": "LIVE",
+  "rideRequestsWriter": false,
+  "livePackageHash": "5f35d660c4d3ba510501614b34e5e23f7dc5ba690a2e695531c14c9f5a878b08",
+  "liveInventory": [
+    {
+      "name": "appsscript",
+      "type": "JSON",
+      "bytes": 336,
+      "sha256": "840cb825252ea73bfaf398da8b4f2a08b05600baf456c2c5514b92685d4a3c50"
+    },
+    {
+      "name": "Code",
+      "type": "SERVER_JS",
+      "bytes": 173668,
+      "sha256": "613a1c1ee0f5e141dfab9fbecb3da5aabc7dc4a18f1a81ad48af1e179a439985"
+    }
+  ],
+  "repositoryFiles": [
+    {
+      "path": "pulse-autobuild/runtime/Code.gs",
+      "name": "Code",
+      "type": "SERVER_JS",
+      "bytes": 173669,
+      "sha256": "306d4c18d11859bc972214f0a3b1beb5098661a3c1fd5394970a5e95ea12b69d"
+    },
+    {
+      "path": "pulse-autobuild/runtime/appsscript.json",
+      "name": "appsscript",
+      "type": "JSON",
+      "bytes": 337,
+      "sha256": "b300db34f9c4f514248900a7750fa2f54f35b4029ed92ec08cceb9ec537f918b"
+    }
+  ],
+  "files": [
+    {
+      "key": "appsscript::JSON",
+      "name": "appsscript",
+      "type": "JSON",
+      "status": "DIFF",
+      "liveSha256": "840cb825252ea73bfaf398da8b4f2a08b05600baf456c2c5514b92685d4a3c50",
+      "repoSha256": "b300db34f9c4f514248900a7750fa2f54f35b4029ed92ec08cceb9ec537f918b",
+      "repoPath": "pulse-autobuild/runtime/appsscript.json",
+      "liveBytes": 336,
+      "repoBytes": 337,
+      "action": "PROPOSE_LIVE_TO_CANONICAL",
+      "canonicalPath": "pulse-autobuild/runtime/appsscript.json"
+    },
+    {
+      "key": "code::SERVER_JS",
+      "name": "Code",
+      "type": "SERVER_JS",
+      "status": "DIFF",
+      "liveSha256": "613a1c1ee0f5e141dfab9fbecb3da5aabc7dc4a18f1a81ad48af1e179a439985",
+      "repoSha256": "306d4c18d11859bc972214f0a3b1beb5098661a3c1fd5394970a5e95ea12b69d",
+      "repoPath": "pulse-autobuild/runtime/Code.gs",
+      "liveBytes": 173668,
+      "repoBytes": 173669,
+      "action": "PROPOSE_LIVE_TO_CANONICAL",
+      "canonicalPath": "pulse-autobuild/runtime/Code.gs"
+    }
+  ],
+  "productionProjectMutated": false
+}
