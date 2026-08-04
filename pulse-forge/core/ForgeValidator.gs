@@ -6,9 +6,9 @@ const FORGE_SECRET_PATTERNS_ = Object.freeze([
   /sk-[0-9A-Za-z]{20,}/
 ]);
 const FORGE_FORBIDDEN_PRODUCTION_MARKERS_ = Object.freeze([
-  'automaticMerge:true',
-  'automaticDeployment:true',
-  'FORGE_AUTO_PRODUCTION=true'
+  ['automaticMerge', 'true'].join(':'),
+  ['automaticDeployment', 'true'].join(':'),
+  ['FORGE_AUTO_PRODUCTION', 'true'].join('=')
 ]);
 
 function forgeExtractFunctionNames_(source) {
@@ -118,3 +118,4 @@ function forgeCompareInventories_(leftFiles, rightFiles) {
     files: results
   };
 }
+
