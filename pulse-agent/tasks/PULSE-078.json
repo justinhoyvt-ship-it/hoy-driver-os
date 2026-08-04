@@ -1,0 +1,42 @@
+{
+  "taskId": "PULSE-078",
+  "title": "Import and reconcile every live Pulse Apps Script project",
+  "status": "PR_READY",
+  "buildType": "LIVE_SOURCE_RECONCILIATION",
+  "dependsOn": [
+    "PULSE-077"
+  ],
+  "scope": [
+    "pulse-forge/controller/PULSE078SourceReconciliation.gs",
+    "pulse-forge/tests/validate-pulse-078.mjs",
+    "pulse-forge/reconciliation/PULSE-078",
+    "pulse-autobuild/request-app",
+    "apps-script/hoy-driver-os-writer",
+    "pulse-autobuild/runtime"
+  ],
+  "targets": {
+    "forgeController": "current controller ScriptApp project",
+    "hoyDriver": "1sN7MFrzEOD0GMIOc10XoA8j5IPzZwQynowIuZpXDCWuLbF2wqIDf8Zj0",
+    "requestApp": "1pxF-tqlu-NrINv0QD-sQZEXMGUoc408YhHOuKccoU_URCtCyOmTiaVSm",
+    "riderStatusRuntime": "1cABIzv0j8poYGy3hVbcmKe-DBuJQHR9Hcj-2l9VqvXMot_kmleKnHgUf"
+  },
+  "acceptance": {
+    "completeLiveSourceRead": true,
+    "perFileStatuses": [
+      "MATCH",
+      "DIFF",
+      "LIVE_ONLY",
+      "REPO_ONLY"
+    ],
+    "immutableSnapshotsAndHashes": true,
+    "reviewedGitHubRepairOnly": true,
+    "requestAppOnlyRideRequestsWriter": true,
+    "controllerRepoPreferred": true,
+    "liveAppsPreferred": true,
+    "appsScriptHeadWrites": 0,
+    "automaticMerge": false,
+    "automaticProductionDeployment": false,
+    "automaticEngineActivation": false,
+    "productionDataChanged": false
+  }
+}
