@@ -169,7 +169,7 @@ function forgeValidateAndActivateEngine(request) {
   const target = forgeString_(request.projectAlias).toUpperCase();
   forgeAssert_(PULSE_FORGE.ENGINE_SLOTS.indexOf(target) >= 0, 'A valid engine slot is required.');
   const testResult = forgeRunScriptFunction({
-    scriptId: request.scriptId,
+    deploymentId: request.deploymentId,
     functionName: request.testFunction || 'forgeEngineSelfTest',
     parameters: request.parameters || [],
     devMode: false
