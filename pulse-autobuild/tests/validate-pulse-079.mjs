@@ -14,7 +14,7 @@ const requiredMarkers = [
   'function reconcileRequestedRides_(incoming)',
   'function releaseHeldRequests_()',
   'byKey=Object.create(null)',
-  'visibleBefore=Object.create(null),heldBefore=Object.create(null)'
+  'visibleBefore=Object.create(null),heldBefore=Object.create(null)',
   'navigator.vibrate([120,60,120])',
   'Request held until drop-off',
   'accept.disabled=locked',
