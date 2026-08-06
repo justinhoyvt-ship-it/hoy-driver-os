@@ -3,9 +3,7 @@ name: Pulse Forge CI
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
-      - copilot/pulse-080r-permanent-builder-restoration
+    branches: [main]
     paths:
       - 'pulse-forge/**'
       - 'pulse-agent/tasks/PULSE-076.json'
@@ -17,77 +15,10 @@ on:
       - '.github/workflows/pulse-forge-ci.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  apply-pulse-080r-repair:
-    if: (github.event_name == 'push' && github.ref_name == 'copilot/pulse-080r-permanent-builder-restoration') || (github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'copilot/pulse-080r-permanent-builder-restoration')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: copilot/pulse-080r-permanent-builder-restoration
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Apply locked PULSE-080R package
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -f .pulse-repair/apply-repair.mjs
-          node .pulse-repair/apply-repair.mjs
-          echo 'c8028e4f7ea1547ea6b1c43b28f966ff4075f3e993f30fa440302e5c9afaf381  .pulse-repair/PULSE-080R-PR50-repair.zip' | sha256sum --check --strict
-          rm -rf .pulse-repair
-          rm -f .github/workflows/pulse-080r-apply-repair.yml
-          cat > .github/workflows/pulse-forge-ci.yml <<'ORIGINAL_WORKFLOW'
-          name: Pulse Forge CI
-
-          on:
-            workflow_dispatch:
-            push:
-              branches: [main]
-              paths:
-                - 'pulse-forge/**'
-                - 'pulse-agent/tasks/PULSE-076.json'
-                - '.github/workflows/pulse-forge-ci.yml'
-            pull_request:
-              paths:
-                - 'pulse-forge/**'
-                - 'pulse-agent/tasks/PULSE-076.json'
-                - '.github/workflows/pulse-forge-ci.yml'
-
-          permissions:
-            contents: read
-
-          jobs:
-            validate-forge:
-              runs-on: ubuntu-latest
-              steps:
-                - uses: actions/checkout@v4
-                - uses: actions/setup-node@v4
-                  with:
-                    node-version: '22'
-                - name: Validate Forge source and safety contract
-                  run: npm --prefix pulse-forge run validate
-          ORIGINAL_WORKFLOW
-          sed -i 's/^          //' .github/workflows/pulse-forge-ci.yml
-      - name: Validate complete repaired Forge source
-        run: npm --prefix pulse-forge run validate
-      - name: Commit repaired files to existing PR branch
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name 'Pulse Forge Repair'
-          git config user.email 'pulse-forge-repair@users.noreply.github.com'
-          git add -A
-          git diff --cached --quiet && { echo 'No repair changes found'; exit 1; }
-          git commit -m 'PULSE-080R: apply validated permanent Builder repair [repair-applied]'
-          git push origin HEAD:copilot/pulse-080r-permanent-builder-restoration
-
   validate-forge:
-    needs: apply-pulse-080r-repair
-    if: always() && (needs.apply-pulse-080r-repair.result == 'success' || needs.apply-pulse-080r-repair.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
