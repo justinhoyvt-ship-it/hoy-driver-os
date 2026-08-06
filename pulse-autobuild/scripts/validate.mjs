@@ -278,7 +278,7 @@ for (const forbidden of [
   }
 }
 for (const marker of [
-  "var S={shift:null, active:null, queued:null, scheduled:[], requests:[], pendingTrips:[]};",
+  "var S={shift:null, active:null, queued:null, scheduled:[], requests:[], heldRequests:[], pendingTrips:[]};",
   "srv('logCompletedTrip',payload)",
   "start.textContent='Begin pickup'",
   "if(S.active||S.queued){toast('Finish current ride first');return;}",

@@ -4,9 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "validate": "node scripts/validate.mjs",
+    "validate": "node scripts/validate.mjs && node tests/validate-pulse-079.mjs",
     "build": "node scripts/build.mjs",
     "autobuild": "npm run validate && npm run build"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }
