@@ -528,7 +528,7 @@
     return String(r.requestId||r.id||[r.name||'',r.pickup||'',r.destination||'',r.whenISO||''].join('|')).trim();
   }
   function uniqueRequests_(list){
-    var order=[],byKey={};
+    var order=[],byKey=Object.create(null);
     (list||[]).forEach(function(r){var key=requestKey_(r);if(!key)return;if(!Object.prototype.hasOwnProperty.call(byKey,key))order.push(key);byKey[key]=r;});
     return order.map(function(key){return byKey[key]});
   }
@@ -538,7 +538,7 @@
     toast(count===1?'New request held until drop-off':count+' new requests held until drop-off');
   }
   function reconcileRequestedRides_(incoming){
-    var list=uniqueRequests_(incoming),visibleBefore={},heldBefore={},visible=[],held=uniqueRequests_(S.heldRequests||[]),newlyHeld=0;
+    var list=uniqueRequests_(incoming),visibleBefore=Object.create(null),heldBefore=Object.create(null),visible=[],held=uniqueRequests_(S.heldRequests||[]),newlyHeld=0;
     (S.requests||[]).forEach(function(r){visibleBefore[requestKey_(r)]=true;});
     (S.heldRequests||[]).forEach(function(r){heldBefore[requestKey_(r)]=true;});
     if(requestReviewLocked_()){

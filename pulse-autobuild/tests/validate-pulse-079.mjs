@@ -13,6 +13,8 @@ const requiredMarkers = [
   'function uniqueRequests_(list)',
   'function reconcileRequestedRides_(incoming)',
   'function releaseHeldRequests_()',
+  'byKey=Object.create(null)',
+  'visibleBefore=Object.create(null),heldBefore=Object.create(null)'
   'navigator.vibrate([120,60,120])',
   'Request held until drop-off',
   'accept.disabled=locked',
@@ -24,7 +26,7 @@ for (const marker of requiredMarkers) {
 }
 
 const holdStart = driverHtml.indexOf('function requestReviewLocked_()');
-const holdEnd = driverHtml.indexOf('function renderInbox()', holdStart);
+const holdEnd = driverHtml.indexOf('function openDecision(url)', holdStart);
 assert.ok(holdStart >= 0 && holdEnd > holdStart, 'PULSE-079 hold block was not found.');
 const holdBlock = driverHtml.slice(holdStart, holdEnd);
 for (const forbidden of [
@@ -48,7 +50,7 @@ function requestKey(request) {
 
 function uniqueRequests(list) {
   const order = [];
-  const byKey = {};
+  const byKey = Object.create(null);
   for (const request of list || []) {
     const key = requestKey(request);
     if (!key) continue;
@@ -57,6 +59,13 @@ function uniqueRequests(list) {
   }
   return order.map((key) => byKey[key]);
 }
+
+const specialKeyRequests = uniqueRequests([
+  { requestId: '__proto__', pickup: 'A', destination: 'B' },
+  { requestId: '__proto__', pickup: 'C', destination: 'D' }
+]);
+assert.equal(specialKeyRequests.length, 1);
+assert.equal(specialKeyRequests[0].pickup, 'C');
 
 function reconcile(state, incoming, locked) {
   const requests = uniqueRequests(incoming);
