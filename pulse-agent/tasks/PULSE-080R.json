@@ -1,0 +1,34 @@
+{
+  "Task ID": "PULSE-080R",
+  "Title": "Restore permanent Forge Builder with runNextReadyTask entry point",
+  "Lane": "Forge Controller",
+  "status": "PRODUCT_PR",
+  "sourceAuthority": "repository",
+  "builderFile": "pulse-forge/controller/SelfValidatingBuilder.gs",
+  "installerFile": "pulse-forge/controller/PermanentBuilderInstaller.gs",
+  "acceptance": {
+    "runNextReadyTaskRestored": true,
+    "codeGsUntouched": true,
+    "immutableRollbackCaptured": true,
+    "selfTestRequired": true,
+    "automaticRollbackOnFailure": true,
+    "duplicateFunctionDetection": true,
+    "dependencyValidation": true,
+    "maxRepairAttempts": 3,
+    "repositoryCiRequired": true,
+    "automaticMerge": false,
+    "automaticDeployment": false,
+    "engineActivated": false,
+    "productionDeployed": false,
+    "productionDataModified": false
+  },
+  "tests": [
+    "SelfValidatingBuilder.gs present and contains runNextReadyTask",
+    "PermanentBuilderInstaller.gs present with rollback guard",
+    "Code.gs is untouched",
+    "no duplicate function declarations",
+    "manifest.json valid",
+    "npm --prefix pulse-forge run validate passes"
+  ],
+  "productionTouched": false
+}
