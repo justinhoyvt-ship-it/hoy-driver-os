@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "taskId": "PULSE-080R",
+  "title": "Restore the permanent Pulse Forge Self-Validating Builder",
+  "repository": "justinhoyvt-ship-it/hoy-driver-os",
+  "baseBranch": "main",
+  "branch": "copilot/pulse-080r-permanent-builder-restoration",
+  "builderPath": "pulse-forge/controller/SelfValidatingBuilder.gs",
+  "installerPath": "pulse-forge/controller/PermanentBuilderInstaller.gs",
+  "builderFileName": "SelfValidatingBuilder",
+  "builderSha256": "0ddc580a63022db39519805849e037ad408a4aa7935d2074d69b52c33e447be9",
+  "controllerScriptId": "11j6IpdCl9LjbjsLPfRQQIUBWn3-QEsZew04YvakE3S2Aiv6PjpqHoeXW",
+  "controlSpreadsheetId": "1JuaJpLmdP6JtJK3xQ9KuptZ99auy0VwXJjQVbCwF2e0",
+  "requiredCiChecks": [
+    "validate-forge"
+  ],
+  "install": {
+    "preserveCodeGs": true,
+    "separatePermanentFile": true,
+    "createImmutableRollbackVersion": true,
+    "removeTemporaryFiles": false,
+    "runtimeSelfTestRequired": true,
+    "automaticRollbackOnFailure": true,
+    "preserveAllExistingSourceFiles": true,
+    "manifestAdditiveExecutionApiOnly": true,
+    "createIsolatedExecutionDeployment": true,
+    "createProductionDeployment": false
+  },
+  "builderContract": {
+    "stableEntryPoint": "runNextReadyTask",
+    "oneTaskOnePullRequest": true,
+    "maximumScopedRepairAttempts": 3,
+    "manualMergeRequired": true,
+    "isolatedTestDeploymentsOnly": true,
+    "phoneTestRequired": true,
+    "explicitProductionApprovalRequired": true
+  },
+  "safety": {
+    "automaticMerge": false,
+    "productionDeployment": false,
+    "engineActivation": false,
+    "productionDataMutation": false,
+    "overwriteCodeGs": false
+  }
+}

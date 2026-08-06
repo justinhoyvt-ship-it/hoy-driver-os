@@ -1,0 +1,35 @@
+{
+  "taskId": "PULSE-080R",
+  "title": "Restore the permanent Pulse Forge Self-Validating Builder",
+  "status": "PR_READY",
+  "blocks": [
+    "PULSE-080"
+  ],
+  "scope": [
+    "pulse-forge/controller/SelfValidatingBuilder.gs",
+    "pulse-forge/controller/PermanentBuilderInstaller.gs",
+    "pulse-forge/builder-restoration",
+    "pulse-forge/tests/validate-builder-restoration.mjs",
+    "pulse-forge/package.json"
+  ],
+  "acceptance": {
+    "stableEntryPoint": "runNextReadyTask",
+    "forgeNativeDependenciesOnly": true,
+    "legacyBuilderBridgeDependencies": false,
+    "separatePermanentControllerFile": true,
+    "overwriteCodeGs": false,
+    "preserveExistingControllerSourceFiles": true,
+    "manifestChange": "add executionApi.access=MYSELF only when required for isolated runtime verification",
+    "immutablePreInstallRollbackVersion": true,
+    "isolatedRuntimeSelfTestDeployment": true,
+    "automaticRollbackOnFailure": true,
+    "oneTaskOnePullRequest": true,
+    "maximumScopedRepairAttempts": 3,
+    "automaticMerge": false,
+    "productionDeployment": false,
+    "engineActivation": false,
+    "productionDataMutation": false,
+    "removeTemporaryPulseFiles": false,
+    "pulse080StartsBeforeBuilderVerified": false
+  }
+}
