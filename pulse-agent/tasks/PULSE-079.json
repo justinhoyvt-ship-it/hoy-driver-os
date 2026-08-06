@@ -1,0 +1,34 @@
+{
+  "Task ID": "PULSE-079",
+  "Title": "Hold new requests during an active ride and surface them after drop-off",
+  "Lane": "Driver Request Flow",
+  "status": "PRODUCT_PR",
+  "sourceAuthority": "repository",
+  "writerBoundary": {
+    "authorizedRideRequestsWriter": "PULSE_REQUEST_APP",
+    "driverWritesRideRequests": false,
+    "driverMayReadRequestedRides": true
+  },
+  "acceptance": {
+    "requestIdHeldOnce": true,
+    "foregroundVibrationOptional": true,
+    "autoAccept": false,
+    "autoDecline": false,
+    "riderStatusWriteDuringHold": false,
+    "heldStateSurvivesRefresh": true,
+    "inboxUnlocksAfterDropoff": true,
+    "duplicatesSuppressed": true,
+    "repositoryCiRequired": true,
+    "automaticMerge": false,
+    "automaticDeployment": false
+  },
+  "tests": [
+    "existing request remains visible but decisions lock while ON_TRIP",
+    "new request is held once by Request ID",
+    "duplicate refresh does not duplicate held request",
+    "held request survives serialized state restore",
+    "drop-off releases held request into Inbox",
+    "hold code performs no request decision or rider-status write"
+  ],
+  "productionTouched": false
+}

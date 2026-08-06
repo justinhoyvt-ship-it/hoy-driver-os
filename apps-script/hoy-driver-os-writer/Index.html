@@ -44,6 +44,8 @@
     .menu-head h2{margin:0}
     .menu-close{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:1.35rem;line-height:1}
     .inbox-list{display:grid;gap:10px}
+    .inbox-hold-notice{display:none;margin:-2px 0 10px;padding:10px 12px;border:1px solid rgba(247,178,59,.42);border-radius:10px;background:rgba(247,178,59,.09);color:var(--sun);font-family:var(--mono);font-size:.7rem;line-height:1.4}
+    .inbox-hold-notice.show{display:block}
     .inbox-card{padding:14px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.035)}
     .inbox-card b{display:block;font-family:var(--display);font-size:1rem;margin-bottom:4px}
     .inbox-time{font-family:var(--mono);font-size:.7rem;color:var(--sun);margin-bottom:7px}
@@ -308,6 +310,7 @@
 <div class="overlay" id="inboxOverlay">
   <div class="sheet menu-sheet">
     <div class="menu-head"><h2>Inbox</h2><button class="menu-close" id="closeInboxBtn" type="button" aria-label="Close inbox">&times;</button></div>
+    <div class="inbox-hold-notice" id="inboxHoldNotice" role="status" aria-live="polite"></div>
     <div class="inbox-list" id="inboxList"></div>
   </div>
 </div>
@@ -322,7 +325,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   var $=function(id){return document.getElementById(id)};
-  var S={shift:null, active:null, queued:null, scheduled:[], requests:[], pendingTrips:[]};
+  var S={shift:null, active:null, queued:null, scheduled:[], requests:[], heldRequests:[], pendingTrips:[]};
   var boot={cost:null, opportunity:null, normalFlow:true};
   var LIVE=(typeof google!=='undefined' && google.script && google.script.run);
   var map=null, meMarker=null, trace={watch:null, pts:[], miles:0, line:null};
@@ -365,8 +368,8 @@
   function money(n){return Number(n).toFixed(2)}
   var STATE_KEY='pulse-hoy-driver-state-v1';
   function newRideId_(prefix){return String(prefix||'ride')+'-'+now()+'-'+Math.floor(Math.random()*1000000);}
-  function persistState(){try{localStorage.setItem(STATE_KEY,JSON.stringify({shift:S.shift,active:S.active,queued:S.queued,pendingTrips:S.pendingTrips||[]}))}catch(e){}}
-  function restoreState(){try{var x=JSON.parse(localStorage.getItem(STATE_KEY)||'null');if(x&&typeof x==='object'){S.shift=x.shift||null;S.active=x.active||null;S.queued=x.queued||null;S.pendingTrips=Array.isArray(x.pendingTrips)?x.pendingTrips:[]}}catch(e){}}
+  function persistState(){try{localStorage.setItem(STATE_KEY,JSON.stringify({shift:S.shift,active:S.active,queued:S.queued,heldRequests:S.heldRequests||[],pendingTrips:S.pendingTrips||[]}))}catch(e){}}
+  function restoreState(){try{var x=JSON.parse(localStorage.getItem(STATE_KEY)||'null');if(x&&typeof x==='object'){S.shift=x.shift||null;S.active=x.active||null;S.queued=x.queued||null;S.heldRequests=Array.isArray(x.heldRequests)?x.heldRequests:[];S.pendingTrips=Array.isArray(x.pendingTrips)?x.pendingTrips:[]}}catch(e){}}
   function navTo(address){if(!address){toast('Address unavailable');return;}var url='https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(address);window.open(url,'_blank','noopener');}
   function scheduledTripState(s){return {rideId:s.requestId?('request-'+s.requestId):newRideId_('scheduled'),state:'ACCEPTED',acceptedAt:now(),pickedUpAt:null,requestId:s.requestId||'',source:s.source||'scheduled',name:s.name||'Ride',pickup:s.pickup||'',dest:s.dest||'',riderStatus:s.riderStatus||'Confirmed'};}
   function queueTripLog_(payload){
@@ -441,6 +444,8 @@
       }
       if(S.queued){ S.active=S.queued; S.queued=null; toast('Dropped · '+miles.toFixed(2)+' mi · next up'); }
       else { S.active=null; toast('Dropped · '+miles.toFixed(2)+' mi'); }
+      releaseHeldRequests_();
+      setTimeout(refreshInbox,0);
     } render();
   }
 
@@ -454,7 +459,7 @@
     closeFare(); toast('Shift $'+money(S.shift?S.shift.earned:0)); render();
   }
   function skipFare(){ closeFare(); }
-  function cancelActive(){ if(!S.active)return; stopTrace(); if(S.queued){S.active=S.queued;S.queued=null;toast('Cancelled · next up');}else{S.active=null;toast('Ride cancelled');} render(); }
+  function cancelActive(){ if(!S.active)return; stopTrace(); if(S.queued){S.active=S.queued;S.queued=null;toast('Cancelled · next up');}else{S.active=null;toast('Ride cancelled');} releaseHeldRequests_();setTimeout(refreshInbox,0);render(); }
 
   /* scheduled lane — persisted server-side */
   function schedFromServer(list){ S.scheduled=(list||[]).map(function(r){return {id:r.id,requestId:r.requestId||'',name:r.name,pickup:r.pickup||'',dest:r.dest||'',notes:r.notes||'',whenTS:Date.parse(r.whenISO),source:r.source||'manual',riderStatus:r.riderStatus||''};}); renderSched(); }
@@ -517,18 +522,68 @@
   function openSettings(){ closeWaffle(); $('settingsOverlay').classList.add('show'); }
   function closeSettings(){ $('settingsOverlay').classList.remove('show'); }
   function openLive(){ closeWaffle(); var url=boot.liveUrl||''; if(!url){toast('Live page unavailable');return;} window.open(url,'_blank','noopener'); }
+  function requestReviewLocked_(){return !!(S.active&&S.active.state==='ON_TRIP');}
+  function requestKey_(r){
+    r=r||{};
+    return String(r.requestId||r.id||[r.name||'',r.pickup||'',r.destination||'',r.whenISO||''].join('|')).trim();
+  }
+  function uniqueRequests_(list){
+    var order=[],byKey={};
+    (list||[]).forEach(function(r){var key=requestKey_(r);if(!key)return;if(!Object.prototype.hasOwnProperty.call(byKey,key))order.push(key);byKey[key]=r;});
+    return order.map(function(key){return byKey[key]});
+  }
+  function notifyHeldRequests_(count){
+    if(!count)return;
+    try{if(navigator.vibrate)navigator.vibrate([120,60,120]);}catch(e){}
+    toast(count===1?'New request held until drop-off':count+' new requests held until drop-off');
+  }
+  function reconcileRequestedRides_(incoming){
+    var list=uniqueRequests_(incoming),visibleBefore={},heldBefore={},visible=[],held=uniqueRequests_(S.heldRequests||[]),newlyHeld=0;
+    (S.requests||[]).forEach(function(r){visibleBefore[requestKey_(r)]=true;});
+    (S.heldRequests||[]).forEach(function(r){heldBefore[requestKey_(r)]=true;});
+    if(requestReviewLocked_()){
+      list.forEach(function(r){
+        var key=requestKey_(r);
+        if(visibleBefore[key])visible.push(r);
+        else{held.push(r);if(!heldBefore[key])newlyHeld++;}
+      });
+      S.requests=uniqueRequests_(visible);
+      S.heldRequests=uniqueRequests_(held);
+      persistState();
+      notifyHeldRequests_(newlyHeld);
+      renderInbox();
+      return;
+    }
+    S.requests=uniqueRequests_(list.concat(S.heldRequests||[]));
+    S.heldRequests=[];
+    persistState();
+    renderInbox();
+  }
+  function releaseHeldRequests_(){
+    var held=uniqueRequests_(S.heldRequests||[]);
+    if(!held.length)return 0;
+    S.requests=uniqueRequests_((S.requests||[]).concat(held));
+    S.heldRequests=[];
+    persistState();
+    renderInbox();
+    toast(held.length===1?'Request ready in Inbox':held.length+' requests ready in Inbox');
+    return held.length;
+  }
   function requestsFromServer(payload){
     var list=Array.isArray(payload)?payload:((payload&&payload.items)||[]);
-    S.requests=list; renderInbox();
+    reconcileRequestedRides_(list);
   }
   function refreshInbox(){
     return srv('listRequestedRides').then(function(payload){requestsFromServer(payload)}).catch(function(){renderInbox()});
   }
   function openDecision(url){
+    if(requestReviewLocked_()){toast('Request held until drop-off');return;}
     if(!url)return;
     window.open(url,'_blank','noopener');
   }
   function renderInbox(){
+    var locked=requestReviewLocked_(),heldCount=(S.heldRequests||[]).length,notice=$('inboxHoldNotice');
+    if(notice){notice.textContent=locked?(heldCount?(heldCount===1?'1 new request held until drop-off':heldCount+' new requests held until drop-off'):'Request review unlocks after drop-off'):'';notice.classList.toggle('show',locked);}
     var list=$('inboxList'); list.innerHTML='';
     (S.requests||[]).slice().sort(function(a,b){return (Date.parse(a.whenISO)||0)-(Date.parse(b.whenISO)||0)}).forEach(function(r){
       var card=document.createElement('div'); card.className='inbox-card';
@@ -539,8 +594,8 @@
         (r.notes?'<div class="inbox-notes">'+esc(r.notes)+'</div>':'');
       if(r.acceptUrl||r.declineUrl){
         var acts=document.createElement('div'); acts.className='inbox-actions';
-        if(r.acceptUrl){var accept=document.createElement('button');accept.className='inbox-accept';accept.textContent='Accept';accept.onclick=function(){openDecision(r.acceptUrl)};acts.appendChild(accept);}
-        if(r.declineUrl){var decline=document.createElement('button');decline.className='inbox-decline';decline.textContent='Decline';decline.onclick=function(){openDecision(r.declineUrl)};acts.appendChild(decline);}
+        if(r.acceptUrl){var accept=document.createElement('button');accept.className='inbox-accept';accept.textContent='Accept';accept.disabled=locked;accept.onclick=function(){openDecision(r.acceptUrl)};acts.appendChild(accept);}
+        if(r.declineUrl){var decline=document.createElement('button');decline.className='inbox-decline';decline.textContent='Decline';decline.disabled=locked;decline.onclick=function(){openDecision(r.declineUrl)};acts.appendChild(decline);}
         card.appendChild(acts);
       }
       list.appendChild(card);
@@ -676,6 +731,7 @@
   setInterval(function(){renderSched(); if(S.shift||S.active)render();},1000);
   window.addEventListener('resize',syncBarPad);
   restoreState();
+  if(!requestReviewLocked_())releaseHeldRequests_();
   try{initMap()}catch(e){$('mapNote').classList.add('show')}
   render(); renderSched(); syncBarPad(); flushPendingTrips_();
   srv('getCockpitBootstrap').then(function(b){ boot=b||{}; renderOpp(); syncModeTag_(); schedFromServer(boot.reservations); requestsFromServer(boot.requests); if(boot.riderReadError){toast('Rider connection: '+boot.riderReadError);} }).catch(function(e){ syncModeTag_(); toast((e&&e.message)?e.message:'Console bootstrap failed'); });

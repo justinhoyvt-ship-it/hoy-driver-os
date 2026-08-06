@@ -71,3 +71,16 @@ The web console pauses its location watcher whenever the document is hidden. It 
 - Foreground client injection fails closed unless `Index.html` contains exactly one closing body tag.
 - Documentation, task snapshot, runtime policy, PR body, and CI use the same stopped-vehicle thresholds.
 - Begin pickup publishes `Leaving`; `On the way` waits for observed foreground movement.
+
+## PULSE-079 — mid-ride request hold
+
+When the active ride is `ON_TRIP`, newly observed direct requests are held by Request ID instead of demanding a decision while the driver is transporting a rider.
+
+- Held requests survive a page refresh in local state.
+- Repeated refreshes do not duplicate the same request.
+- Inbox decision buttons are locked while the rider is aboard.
+- A supported foreground device may vibrate once when a new request is held.
+- Drop-off releases held requests for safe Inbox review and refreshes the server list.
+- The driver does not accept, decline, or change rider status as part of the hold.
+- The standalone request app remains the only Ride Requests writer.
+- No automatic merge or Apps Script deployment occurs.
