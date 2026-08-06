@@ -3,7 +3,9 @@ name: Pulse Forge CI
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches:
+      - main
+      - copilot/pulse-080r-permanent-builder-restoration
     paths:
       - 'pulse-forge/**'
       - 'pulse-agent/tasks/PULSE-076.json'
@@ -19,7 +21,7 @@ permissions:
 
 jobs:
   apply-pulse-080r-repair:
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'copilot/pulse-080r-permanent-builder-restoration'
+    if: (github.event_name == 'push' && github.ref_name == 'copilot/pulse-080r-permanent-builder-restoration') || (github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'copilot/pulse-080r-permanent-builder-restoration')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
