@@ -1,33 +1,13 @@
-# PULSE-080R: Rollback Procedure
+# Permanent Builder rollback
 
-## When to roll back
-
-Roll back if:
-- `permanentBuilderInstall` returns `ok: false`
-- The remote `selfValidatingBuilderCheck` self-test does not return `ok: true`
-- Any validation stage in `npm --prefix pulse-forge run validate` fails after install
+The installer creates an immutable Apps Script version before it changes controller HEAD.
 
 ## Automatic rollback
 
-`PermanentBuilderInstaller.gs` captures an immutable rollback version
-(`Rollback before PULSE-080R permanent builder install`) via
-`forgeCreateScriptVersion` **before** any write is performed.
+If source verification, inventory preservation, duplicate-function checks, Apps Script update verification, execution-deployment discovery, or the runtime Builder self-test fails, the installer restores the exact pre-install file package, including the original manifest and verifies the original package hash.
 
-If the post-install self-test fails, the installer automatically restores
-the pre-install file set and creates a new version
-(`PULSE-080R rollback after failed self-test`).
+## Explicit rollback
 
-## Manual rollback
+Run `forgeRollbackPermanentBuilderInstallation()` only when rollback is explicitly approved. It reads the immutable pre-install version, replaces controller HEAD with that exact package, verifies the package hash, and records `ROLLED_BACK` in Script Properties.
 
-1. Identify the rollback version number from the `rollbackVersion` field
-   in the install result envelope.
-2. In the Apps Script dashboard, navigate to the Forge Controller project.
-3. Select **Manage versions** and deploy the rollback version number.
-4. Confirm `forgeControllerSelfTest()` passes in the live project.
-
-## Constraints
-
-- Do not merge the PR while rollback is in progress.
-- Do not activate an engine slot until the Builder passes self-test.
-- Do not modify production data during rollback.
-- Maximum three scoped repair attempts before escalating manually.
+Rollback does not merge GitHub, deploy production, activate an engine, modify production data, or remove temporary PULSE files. A failed installation also deletes the isolated self-test deployment when it was created.

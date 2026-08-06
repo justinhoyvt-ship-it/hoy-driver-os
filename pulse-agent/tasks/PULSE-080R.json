@@ -1,34 +1,35 @@
 {
-  "Task ID": "PULSE-080R",
-  "Title": "Restore permanent Forge Builder with runNextReadyTask entry point",
-  "Lane": "Forge Controller",
-  "status": "PRODUCT_PR",
-  "sourceAuthority": "repository",
-  "builderFile": "pulse-forge/controller/SelfValidatingBuilder.gs",
-  "installerFile": "pulse-forge/controller/PermanentBuilderInstaller.gs",
-  "acceptance": {
-    "runNextReadyTaskRestored": true,
-    "codeGsUntouched": true,
-    "immutableRollbackCaptured": true,
-    "selfTestRequired": true,
-    "automaticRollbackOnFailure": true,
-    "duplicateFunctionDetection": true,
-    "dependencyValidation": true,
-    "maxRepairAttempts": 3,
-    "repositoryCiRequired": true,
-    "automaticMerge": false,
-    "automaticDeployment": false,
-    "engineActivated": false,
-    "productionDeployed": false,
-    "productionDataModified": false
-  },
-  "tests": [
-    "SelfValidatingBuilder.gs present and contains runNextReadyTask",
-    "PermanentBuilderInstaller.gs present with rollback guard",
-    "Code.gs is untouched",
-    "no duplicate function declarations",
-    "manifest.json valid",
-    "npm --prefix pulse-forge run validate passes"
+  "taskId": "PULSE-080R",
+  "title": "Restore the permanent Pulse Forge Self-Validating Builder",
+  "status": "PR_READY",
+  "blocks": [
+    "PULSE-080"
   ],
-  "productionTouched": false
+  "scope": [
+    "pulse-forge/controller/SelfValidatingBuilder.gs",
+    "pulse-forge/controller/PermanentBuilderInstaller.gs",
+    "pulse-forge/builder-restoration",
+    "pulse-forge/tests/validate-builder-restoration.mjs",
+    "pulse-forge/package.json"
+  ],
+  "acceptance": {
+    "stableEntryPoint": "runNextReadyTask",
+    "forgeNativeDependenciesOnly": true,
+    "legacyBuilderBridgeDependencies": false,
+    "separatePermanentControllerFile": true,
+    "overwriteCodeGs": false,
+    "preserveExistingControllerSourceFiles": true,
+    "manifestChange": "add executionApi.access=MYSELF only when required for isolated runtime verification",
+    "immutablePreInstallRollbackVersion": true,
+    "isolatedRuntimeSelfTestDeployment": true,
+    "automaticRollbackOnFailure": true,
+    "oneTaskOnePullRequest": true,
+    "maximumScopedRepairAttempts": 3,
+    "automaticMerge": false,
+    "productionDeployment": false,
+    "engineActivation": false,
+    "productionDataMutation": false,
+    "removeTemporaryPulseFiles": false,
+    "pulse080StartsBeforeBuilderVerified": false
+  }
 }
