@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "taskId": "PULSE-080",
+  "release": "PHASE_2A_DIRECT_RIDE_BETA",
+  "purpose": "Build isolated release candidates, create rollback versions and test deployments, run the controlled phone flow, repair failures through reviewed PRs, and preserve owner-controlled production approval.",
+  "canonicalSources": [
+    {
+      "role": "REQUEST_APP",
+      "sourceRoot": "pulse-autobuild/request-app",
+      "stagingSnapshotRoot": "pulse-forge/tasks/PULSE-080/staging/request-app",
+      "sourceCommitSha": "974a466348f0657ba412cf489298029e508bb8cf",
+      "canonicalPackageHashAtPrerequisiteBuild": "eb4ede122a168c65d61214b39bbe60b6796ba1fdb7941f2596440458fab2005a",
+      "authority": "SOLE_RIDE_REQUEST_WRITER"
+    },
+    {
+      "role": "HOY_DRIVER",
+      "sourceRoot": "apps-script/hoy-driver-os-writer",
+      "stagingSnapshotRoot": "pulse-forge/tasks/PULSE-080/staging/hoy-driver",
+      "sourceCommitSha": "974a466348f0657ba412cf489298029e508bb8cf",
+      "canonicalPackageHashAtPrerequisiteBuild": "41e915fb2c99e4d3a54f3a13b3a754c7ed0396fb3dd5c41076ede9e0bdb3c40e",
+      "authority": "DRIVER_UI_AND_TRIP_LIFECYCLE_CONSUMER"
+    }
+  ],
+  "definitionOfWorking": [
+    "Request form calculates and shows a truthful Pulse fare before confirmation.",
+    "One confirmation creates exactly one request.",
+    "Driver can accept or decline safely.",
+    "Confirmed rides appear in Scheduled.",
+    "Ride ID/PIN exposes only the correct rider-safe record.",
+    "Foreground pickup sequence remains intentional and visible.",
+    "New requests arriving during an active ride wait safely instead of interrupting the ride.",
+    "Start and Complete are intentional actions.",
+    "One completed ride creates exactly one Trip Log row.",
+    "End Shift reconciles earnings correctly.",
+    "Rollback versions, source hashes, and isolated deployment receipts are recorded."
+  ],
+  "controlledPhoneTest": {
+    "participantBoundary": "One known consenting adult rider and the owner-driver only.",
+    "passEvidence": [
+      "Ride Requests increases by exactly one.",
+      "Calendar event count increases by exactly one after confirmation where configured.",
+      "Receipt and confirmation/access messages are each emitted once where configured.",
+      "Each approved lifecycle transition records one status event with no duplicates.",
+      "Trip Log increases by exactly one after completion.",
+      "Shift reconciliation records exactly one completed shift result or intended update."
+    ],
+    "stopConditions": [
+      "Any duplicate request, status event, or Trip Log row.",
+      "Any rider privacy leak or Ride ID/PIN record mismatch.",
+      "Any skipped or impossible lifecycle transition.",
+      "Hoy Driver writes directly to Ride Requests.",
+      "Earnings reconcile falsely to zero or otherwise contradict the controlled ride.",
+      "Foreground automation advances while the app is hidden.",
+      "State becomes unrecoverable without a rollback."
+    ]
+  },
+  "sourceSnapshot": {
+    "mapPath": "pulse-forge/tasks/PULSE-080/staging/source-map.json",
+    "mapSha256": "c4cd37126e1c1eebde49c8a8a632c3db22cb7dc735ea2cbfbe3cc46fdcec324c",
+    "collisionPolicy": "Preserve HTML basename; rename colliding SERVER_JS basename with __SERVER suffix.",
+    "directChildrenOnly": true
+  },
+  "rollback": {
+    "immutablePreStageVersionRequired": true,
+    "expectedHeadHashRequired": true,
+    "sourcePackageHashesRecorded": true,
+    "isolatedTestDeploymentRequired": true,
+    "productionRollbackNotAuthorizedByThisTask": true
+  },
+  "safety": {
+    "automaticGitHubMerge": false,
+    "automaticProductionDeployment": false,
+    "engineActivation": false,
+    "productionDataMutationByForge": false,
+    "ownerProductionApprovalRequired": true
+  }
+}
