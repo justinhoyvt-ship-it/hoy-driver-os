@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "taskId": "PULSE-080",
+  "policy": {
+    "directChildrenOnly": true,
+    "htmlBasenamePreserved": true,
+    "collidingServerSuffix": "__SERVER"
+  },
+  "packages": [
+    {
+      "role": "REQUEST_APP",
+      "canonicalRoot": "pulse-autobuild/request-app",
+      "snapshotRoot": "pulse-forge/tasks/PULSE-080/staging/request-app",
+      "sourceCommitSha": "974a466348f0657ba412cf489298029e508bb8cf",
+      "sourceTreeSha": "d5ba0247360ef4003869f260439bc7a7593b9d5b",
+      "files": [
+        {
+          "sourcePath": "pulse-autobuild/request-app/appsscript.json",
+          "snapshotPath": "pulse-forge/tasks/PULSE-080/staging/request-app/appsscript.json",
+          "appsScriptName": "appsscript",
+          "type": "JSON",
+          "sha256": "2824c8c201d7ae56907ff9d80a6e4a41c9c739f5731250e58751efa94a4ee343",
+          "renamedForAppsScriptCollision": false
+        },
+        {
+          "sourcePath": "pulse-autobuild/request-app/Code.gs",
+          "snapshotPath": "pulse-forge/tasks/PULSE-080/staging/request-app/Code.gs",
+          "appsScriptName": "Code",
+          "type": "SERVER_JS",
+          "sha256": "1862ee4a87819a0fd2f16428e8b072f2b6d277c236fe3314aa6b8812c700ba19",
+          "renamedForAppsScriptCollision": false
+        },
+        {
+          "sourcePath": "pulse-autobuild/request-app/FareQuote.gs",
+          "snapshotPath": "pulse-forge/tasks/PULSE-080/staging/request-app/FareQuote.gs",
+          "appsScriptName": "FareQuote",
+          "type": "SERVER_JS",
+          "sha256": "428a90fe3426909664650abf2e9a4f8cc38a5fd7ccc8168916ee4f330e1e0f8e",
+          "renamedForAppsScriptCollision": false
+        },
+        {
+          "sourcePath": "pulse-autobuild/request-app/RequestForm.html",
+          "snapshotPath": "pulse-forge/tasks/PULSE-080/staging/request-app/RequestForm.html",
+          "appsScriptName": "RequestForm",
+          "type": "HTML",
+          "sha256": "d0686968382daa15bac96774857f5b266d9d92e7c36ec77d2f27a69a22dfca69",
+          "renamedForAppsScriptCollision": false
+        },
+        {
+          "sourcePath": "pulse-autobuild/request-app/RiderExperience.gs",
+          "snapshotPath": "pulse-forge/tasks/PULSE-080/staging/request-app/RiderExperience.gs",
+          "appsScriptName": "RiderExperience",
+          "type": "SERVER_JS",
+          "sha256": "9f816ea7aaa9a78d282a2ab20a416c353655c57f61140868e6730133ae66c3a9",
+          "renamedForAppsScriptCollision": false
+        }
+      ]
+    },
+    {
+      "role": "HOY_DRIVER",
+      "canonicalRoot": "apps-script/hoy-driver-os-writer",
+      "snapshotRoot": "pulse-forge/tasks/PULSE-080/staging/hoy-driver",
+      "sourceCommitSha": "974a466348f0657ba412cf489298029e508bb8cf",
+      "sourceTreeSha": "d5ba0247360ef4003869f260439bc7a7593b9d5b",
+      "files": [
+        {
+          "sourcePath": "apps-script/hoy-driver-os-writer/appsscript.json",
+          "snapshotPath": "pulse-forge/tasks/PULSE-080/staging/hoy-driver/appsscript.json",
+          "appsScriptName": "appsscript",
+          "type": "JSON",
+          "sha256": "2453f8d6311d3d02408e2ce2521a088ad65e99325c87f5e3b00ffaea7ba57b72",
+          "renamedForAppsScriptCollision": false
+        },
+        {
+          "sourcePath": "apps-script/hoy-driver-os-writer/Code.gs",
+          "snapshotPath": "pulse-forge/tasks/PULSE-080/staging/hoy-driver/Code.gs",
+          "appsScriptName": "Code",
+          "type": "SERVER_JS",
+          "sha256": "9ae005fc2444e6a58758a880d1896afc83a8126d6f1c445daeed0ced1ed91b0b",
+          "renamedForAppsScriptCollision": false
+        },
+        {
+          "sourcePath": "apps-script/hoy-driver-os-writer/ForegroundPickup.gs",
+          "snapshotPath": "pulse-forge/tasks/PULSE-080/staging/hoy-driver/ForegroundPickup__SERVER.gs",
+          "appsScriptName": "ForegroundPickup__SERVER",
+          "type": "SERVER_JS",
+          "sha256": "0cddcdf17138507c8e884c1f8e36f855f73ecf1fc635d21a0f404c4c2d078561",
+          "renamedForAppsScriptCollision": true
+        },
+        {
+          "sourcePath": "apps-script/hoy-driver-os-writer/ForegroundPickup.html",
+          "snapshotPath": "pulse-forge/tasks/PULSE-080/staging/hoy-driver/ForegroundPickup.html",
+          "appsScriptName": "ForegroundPickup",
+          "type": "HTML",
+          "sha256": "5dd53d9dfa8defbd9f40f86cd8301ec9cba2ed360fef9ae20ca5a135f6eda8a7",
+          "renamedForAppsScriptCollision": false
+        },
+        {
+          "sourcePath": "apps-script/hoy-driver-os-writer/Index.html",
+          "snapshotPath": "pulse-forge/tasks/PULSE-080/staging/hoy-driver/Index.html",
+          "appsScriptName": "Index",
+          "type": "HTML",
+          "sha256": "7f51890ef8c66553a304230db3ada1dffd9cb5a4db655814bf58c629bec001e0",
+          "renamedForAppsScriptCollision": false
+        }
+      ]
+    }
+  ]
+}

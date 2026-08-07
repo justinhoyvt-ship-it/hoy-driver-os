@@ -1,0 +1,145 @@
+<script>
+(function(){
+  var PULSE069_CFG={movementMiles:0.08,arrivingSoonMiles:0.60,arrivedMiles:0.08,stoppedMs:20000,stationarySpeedMetersPerSecond:0.8,stationaryMiles:0.015,maxAccuracyMeters:100};
+  var PULSE069={watch:null,timer:null,last:null,busy:false,error:'',paused:false};
+  var p069BaseCancelActive=cancelActive;
+  var p069BaseDropOff=dropOff;
+
+  function p069Rider_(){return S.active&&S.active.requestId?S.active:null;}
+  function p069Status_(){var a=p069Rider_();return a?(a.riderStatus||'Confirmed'):'';}
+  function p069NeedsWatch_(){var s=p069Status_();return s==='Leaving'||s==='On the way'||s==='Arriving soon';}
+  function p069Point_(lat,lng){lat=Number(lat);lng=Number(lng);return isFinite(lat)&&isFinite(lng)?[lat,lng]:null;}
+  function p069Target_(){var a=p069Rider_(),t=a&&a.pickupTarget;return t?p069Point_(t.lat,t.lng):null;}
+  function p069MapPoint_(){
+    try{if(meMarker&&meMarker.getLatLng){var p=meMarker.getLatLng();return p069Point_(p.lat,p.lng);}}catch(e){}
+    var a=p069Rider_();return a&&a.pickupLast?p069Point_(a.pickupLast[0],a.pickupLast[1]):null;
+  }
+  function p069Label_(){
+    var a=p069Rider_();if(!a)return '';
+    if(PULSE069.error)return PULSE069.error;
+    if(document.hidden||PULSE069.paused)return 'foreground paused';
+    if(isFinite(Number(a.pickupDistanceMiles)))return Number(a.pickupDistanceMiles).toFixed(2)+' mi to pickup';
+    if(PULSE069.watch!=null)return 'foreground GPS active';
+    return 'foreground GPS ready';
+  }
+  function p069Stop_(paused){
+    if(PULSE069.watch!=null&&navigator.geolocation){navigator.geolocation.clearWatch(PULSE069.watch);PULSE069.watch=null;}
+    if(PULSE069.timer!=null){clearInterval(PULSE069.timer);PULSE069.timer=null;}
+    PULSE069.paused=!!paused;
+  }
+  function p069PersistPoint_(a,point,position,step){
+    var origin=a.pickupOrigin&&p069Point_(a.pickupOrigin[0],a.pickupOrigin[1]);
+    var displacement=origin?seg(origin,point):0;
+    var accumulated=Math.max(0,Number(a.pickupMovedMiles)||0);
+    if(isFinite(step)&&step>=0&&step<0.5)accumulated+=step;
+    a.pickupMovedMiles=Math.max(accumulated,displacement);
+    a.pickupLast=point;
+    a.pickupLastAt=now();
+    a.pickupAccuracyMeters=Number(position&&position.coords&&position.coords.accuracy)||null;
+  }
+  function p069Publish_(status){
+    var a=p069Rider_();if(!a||PULSE069.busy||riderFlowBusy)return Promise.resolve(null);
+    PULSE069.busy=true;PULSE069.error='';render();
+    return advanceRiderStatus_(status).then(function(result){
+      PULSE069.busy=false;
+      if(status==='Arrived')p069Stop_(false);
+      persistState();render();
+      setTimeout(p069EvaluateLast_,0);
+      return result;
+    }).catch(function(error){
+      PULSE069.busy=false;
+      var detail=error&&error.message?String(error.message):String(error||'');
+      detail=detail.trim().slice(0,180);
+      PULSE069.error='Could not publish '+status+(detail?': '+detail:'');
+      toast(PULSE069.error);
+      render();
+      return null;
+    });
+  }
+  function p069Evaluate_(position){
+    var a=p069Rider_();if(!a||!p069NeedsWatch_()||document.hidden)return;
+    var target=p069Target_();
+    if(!target){PULSE069.error=a.pickupTargetError||'pickup GPS target unavailable';render();return;}
+    var accuracy=Number(position&&position.coords&&position.coords.accuracy);
+    if(!isFinite(accuracy)||accuracy>PULSE069_CFG.maxAccuracyMeters){PULSE069.error='GPS accuracy too low';render();return;}
+    PULSE069.error='';
+    var point=p069Point_(position.coords.latitude,position.coords.longitude);if(!point)return;
+    var previous=a.pickupLast&&p069Point_(a.pickupLast[0],a.pickupLast[1]);
+    var step=previous?seg(previous,point):0;
+    p069PersistPoint_(a,point,position,step);
+    var remaining=seg(point,target);a.pickupDistanceMiles=remaining;
+    var speed=Number(position.coords.speed);
+    var stationary=isFinite(speed)&&speed>=0?speed<=PULSE069_CFG.stationarySpeedMetersPerSecond:step<=PULSE069_CFG.stationaryMiles;
+    var status=p069Status_();
+    if(status==='Leaving'&&Number(a.pickupMovedMiles)>=PULSE069_CFG.movementMiles){persistState();render();p069Publish_('On the way');return;}
+    if(status==='On the way'&&remaining<=PULSE069_CFG.arrivingSoonMiles){persistState();render();p069Publish_('Arriving soon');return;}
+    if(status==='Arriving soon'&&remaining<=PULSE069_CFG.arrivedMiles){
+      if(stationary){if(!a.pickupStoppedSince)a.pickupStoppedSince=now();}
+      else a.pickupStoppedSince=0;
+      if(a.pickupStoppedSince&&now()-a.pickupStoppedSince>=PULSE069_CFG.stoppedMs){persistState();render();p069Publish_('Arrived');return;}
+    }else if(status==='Arriving soon')a.pickupStoppedSince=0;
+    persistState();render();
+  }
+  function p069EvaluateLast_(){if(PULSE069.last)p069Evaluate_(PULSE069.last);}
+  function p069Resume_(){
+    var a=p069Rider_();if(!a||!p069NeedsWatch_()||document.hidden){p069Stop_(!!document.hidden);return;}
+    if(!navigator.geolocation){PULSE069.error='GPS unavailable';render();return;}
+    if(!p069Target_()){PULSE069.error=a.pickupTargetError||'pickup GPS target unavailable';render();return;}
+    if(PULSE069.watch!=null)return;
+    PULSE069.paused=false;PULSE069.error='';
+    PULSE069.watch=navigator.geolocation.watchPosition(function(position){PULSE069.last=position;p069Evaluate_(position);},function(){PULSE069.error='GPS permission or signal unavailable';render();},{enableHighAccuracy:true,maximumAge:3000,timeout:15000});
+    PULSE069.timer=setInterval(p069EvaluateLast_,5000);
+    render();
+  }
+
+  startScheduled=function(id){
+    var s=S.scheduled.filter(function(x){return x.id===id})[0];if(!s||scheduledStartBusy[id])return;
+    if(s.requestId&&((S.active&&S.active.requestId===s.requestId)||(S.queued&&S.queued.requestId===s.requestId))){toast('Ride already started');return;}
+    if(S.active||S.queued){toast('Finish current ride first');return;}
+    if(!S.shift)goOnline();
+    scheduledStartBusy[id]=true;renderSched();
+    var departure=p069MapPoint_();
+    function release(){delete scheduledStartBusy[id];renderSched();}
+    function begin(result){
+      var ride=scheduledTripState(s);
+      if(s.source==='rider'){
+        ride.riderStatus=(result&&result.status)||'Leaving';
+        ride.pickupTarget=(result&&result.pickupTarget)||null;
+        ride.pickupTargetError=(result&&result.pickupTargetError)||'';
+        ride.pickupOrigin=departure;
+        ride.pickupMovedMiles=0;
+        ride.pickupStoppedSince=0;
+      }
+      S.active=ride;persistState();schedFromServer((result&&result.reservations)||[]);release();toast('Pickup started: '+s.name);render();p069Resume_();
+    }
+    var pickupCall=srv('beginForegroundPickup',s.requestId||'',id,s.pickup||'');
+    if(s.pickup)navTo(s.pickup);
+    pickupCall.then(begin).catch(function(e){release();PULSE069.error=e&&e.message?e.message:'Could not begin pickup';toast(PULSE069.error);render();});
+  };
+
+  renderRiderFlow=function(){
+    var box=$('riderFlow'),actions=$('riderFlowActions');actions.innerHTML='';
+    var a=S.active;if(!isRiderRide_(a)){box.classList.remove('show');p069Stop_(false);return;}
+    box.classList.add('show');var st=riderStatus_(a),label=p069Label_();$('riderFlowStatus').textContent=st+(label?' · '+label:'');
+    if(st==='Leaving'||st==='On the way'||st==='Arriving soon'){
+      actions.appendChild(riderActionButton_('Navigate pickup',false,function(){navTo(a.pickup)}));
+      p069Resume_();
+    }else if(st==='Arrived'){
+      p069Stop_(false);
+      actions.appendChild(riderActionButton_('Start ride',true,function(){p069Stop_(false);advanceRiderStatus_('Ride in progress',function(){a.state='ON_TRIP';a.pickedUpAt=now();startTrace();toast('Ride in progress')})}));
+    }else if(st==='Ride in progress'){
+      p069Stop_(false);
+      actions.appendChild(riderActionButton_('Navigate destination',false,function(){navTo(a.dest)}));
+      actions.appendChild(riderActionButton_('Complete ride',true,function(){advanceRiderStatus_('Complete',function(){dropOff()})}));
+    }else if(st==='Complete'){
+      p069Stop_(false);actions.appendChild(riderActionButton_('Complete',false,function(){}));actions.firstChild.disabled=true;
+    }
+  };
+
+  cancelActive=function(){p069Stop_(false);return p069BaseCancelActive.apply(this,arguments);};
+  dropOff=function(){p069Stop_(false);return p069BaseDropOff.apply(this,arguments);};
+  document.addEventListener('visibilitychange',function(){if(document.hidden)p069Stop_(true);else p069Resume_();});
+  window.addEventListener('focus',p069Resume_);
+  setTimeout(function(){render();p069Resume_();},0);
+})();
+</script>
