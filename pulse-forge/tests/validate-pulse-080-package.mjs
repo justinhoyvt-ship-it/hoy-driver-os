@@ -2,7 +2,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 
-const root = path.resolve('pulse-forge');
+const cwd = process.cwd();
+const root = path.basename(cwd) === 'pulse-forge'
+  ? cwd
+  : path.resolve(cwd, 'pulse-forge');
 const manifestPath = path.join(root, 'tasks/PULSE-080/task-package.json');
 const planPath = path.join(root, 'tasks/PULSE-080/candidate/release-plan.json');
 const sourceMapPath = path.join(root, 'tasks/PULSE-080/staging/source-map.json');
