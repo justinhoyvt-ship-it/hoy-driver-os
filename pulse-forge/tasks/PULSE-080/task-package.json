@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "taskId": "PULSE-080",
+  "repository": "justinhoyvt-ship-it/hoy-driver-os",
+  "baseBranch": "main",
+  "branch": "pulse/pulse-080",
+  "pullRequest": {
+    "title": "PULSE-080: Stage Phase 2A Direct Ride Beta",
+    "commitMessage": "PULSE-080: stage Phase 2A Direct Ride Beta release gate",
+    "body": "Records the locked Phase 2A release plan. After manual merge, the permanent Builder stages the canonical Request App and Hoy Driver into dedicated isolated Apps Script projects, creates rollback versions and test deployments, and stops for phone testing. No automatic merge or production deployment."
+  },
+  "ci": {
+    "requiredChecks": [
+      "validate-forge"
+    ]
+  },
+  "production": {
+    "automaticMerge": false,
+    "automaticDeployment": false,
+    "activateEngine": false
+  },
+  "repositoryChanges": [
+    {
+      "sourcePath": "pulse-forge/tasks/PULSE-080/candidate/release-plan.json",
+      "targetPath": "pulse-forge/releases/PULSE-080/release-plan.json",
+      "sha256": "df8275f94bfd1de39a972e58fbb51160fc48fd3ad563d140255d3c1ac7812958"
+    }
+  ],
+  "stagingProjects": [
+    {
+      "projectAlias": "PULSE080_REQUEST_STAGE",
+      "sourceRoot": "pulse-forge/tasks/PULSE-080/staging/request-app",
+      "canonicalSourceRoot": "pulse-autobuild/request-app",
+      "expectedLivePackageHash": "77da00cfa979ee247821d4f6664cbc8c081e1fae6ffe5ac2ea92d8b52afae5c9",
+      "requiredFunctions": [
+        "doGet"
+      ],
+      "createTestDeployment": true,
+      "activateEngine": false
+    },
+    {
+      "projectAlias": "PULSE080_HOY_STAGE",
+      "sourceRoot": "pulse-forge/tasks/PULSE-080/staging/hoy-driver",
+      "canonicalSourceRoot": "apps-script/hoy-driver-os-writer",
+      "expectedLivePackageHash": "77da00cfa979ee247821d4f6664cbc8c081e1fae6ffe5ac2ea92d8b52afae5c9",
+      "requiredFunctions": [
+        "doGet"
+      ],
+      "createTestDeployment": true,
+      "activateEngine": false
+    }
+  ]
+}

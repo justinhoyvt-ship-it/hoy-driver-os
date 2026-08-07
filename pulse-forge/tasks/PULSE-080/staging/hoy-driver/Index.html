@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0f1c">
+  <title>Pulse · Console</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --ink:#050813; --night1:#0b1440; --night2:#0a0f26;
+      --cyan:#2bd4e5; --sun:#f7b23b; --gold:#f7b23b; --clay:#d6522f; --blue:#4c93ff;
+      --green:#45e394; --red:#ff6680;
+      --text:#eaf2ff; --muted:#9fb2d6; --line:rgba(255,255,255,.12);
+      --display:'Space Grotesk',sans-serif; --sans:'IBM Plex Sans',system-ui,sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+      --glass:linear-gradient(180deg, rgba(255,255,255,.048), rgba(255,255,255,.018));
+      --glow:0 10px 28px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.08);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%}
+    body{background:var(--ink);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;position:relative;overflow-x:hidden}
+    .sky{position:fixed;inset:0;z-index:0;background:radial-gradient(120% 78% at 50% -12%,rgba(43,212,229,.16),transparent 55%),radial-gradient(70% 55% at 80% 6%,rgba(247,178,59,.10),transparent 60%),linear-gradient(180deg,var(--night1) 0%,var(--night2) 46%,var(--ink) 100%)}
+    .moon{position:fixed;top:3.5%;right:12%;width:52px;height:52px;border-radius:50%;z-index:0;background:radial-gradient(circle at 38% 34%,#fff,#d7ecff 40%,#7fb4d6 75%,rgba(127,180,214,0) 78%);box-shadow:0 0 48px 12px rgba(120,200,230,.3)}
+    .stars{position:fixed;inset:0;z-index:0;opacity:.6}
+    .ridge{position:fixed;left:0;right:0;bottom:0;z-index:0;width:100%;height:230px;display:block}
+    #app{position:relative;z-index:2;display:flex;flex-direction:column;gap:10px;min-height:100dvh;max-width:520px;margin:0 auto;padding:calc(12px + env(safe-area-inset-top)) 13px 176px}
+    button{font:inherit;cursor:pointer;border:0;color:inherit}
+    input,select{font-family:var(--sans)}
+    .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+    .head{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .head-actions{display:flex;align-items:center;gap:8px}
+    .waffle-btn{width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:rgba(255,255,255,.045);display:grid;place-items:center;padding:0}
+    .waffle-grid{width:17px;height:17px;display:grid;grid-template-columns:repeat(3,4px);grid-template-rows:repeat(3,4px);gap:2.5px}
+    .waffle-grid i{width:4px;height:4px;border-radius:1px;background:var(--text);display:block}
+    .menu-pop{position:absolute;right:0;top:48px;z-index:950;width:170px;padding:7px;border:1px solid var(--line);border-radius:13px;background:rgba(10,15,36,.97);box-shadow:0 16px 38px rgba(0,0,0,.42);backdrop-filter:blur(14px);display:none}
+    .menu-pop.show{display:grid}
+    .menu-item{min-height:43px;text-align:left;border-radius:9px;background:transparent;color:var(--text);padding:0 12px;font-family:var(--display);font-size:.9rem;font-weight:600}
+    .menu-item:active{background:rgba(255,255,255,.08)}
+    .menu-sheet{max-height:min(78dvh,620px);overflow:auto}
+    .menu-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .menu-head h2{margin:0}
+    .menu-close{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:1.35rem;line-height:1}
+    .inbox-list{display:grid;gap:10px}
+    .inbox-hold-notice{display:none;margin:-2px 0 10px;padding:10px 12px;border:1px solid rgba(247,178,59,.42);border-radius:10px;background:rgba(247,178,59,.09);color:var(--sun);font-family:var(--mono);font-size:.7rem;line-height:1.4}
+    .inbox-hold-notice.show{display:block}
+    .inbox-card{padding:14px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.035)}
+    .inbox-card b{display:block;font-family:var(--display);font-size:1rem;margin-bottom:4px}
+    .inbox-time{font-family:var(--mono);font-size:.7rem;color:var(--sun);margin-bottom:7px}
+    .inbox-route{font-size:.82rem;line-height:1.45}
+    .inbox-notes{font-size:.74rem;color:var(--muted);margin-top:7px}
+    .inbox-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+    .inbox-actions button{min-height:43px;border-radius:10px;font-family:var(--display);font-weight:700}
+    .inbox-accept{background:linear-gradient(180deg,#8ff5c1,var(--green) 55%,#1f9c63);color:#04220f}
+    .inbox-decline{background:rgba(255,102,128,.08);border:1px solid rgba(255,102,128,.38);color:var(--red)}
+    .settings-sheet{height:min(62dvh,480px);background:linear-gradient(180deg,rgba(22,28,58,.98),rgba(10,15,36,.98))}
+    .rider-flow{display:none;border:1px solid rgba(69,227,148,.28);border-radius:13px;padding:10px;background:rgba(69,227,148,.055);gap:8px}
+    .rider-flow.show{display:grid}
+    .rider-flow-head{display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:var(--display);font-size:.78rem}
+    .rider-flow-head small{font-family:var(--mono);color:var(--green);font-size:.66rem}
+    .rider-flow-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .rider-flow-actions button{min-height:43px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.045);font-family:var(--display);font-weight:700;font-size:.78rem}
+    .rider-flow-actions button.primary{background:linear-gradient(180deg,#8ff5c1,var(--green) 55%,#1f9c63);color:#04220f;border:0}
+    .rider-flow-actions button:disabled{opacity:.45;cursor:default}
+    .brand{display:flex;align-items:center;gap:9px;font-family:var(--display);font-weight:700;font-size:.98rem}
+    .logo{width:36px;height:18px}.logo path{fill:none;stroke:url(#g);stroke-width:3;stroke-linecap:square}
+    .tag{font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);border-radius:7px;padding:4px 8px;background:rgba(255,255,255,.04)}
+    .tag.live{color:var(--green);border-color:rgba(69,227,148,.4)}
+    .opp,.online-bar,.test,.sched,.map-wrap,.status,.queue,.sheet,.ro,.result{background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(10px);box-shadow:var(--glow)}
+    .opp{border-radius:16px;padding:13px 15px}
+    .opp-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+    .opp-chip{font-family:var(--mono);font-size:.6rem;letter-spacing:.05em;padding:3px 8px;border-radius:6px;border:1px solid var(--line);color:var(--muted);background:rgba(255,255,255,.04)}
+    .opp-chip.vhigh{color:var(--red);border-color:rgba(255,102,128,.45)}
+    .opp-chip.high{color:var(--sun);border-color:rgba(247,178,59,.45)}
+    .opp-chip.med{color:var(--cyan);border-color:rgba(43,212,229,.4)}
+    .opp-date{font-family:var(--mono);font-size:.66rem;color:var(--muted)}
+    .opp-event{font-family:var(--display);font-weight:700;font-size:1.08rem;letter-spacing:-.01em}
+    .opp-meta{font-size:.78rem;color:var(--muted);margin-top:2px}
+    .opp-move{font-size:.82rem;margin-top:8px;padding-top:8px;border-top:1px solid var(--line);line-height:1.45}
+    .go{position:relative;overflow:hidden;width:100%;min-height:60px;border-radius:15px;font-family:var(--display);font-weight:700;font-size:1.14rem;letter-spacing:.04em;color:#fff;background:linear-gradient(180deg,#7db4ff 0%,var(--blue) 46%,#2f5fc0 100%);box-shadow:0 12px 30px rgba(76,147,255,.34),inset 0 1px 0 rgba(255,255,255,.6);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:transform .08s}
+    .go::after{content:"";position:absolute;left:0;right:0;top:0;height:46%;background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,0));pointer-events:none}
+    .go small{font-family:var(--mono);font-weight:500;font-size:.6rem;letter-spacing:.03em;opacity:.9}
+    .go:active{transform:translateY(2px)}
+    .online-bar{display:none;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;border-radius:13px;border-color:rgba(69,227,148,.32)}
+    .ob-meta{font-size:.9rem}.ob-meta b{font-family:var(--display);font-weight:600}.ob-meta small{display:block;color:var(--muted);font-size:.74rem;margin-top:2px}
+    .shift-btn{font-family:var(--display);font-size:.82rem;font-weight:600;padding:10px 16px;border-radius:11px;background:rgba(255,255,255,.06);border:1px solid var(--line)}
+    .shift-btn.end{background:rgba(255,102,128,.14);border-color:rgba(255,102,128,.4);color:var(--red)}
+    .test{display:none;align-items:center;justify-content:space-between;gap:12px;border-radius:11px;padding:9px 13px}
+    .t-id{font-family:var(--mono);font-size:.7rem;color:var(--text)}.t-id em{font-style:normal;color:var(--muted)}
+    .t-ref{font-family:var(--mono);font-size:.68rem;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}.t-ref b{color:var(--text);font-weight:600}
+    .sched{border-radius:13px;padding:11px 13px 12px}
+    .sched-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .sched-head span{font-family:var(--display);font-weight:600;font-size:.9rem}
+    .sched-add{font-family:var(--mono);font-size:.68rem;color:var(--cyan);background:rgba(43,212,229,.08);border:1px solid rgba(43,212,229,.35);border-radius:8px;padding:5px 10px}
+    .sched-empty{font-size:.78rem;color:var(--muted);padding:2px}
+    .sched-card{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--line);margin-bottom:7px}
+    .sched-card.due{border-color:rgba(247,178,59,.5);background:rgba(247,178,59,.09)}
+    .sched-card:last-child{margin-bottom:0}
+    .sc-main{flex:1;min-width:0}.sc-main b{font-family:var(--display);font-weight:600;font-size:.9rem;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .sc-main small{color:var(--muted);font-size:.72rem}
+    .sc-when{font-family:var(--mono);font-size:.72rem;color:var(--muted);text-align:right;white-space:nowrap}.sc-when em{display:block;font-style:normal;color:var(--sun);font-size:.6rem;letter-spacing:.06em}
+    .sc-acts{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+    .sc-start{position:relative;overflow:hidden;font-family:var(--display);font-size:.74rem;font-weight:700;color:#04222b;background:linear-gradient(180deg,#7ef0ff,var(--cyan) 55%,#17a9bd);border-radius:8px;padding:7px 11px;box-shadow:0 6px 16px rgba(43,212,229,.28),inset 0 1px 0 rgba(255,255,255,.6)}
+    .sc-nav{font-family:var(--mono);font-size:.62rem;color:var(--text);background:rgba(76,147,255,.14);border:1px solid rgba(76,147,255,.45);border-radius:8px;padding:7px 9px}
+    .sc-del{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--muted);font-size:1rem;line-height:1}
+    .map-wrap{position:relative;border-radius:14px;overflow:hidden;height:150px}
+    #map{position:absolute;inset:0;background:#0c1a2d}
+    .leaflet-tile{filter:saturate(.75) brightness(.7) contrast(1.12)}
+    .leaflet-control-attribution{font-size:8px!important;background:rgba(0,0,0,.5)!important;color:#bbb!important}
+    .map-miles{position:absolute;z-index:500;left:9px;bottom:9px;font-family:var(--mono);font-size:.72rem;color:var(--muted);background:rgba(5,8,19,.82);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-variant-numeric:tabular-nums}
+    .map-miles b{color:var(--cyan);font-size:.9rem;font-weight:600}
+    .map-note{position:absolute;z-index:500;left:9px;top:9px;font-family:var(--mono);font-size:.62rem;background:rgba(5,8,19,.82);border:1px solid rgba(247,178,59,.35);color:var(--sun);border-radius:7px;padding:5px 9px;display:none}
+    .map-note.show{display:block}
+    .status{border-radius:15px;padding:15px 17px;transition:border-color .25s}
+    .status[data-state="ACCEPTED"]{border-color:rgba(247,178,59,.45)}
+    .status[data-state="ON_TRIP"]{border-color:rgba(43,212,229,.45)}
+    .s-eyebrow{font-size:.74rem;color:var(--muted)}
+    .s-main{font-family:var(--display);font-weight:700;font-size:1.5rem;letter-spacing:-.02em;margin:5px 0 3px}
+    .s-sub{color:var(--muted);font-size:.84rem}
+    .s-timer{font-family:var(--mono);font-size:.9rem;margin-top:9px;font-variant-numeric:tabular-nums}.s-timer span{color:var(--muted);font-size:.64rem;letter-spacing:.04em}
+    .queue{border-radius:11px;padding:10px 14px;display:none;align-items:center;justify-content:space-between;gap:12px;color:var(--muted);font-size:.84rem;border-style:dashed;transition:.25s}
+    .queue.live{border-style:solid;border-color:rgba(247,178,59,.45);background:rgba(247,178,59,.08);color:var(--sun)}
+    .q-label{font-size:.76rem}.q-time{font-family:var(--mono);font-size:.74rem}
+    .accept{position:relative;overflow:hidden;width:100%;min-height:62px;border-radius:15px;font-family:var(--display);font-weight:700;font-size:1.08rem;letter-spacing:.04em;color:#241606;background:linear-gradient(180deg,#ffe0a6 0%,var(--sun) 46%,#d98f1e 100%);box-shadow:0 12px 30px rgba(247,178,59,.32),inset 0 1px 0 rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .08s}
+    .accept::after{content:"";position:absolute;left:0;right:0;top:0;height:46%;background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0));pointer-events:none}
+    .accept small{font-family:var(--mono);font-weight:500;font-size:.62rem;letter-spacing:.04em;opacity:.7}
+    .accept:active{transform:translateY(2px)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .life{position:relative;overflow:hidden;min-height:62px;border-radius:15px;font-family:var(--display);font-weight:700;font-size:1rem;letter-spacing:.04em;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--muted);transition:transform .08s,opacity .2s}
+    .life small{display:block;font-family:var(--mono);font-weight:500;font-size:.58rem;letter-spacing:.03em;margin-top:4px;opacity:.7}
+    .life:active{transform:translateY(2px)}
+    .life[data-armed="pickup"]{color:#04222b;border-color:transparent;background:linear-gradient(180deg,#7ef0ff,var(--cyan) 55%,#17a9bd);box-shadow:0 10px 24px rgba(43,212,229,.28),inset 0 1px 0 rgba(255,255,255,.6)}
+    .life[data-armed="dropoff"]{color:#04220f;border-color:transparent;background:linear-gradient(180deg,#8ff5c1,var(--green) 55%,#1f9c63);box-shadow:0 10px 24px rgba(69,227,148,.26),inset 0 1px 0 rgba(255,255,255,.55)}
+    .life[data-armed="pickup"]::after,.life[data-armed="dropoff"]::after{content:"";position:absolute;left:0;right:0;top:0;height:46%;background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,0));pointer-events:none}
+    .life:disabled{opacity:.3;cursor:not-allowed;box-shadow:none}
+    .cancel-ride{width:100%;min-height:42px;border-radius:12px;background:rgba(255,102,128,.06);border:1px solid rgba(255,102,128,.35);color:var(--red);font-size:.82rem;font-weight:500;font-family:var(--display)}
+    .actionbar{position:fixed;left:0;right:0;bottom:0;z-index:900;max-width:520px;margin:0 auto;padding:9px 13px calc(9px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px;background:linear-gradient(to top,var(--ink) 52%,rgba(5,8,19,.35) 100%);backdrop-filter:blur(6px)}
+    .actionbar .row{margin:0}
+    #rideBar{display:flex;flex-direction:column;gap:8px}
+    .overlay{position:fixed;inset:0;z-index:1000;background:rgba(4,7,16,.72);backdrop-filter:blur(5px);display:none;align-items:flex-end;justify-content:center;padding:14px}
+    .overlay.show{display:flex}
+    .sheet{width:100%;max-width:494px;border-radius:20px;padding:20px 18px calc(18px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(22,28,58,.97),rgba(10,15,36,.97));backdrop-filter:blur(14px)}
+    .sheet h2{font-family:var(--display);font-weight:700;font-size:1.3rem;margin:0 0 3px}
+    .sheet .sub{color:var(--muted);font-size:.82rem;margin:0 0 16px}
+    .readouts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+    .ro{border-radius:11px;padding:10px 13px}
+    .ro small{display:block;font-size:.66rem;color:var(--muted);margin-bottom:2px}
+    .ro b{font-family:var(--mono);font-weight:600;font-size:1.24rem;font-variant-numeric:tabular-nums}
+    .fld{margin-bottom:13px}
+    .fld label{display:block;font-size:.72rem;color:var(--muted);margin-bottom:6px}
+    .fld label b{color:var(--sun);font-weight:600}
+    .fld input,.fld select{width:100%;height:46px;border-radius:11px;border:1px solid var(--line);background:rgba(6,10,24,.55);color:var(--text);padding:0 13px;font-size:16px}
+    .fld.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.fld.two>div{min-width:0}
+    .save{position:relative;overflow:hidden;width:100%;min-height:52px;border-radius:13px;font-family:var(--display);font-weight:700;font-size:1.02rem;color:#04220f;background:linear-gradient(180deg,#8ff5c1,var(--green) 55%,#1f9c63);box-shadow:0 10px 24px rgba(69,227,148,.28),inset 0 1px 0 rgba(255,255,255,.55);margin-top:6px}
+    .save::after{content:"";position:absolute;left:0;right:0;top:0;height:46%;background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,0));pointer-events:none}
+    .save:disabled{opacity:.55;cursor:wait}
+    .cancel{width:100%;min-height:44px;border-radius:11px;background:transparent;border:1px solid var(--line);color:var(--muted);margin-top:9px;font-size:.82rem;font-weight:500}
+    .t001-toggle{display:flex;align-items:center;gap:9px;margin:2px 0 12px;font-size:.82rem;color:var(--muted);cursor:pointer}
+    .t001-toggle input{width:20px;height:20px;accent-color:var(--green);flex:none}
+    .t001-toggle span{line-height:1.3}
+    .bignum{height:58px!important;font-family:var(--mono)!important;font-size:1.6rem!important;text-align:center;font-variant-numeric:tabular-nums}
+    .result{border-radius:12px;padding:14px 15px;margin-bottom:14px;display:none}
+    .result.show{display:block}
+    .result.above{border-color:rgba(69,227,148,.5)}
+    .result.below{border-color:rgba(255,102,128,.5)}
+    .result .r-rate{font-family:var(--mono);font-weight:600;font-size:1.7rem;font-variant-numeric:tabular-nums}
+    .result .r-status{font-family:var(--mono);font-size:.66rem;letter-spacing:.06em;color:var(--muted);margin-left:8px}
+    .result.above .r-status{color:var(--green)}.result.below .r-status{color:var(--red)}
+    .result .r-ref{font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-top:6px;font-variant-numeric:tabular-nums}
+    .result .r-meta{font-size:.72rem;color:var(--muted);margin-top:6px}
+    .toast{position:fixed;left:50%;bottom:calc(190px + env(safe-area-inset-bottom));transform:translate(-50%,14px);opacity:0;pointer-events:none;background:#f6fbff;color:#0a1220;border-radius:999px;padding:10px 17px;font-weight:600;font-size:.86rem;z-index:1200;transition:.18s;box-shadow:0 12px 30px rgba(0,0,0,.4);max-width:90%;text-align:center}
+    .toast.show{opacity:1;transform:translate(-50%,0)}
+    @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+  </style>
+</head>
+<body>
+<div class="sky"></div>
+<div class="moon"></div>
+<svg class="stars" viewBox="0 0 400 300" preserveAspectRatio="xMidYMin slice" aria-hidden="true"><g fill="#fff"><circle cx="40" cy="30" r="1.1" opacity=".8"/><circle cx="120" cy="60" r="0.9" opacity=".6"/><circle cx="200" cy="24" r="1.3" opacity=".9"/><circle cx="300" cy="70" r="1" opacity=".7"/><circle cx="360" cy="36" r="0.8" opacity=".6"/><circle cx="90" cy="110" r="0.9" opacity=".5"/><circle cx="250" cy="120" r="1.1" opacity=".7"/><circle cx="330" cy="150" r="0.8" opacity=".5"/><circle cx="160" cy="96" r="0.8" opacity=".55"/><circle cx="20" cy="80" r="0.9" opacity=".6"/></g></svg>
+<svg class="ridge" viewBox="0 0 1200 320" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+  <defs>
+    <linearGradient id="rg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16224e"/><stop offset="1" stop-color="#0c1330"/></linearGradient>
+    <linearGradient id="rg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0c1738"/><stop offset="1" stop-color="#070c20"/></linearGradient>
+  </defs>
+  <path d="M0,200 L150,120 L300,190 L470,90 L640,180 L820,110 L1000,175 L1200,120 L1200,320 L0,320 Z" fill="url(#rg1)" opacity=".9"/>
+  <path d="M0,250 L180,190 L360,250 L560,175 L760,245 L980,190 L1200,240 L1200,320 L0,320 Z" fill="url(#rg2)"/>
+</svg>
+<div id="app">
+  <svg width="0" height="0" style="position:absolute"><defs>
+    <linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#42dcff"/><stop offset=".55" stop-color="#f7b23b"/><stop offset="1" stop-color="#d6522f"/></linearGradient>
+  </defs></svg>
+
+  <div class="head">
+    <div class="brand"><svg class="logo" viewBox="0 0 100 40"><path d="M0,20 L15,20 L25,5 L35,35 L45,10 L55,20 L100,20"/></svg><span>Pulse Console</span></div>
+    <div class="head-actions">
+      <span class="tag" id="modeTag">connecting</span>
+      <button class="waffle-btn" id="waffleBtn" type="button" aria-label="Open menu" aria-expanded="false">
+        <span class="waffle-grid" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      </button>
+    </div>
+    <div class="menu-pop" id="waffleMenu">
+      <button class="menu-item" id="menuInbox" type="button">Inbox</button>
+      <button class="menu-item" id="menuLive" type="button">Live</button>
+      <button class="menu-item" id="menuSettings" type="button">Settings</button>
+    </div>
+  </div>
+
+  <div class="opp" id="oppCard" style="display:none">
+    <div class="opp-top"><span class="opp-chip" id="oppChip">—</span><span class="opp-date" id="oppDate"></span></div>
+    <div class="opp-event" id="oppEvent"></div>
+    <div class="opp-meta" id="oppMeta"></div>
+    <div class="opp-move" id="oppMove"></div>
+  </div>
+
+  <div class="online-bar" id="onlineBar">
+    <div class="ob-meta"><b>On shift</b> · <span class="num" id="obTimer">00:00</span><small id="obStats">0 rides</small></div>
+    <button class="shift-btn end" id="endShiftBtn">End shift</button>
+  </div>
+
+  <div class="sched" id="schedLane">
+    <div class="sched-head"><span>Scheduled</span><button class="sched-add" id="addSchedBtn">+ Add</button></div>
+    <div id="schedList"></div>
+  </div>
+
+  <div class="map-wrap">
+    <div id="map"></div>
+    <div class="map-note" id="mapNote">GPS off — miles manual</div>
+    <div class="map-miles">RIDE <b id="rideMiles">0.00</b> mi</div>
+  </div>
+
+  <div class="status" id="status" data-state="IDLE">
+    <div class="s-eyebrow" id="sEyebrow">No active ride</div>
+    <div class="s-main" id="sMain">Stand by</div>
+    <div class="s-sub" id="sSub">Tap Accept the moment you accept the ride.</div>
+    <div class="s-timer" id="sTimer" style="display:none"></div>
+  </div>
+
+  <div class="rider-flow" id="riderFlow">
+    <div class="rider-flow-head"><span>Rider update</span><small id="riderFlowStatus">Confirmed</small></div>
+    <div class="rider-flow-actions" id="riderFlowActions"></div>
+  </div>
+  <div class="queue" id="queue"><span class="q-label">Next ride</span><span class="q-time" id="queueTime">none stacked</span></div>
+</div>
+
+<div class="actionbar" id="actionbar">
+  <div id="goInBar"><button class="go" id="goBtn">GO ONLINE<small>tap to begin a shift</small></button></div>
+  <div id="rideBar" style="display:none">
+    <button class="accept" id="acceptBtn">Accept ride <small id="acceptHint">start ride</small></button>
+    <div class="row">
+      <button class="life" id="pickupBtn" disabled>Picked up<small>start trace</small></button>
+      <button class="life" id="dropoffBtn" disabled>Drop off<small>end ride</small></button>
+    </div>
+    <button class="cancel-ride" id="cancelActiveBtn" style="display:none">Cancel active ride</button>
+  </div>
+</div>
+
+<!-- End-shift overlay -->
+<div class="overlay" id="overlay">
+  <div class="sheet">
+    <h2>End shift</h2>
+    <p class="sub">Time and miles are captured. Earnings can be added now or reconciled later.</p>
+    <div class="result" id="result"></div>
+    <div class="readouts">
+      <div class="ro"><small>Online</small><b id="roOnline">0h 00m</b></div>
+      <div class="ro"><small>Traced miles</small><b id="roMiles">0.00</b></div>
+    </div>
+    <div class="fld two">
+      <div><label for="inEarnings">Total earnings</label><input id="inEarnings" type="number" inputmode="decimal" min="0" step="0.01" placeholder="optional — reconcile later"></div>
+      <div><label for="inTips">Of that, tips</label><input id="inTips" type="number" inputmode="decimal" min="0" step="0.01" placeholder="optional"></div>
+    </div>
+    <div class="fld"><label for="inZone">Primary zone</label>
+      <select id="inZone"><option value="">—</option><option>BTV Airport</option><option>Church Street / Downtown</option><option>UVM</option><option>Essex Junction</option><option>South Burlington hotels</option><option>Winooski</option><option>Waterfront</option></select>
+    </div>
+    <div class="fld"><label for="inNotes">Notes</label><input id="inNotes" type="text" placeholder="optional"></div>
+    <button class="save" id="saveBtn">Save shift</button>
+    <button class="cancel" id="cancelBtn">Keep driving</button>
+  </div>
+</div>
+
+<!-- Per-ride fare overlay -->
+<div class="overlay" id="fareOverlay">
+  <div class="sheet">
+    <h2>Ride paid?</h2>
+    <p class="sub">Drop the fare in now and the shift total fills itself in. <span class="num" id="fareMiles">0.00</span> mi traced.</p>
+    <div class="fld two">
+      <div><label for="fareAmt">Fare</label><input id="fareAmt" class="bignum" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00"></div>
+      <div><label for="fareTip">Tip</label><input id="fareTip" class="bignum" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00"></div>
+    </div>
+    <button class="save" id="addFareBtn">Add to shift</button>
+    <button class="cancel" id="skipFareBtn">Skip</button>
+  </div>
+</div>
+
+<!-- Schedule overlay -->
+<div class="overlay" id="schedOverlay">
+  <div class="sheet">
+    <h2>Schedule a ride</h2>
+    <p class="sub">Reservations surface below and come due at their time.</p>
+    <div class="fld"><label for="inSchedName">Name</label><input id="inSchedName" type="text" placeholder="e.g. Airport run — Dana"></div>
+    <div class="fld"><label for="inSchedWhen">When</label><input id="inSchedWhen" type="datetime-local"></div>
+    <div class="fld"><label for="inSchedPickup">Pickup</label><input id="inSchedPickup" type="text" placeholder="optional"></div>
+    <button class="save" id="saveSchedBtn" style="background:linear-gradient(180deg,var(--blue),#2f6fd0);color:#fff">Add to schedule</button>
+    <button class="cancel" id="cancelSchedBtn">Close</button>
+  </div>
+</div>
+
+<!-- Inbox overlay -->
+<div class="overlay" id="inboxOverlay">
+  <div class="sheet menu-sheet">
+    <div class="menu-head"><h2>Inbox</h2><button class="menu-close" id="closeInboxBtn" type="button" aria-label="Close inbox">&times;</button></div>
+    <div class="inbox-hold-notice" id="inboxHoldNotice" role="status" aria-live="polite"></div>
+    <div class="inbox-list" id="inboxList"></div>
+  </div>
+</div>
+
+<!-- Settings intentionally blank -->
+<div class="overlay" id="settingsOverlay" aria-label="Settings">
+  <div class="sheet settings-sheet"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  var $=function(id){return document.getElementById(id)};
+  var S={shift:null, active:null, queued:null, scheduled:[], requests:[], heldRequests:[], pendingTrips:[]};
+  var boot={cost:null, opportunity:null, normalFlow:true};
+  var LIVE=(typeof google!=='undefined' && google.script && google.script.run);
+  var map=null, meMarker=null, trace={watch:null, pts:[], miles:0, line:null};
+  var mockResList=[];
+  var riderFlowBusy=false, scheduledStartBusy={};
+  var RIDER_STATUS_SEQUENCE=['Confirmed','Leaving','On the way','Arriving soon','Arrived','Ride in progress','Complete'];
+  var mockRequestList=[{requestId:'FR-PREVIEW1',name:'Preview rider',pickup:'Essex Junction',destination:'BTV Airport',whenISO:new Date(Date.now()+7200000).toISOString(),notes:'',status:'REQUESTED',acceptUrl:'',declineUrl:''}];
+
+  function srv(fn){
+    var args=[].slice.call(arguments,1);
+    if(LIVE){ return new Promise(function(res,rej){ google.script.run.withSuccessHandler(res).withFailureHandler(function(e){rej(new Error(e&&e.message?e.message:String(e)))})[fn].apply(google.script.run,args); }); }
+    return Promise.resolve(mockSrv_(fn,args));
+  }
+  function mockSrv_(fn,args){
+    if(fn==='getCockpitBootstrap') return {ok:true, preview:true, normalFlow:true, testWorkbookTargeted:false,
+      cost:{fuelPerGal:3.5,mpg:25,maintPerMile:0.10,taxRate:0.22},
+      reservations:mockResList.slice(),
+      requests:mockRequestList.slice(),
+      liveUrl:'https://script.google.com/macros/s/AKfycbyde9C6y6iIoJO8AfWxt5z-D2FxwKXXMonpypmW8xaI7BZaAwChYBXM4JO7zqYvmw7Y/exec',
+      opportunity:{date:'Sat Jul 18',event:'SlipBizkit + Sex With Jenna',location:'Higher Ground, South Burlington',demand:'High',window:'10:00 PM-12:00 AM est.',move:'Two same-night events may create staggered exits; work the corridor, not the curb.'}};
+    if(fn==='listReservations') return mockResList.slice();
+    if(fn==='listRequestedRides') return {items:mockRequestList.slice(),error:''};
+    if(fn==='updateRiderStatus') return {ok:true,requestId:args[0],status:args[1],occurredAt:new Date().toISOString(),duplicate:false};
+    if(fn==='addReservation'){ var r=args[0]||{}; mockResList.push({id:'r'+Date.now()+Math.floor(Math.random()*1000),name:r.name||'Ride',pickup:r.pickup||'',dest:r.dest||'',phone:r.phone||'',notes:r.notes||'',whenISO:r.whenISO,source:r.source||'manual'}); return mockResList.slice(); }
+    if(fn==='removeReservation'||fn==='startReservation'){ var id=args[0]; mockResList=mockResList.filter(function(x){return x.id!==id}); return mockResList.slice(); }
+    if(fn==='logCompletedTrip') return {ok:true,preview:true,duplicate:false,rideId:(args[0]||{}).rideId||'',row:'(preview)'};
+    if(fn==='endShiftToSheet'){
+      var p=args[0]||{}, provided=p.earnings!==''&&p.earnings!=null&&isFinite(Number(p.earnings));
+      return {ok:true, preview:true, earningsPending:!provided, shift:{row:'(preview)',grossPerHr:provided&&p.onlineHours>0?Number(p.earnings)/p.onlineHours:null}};
+    }
+    return {ok:false};
+  }
+
+  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function toast(m){var t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show')},2100)}
+  function now(){return Date.now()}
+  function clock(ms){var s=Math.max(0,Math.round((now()-ms)/1000)),m=Math.floor(s/60),r=s%60;return (m<10?'0':'')+m+':'+(r<10?'0':'')+r}
+  function hm(ms){var s=Math.max(0,Math.round(ms/1000)),h=Math.floor(s/3600),m=Math.floor((s%3600)/60);return h+'h '+(m<10?'0':'')+m+'m'}
+  function ago(ms){var s=Math.max(0,Math.round((now()-ms)/1000)),m=Math.floor(s/60),r=s%60;return (m?m+'m ':'')+r+'s'}
+  function money(n){return Number(n).toFixed(2)}
+  var STATE_KEY='pulse-hoy-driver-state-v1';
+  function newRideId_(prefix){return String(prefix||'ride')+'-'+now()+'-'+Math.floor(Math.random()*1000000);}
+  function persistState(){try{localStorage.setItem(STATE_KEY,JSON.stringify({shift:S.shift,active:S.active,queued:S.queued,heldRequests:S.heldRequests||[],pendingTrips:S.pendingTrips||[]}))}catch(e){}}
+  function restoreState(){try{var x=JSON.parse(localStorage.getItem(STATE_KEY)||'null');if(x&&typeof x==='object'){S.shift=x.shift||null;S.active=x.active||null;S.queued=x.queued||null;S.heldRequests=Array.isArray(x.heldRequests)?x.heldRequests:[];S.pendingTrips=Array.isArray(x.pendingTrips)?x.pendingTrips:[]}}catch(e){}}
+  function navTo(address){if(!address){toast('Address unavailable');return;}var url='https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(address);window.open(url,'_blank','noopener');}
+  function scheduledTripState(s){return {rideId:s.requestId?('request-'+s.requestId):newRideId_('scheduled'),state:'ACCEPTED',acceptedAt:now(),pickedUpAt:null,requestId:s.requestId||'',source:s.source||'scheduled',name:s.name||'Ride',pickup:s.pickup||'',dest:s.dest||'',riderStatus:s.riderStatus||'Confirmed'};}
+  function queueTripLog_(payload){
+    if(!payload||!payload.rideId)return;
+    S.pendingTrips=S.pendingTrips||[];
+    if(!S.pendingTrips.some(function(x){return x.rideId===payload.rideId}))S.pendingTrips.push(payload);
+    persistState();flushPendingTrips_();
+  }
+  function flushPendingTrips_(){
+    if(!LIVE||!S.pendingTrips||!S.pendingTrips.length)return Promise.resolve();
+    var payload=S.pendingTrips[0];
+    return srv('logCompletedTrip',payload).then(function(){
+      S.pendingTrips.shift();persistState();return flushPendingTrips_();
+    }).catch(function(e){toast(e.message||'Trip log pending');});
+  }
+
+  function initMap(){
+    map=L.map('map',{zoomControl:false,attributionControl:true,preferCanvas:true}).setView([44.49,-73.10],11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'© OpenStreetMap'}).addTo(map);
+    setTimeout(function(){map.invalidateSize(true)},120);
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(function(p){var pt=[p.coords.latitude,p.coords.longitude];meMarker=L.circleMarker(pt,{radius:8,color:'#fff',weight:3,fillColor:'#42dcff',fillOpacity:1}).addTo(map);map.setView(pt,14);},
+        function(){$('mapNote').classList.add('show')},{enableHighAccuracy:true,timeout:8000,maximumAge:30000});
+    } else { $('mapNote').classList.add('show'); }
+  }
+  function seg(a,b){var la1=a[0]*Math.PI/180,la2=b[0]*Math.PI/180,dLa=la2-la1,dLo=(b[1]-a[1])*Math.PI/180;var h=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(la1)*Math.cos(la2)*Math.sin(dLo/2)*Math.sin(dLo/2);return 3958.8*2*Math.asin(Math.min(1,Math.sqrt(h)));}
+  function startTrace(){
+    trace.pts=[];trace.miles=0; if(trace.line){map.removeLayer(trace.line);trace.line=null;} $('rideMiles').textContent='0.00';
+    if(!navigator.geolocation){$('mapNote').classList.add('show');return;}
+    trace.watch=navigator.geolocation.watchPosition(function(p){
+      var pt=[p.coords.latitude,p.coords.longitude];
+      if(trace.pts.length)trace.miles+=seg(trace.pts[trace.pts.length-1],pt);
+      trace.pts.push(pt);
+      if(!trace.line)trace.line=L.polyline(trace.pts,{color:'#42dcff',weight:5,opacity:.9}).addTo(map);else trace.line.setLatLngs(trace.pts);
+      if(meMarker)meMarker.setLatLng(pt);else meMarker=L.circleMarker(pt,{radius:8,color:'#fff',weight:3,fillColor:'#42dcff',fillOpacity:1}).addTo(map);
+      map.setView(pt,Math.max(map.getZoom(),15)); $('rideMiles').textContent=trace.miles.toFixed(2);
+    },function(){$('mapNote').classList.add('show')},{enableHighAccuracy:true,maximumAge:2000,timeout:12000});
+  }
+  function stopTrace(){ if(trace.watch!=null){navigator.geolocation.clearWatch(trace.watch);trace.watch=null;} return Math.round(trace.miles*100)/100; }
+
+  /* shift = online */
+  function goOnline(){ S.shift={startedAt:now(), miles:0, rides:0, earned:0, tips:0}; toast('Online'); render(); }
+
+  /* ride lifecycle */
+  function accept(){
+    if(!S.shift)goOnline();
+    if(!S.active){ S.active={rideId:newRideId_('app'),source:'app',state:'ACCEPTED',acceptedAt:now(),pickedUpAt:null,pickup:'',dest:''}; toast('Accepted'); }
+    else if(!S.queued){ S.queued={rideId:newRideId_('app'),source:'app',state:'ACCEPTED',acceptedAt:now(),pickedUpAt:null,pickup:'',dest:''}; toast('Next ride stacked'); }
+    else { toast('Queue full'); }
+    render();
+  }
+  function pickedUp(){ if(S.active&&S.active.state==='ACCEPTED'){ S.active.state='ON_TRIP'; S.active.pickedUpAt=now(); startTrace(); toast('Tracing route'); } render(); }
+  function dropOff(){
+    if(S.active&&S.active.state==='ON_TRIP'){
+      var completed=S.active, completedAt=now(), miles=stopTrace();
+      queueTripLog_({
+        rideId:completed.rideId||newRideId_('completed'),
+        requestId:completed.requestId||'',
+        source:completed.source||'app',
+        acceptedISO:new Date(completed.acceptedAt||completed.pickedUpAt||completedAt).toISOString(),
+        pickedUpISO:new Date(completed.pickedUpAt||completed.acceptedAt||completedAt).toISOString(),
+        completedISO:new Date(completedAt).toISOString(),
+        pickup:completed.pickup||'',
+        destination:completed.dest||'',
+        miles:miles,
+        fare:'',
+        tip:''
+      });
+      if(S.shift){
+        S.shift.miles+=miles;S.shift.rides++;
+        if(completed.requestId){S.shift.requestIds=S.shift.requestIds||[];if(S.shift.requestIds.indexOf(completed.requestId)<0)S.shift.requestIds.push(completed.requestId);}
+      }
+      if(S.queued){ S.active=S.queued; S.queued=null; toast('Dropped · '+miles.toFixed(2)+' mi · next up'); }
+      else { S.active=null; toast('Dropped · '+miles.toFixed(2)+' mi'); }
+      releaseHeldRequests_();
+      setTimeout(refreshInbox,0);
+    } render();
+  }
+
+  /* per-ride fare capture — the shift total fills itself in so end-shift is one tap */
+  function openFare(miles){ if(!S.shift)return; $('fareMiles').textContent=miles.toFixed(2); $('fareAmt').value=''; $('fareTip').value=''; $('fareOverlay').classList.add('show'); setTimeout(function(){try{$('fareAmt').focus();}catch(e){}},60); }
+  function closeFare(){ $('fareOverlay').classList.remove('show'); }
+  function addFare(){
+    var f=parseFloat($('fareAmt').value); if(!isFinite(f)||f<0)f=0;
+    var t=parseFloat($('fareTip').value); if(!isFinite(t)||t<0)t=0;
+    if(S.shift){ S.shift.earned=Math.round((S.shift.earned+f+t)*100)/100; S.shift.tips=Math.round((S.shift.tips+t)*100)/100; }
+    closeFare(); toast('Shift $'+money(S.shift?S.shift.earned:0)); render();
+  }
+  function skipFare(){ closeFare(); }
+  function cancelActive(){ if(!S.active)return; stopTrace(); if(S.queued){S.active=S.queued;S.queued=null;toast('Cancelled · next up');}else{S.active=null;toast('Ride cancelled');} releaseHeldRequests_();setTimeout(refreshInbox,0);render(); }
+
+  /* scheduled lane — persisted server-side */
+  function schedFromServer(list){ S.scheduled=(list||[]).map(function(r){return {id:r.id,requestId:r.requestId||'',name:r.name,pickup:r.pickup||'',dest:r.dest||'',notes:r.notes||'',whenTS:Date.parse(r.whenISO),source:r.source||'manual',riderStatus:r.riderStatus||''};}); renderSched(); }
+  function saveScheduled(){
+    var when=$('inSchedWhen').value; if(!when){toast('Pick a time');return;}
+    var d=new Date(when); if(isNaN(d.getTime())){toast('Bad time');return;}
+    var payload={name:$('inSchedName').value.trim()||'Ride', pickup:$('inSchedPickup').value.trim(), whenISO:d.toISOString(), source:'manual'};
+    var b=$('saveSchedBtn'); b.disabled=true;
+    srv('addReservation',payload).then(function(list){ schedFromServer(list); $('inSchedName').value='';$('inSchedWhen').value='';$('inSchedPickup').value=''; $('schedOverlay').classList.remove('show'); toast('Scheduled'); })
+      .catch(function(e){toast(e.message||'Failed')}).then(function(){b.disabled=false});
+  }
+  function startScheduled(id){
+    var s=S.scheduled.filter(function(x){return x.id===id})[0]; if(!s||scheduledStartBusy[id])return;
+    if(s.requestId&&((S.active&&S.active.requestId===s.requestId)||(S.queued&&S.queued.requestId===s.requestId))){toast('Ride already started');return;}
+    if(S.active||S.queued){toast('Finish current ride first');return;}
+    if(!S.shift)goOnline();
+    scheduledStartBusy[id]=true;renderSched();
+    function release(){delete scheduledStartBusy[id];renderSched();}
+    function begin(status,list){
+      var ride=scheduledTripState(s);
+      if(s.source==='rider')ride.riderStatus=status||'On the way';
+      S.active=ride;
+      persistState();
+      schedFromServer(list||[]);
+      release();
+      toast('Pickup started: '+s.name); render();
+    }
+    var pickupCall=srv('beginScheduledPickup',s.requestId||'',id);
+    if(s.pickup)navTo(s.pickup);
+    pickupCall.then(function(result){
+      begin((result&&result.status)||'',(result&&result.reservations)||[]);
+    }).catch(function(e){release();toast(e.message||'Could not begin pickup')});
+  }
+
+  function renderSched(){
+    var lane=$('schedList'); lane.innerHTML='';
+    if(!S.scheduled.length){ return; }
+    S.scheduled.slice().sort(function(a,b){return a.whenTS-b.whenTS}).forEach(function(s){
+      var diff=s.whenTS-now(), mins=Math.round(diff/60000);
+      var when = mins>90 ? new Date(s.whenTS).toLocaleString([], {weekday:'short',hour:'numeric',minute:'2-digit'}) : (mins>=0 ? ('in '+mins+'m') : (Math.abs(mins)+'m ago'));
+      var due = diff<=30*60000 && diff> -60*60000;
+      var sub=[s.pickup, s.dest?('→ '+s.dest):'', (s.source==='rider'?'confirmed rider':'')].filter(Boolean).join(' · ');
+      var card=document.createElement('div'); card.className='sched-card'+(due?' due':'');
+      card.innerHTML='<div class="sc-main"><b>'+esc(s.name)+'</b>'+(sub?'<small>'+esc(sub)+'</small>':'')+'</div><div class="sc-when">'+when+(due?'<em>DUE</em>':'')+'</div>';
+      var acts=document.createElement('div'); acts.className='sc-acts';
+      var start=document.createElement('button'); start.className='sc-start'; start.textContent='Begin pickup'; start.disabled=!!scheduledStartBusy[s.id]||!!S.active||!!S.queued; start.onclick=function(){startScheduled(s.id)};
+      acts.appendChild(start);
+      if(s.dest){var navD=document.createElement('button');navD.className='sc-nav';navD.textContent='Drop';navD.onclick=function(){navTo(s.dest)};acts.appendChild(navD);}
+      if(s.source!=='rider'){var del=document.createElement('button'); del.className='sc-del'; del.innerHTML='&times;'; del.onclick=function(){ srv('removeReservation',s.id).then(function(list){schedFromServer(list)}).catch(function(){}); };acts.appendChild(del);}
+      card.appendChild(acts); lane.appendChild(card);
+    });
+  }
+
+
+  /* waffle + Inbox */
+  function closeWaffle(){ $('waffleMenu').classList.remove('show'); $('waffleBtn').setAttribute('aria-expanded','false'); }
+  function toggleWaffle(){ var open=$('waffleMenu').classList.toggle('show'); $('waffleBtn').setAttribute('aria-expanded',String(open)); }
+  function openInbox(){ closeWaffle(); $('inboxOverlay').classList.add('show'); refreshInbox(); }
+  function closeInbox(){ $('inboxOverlay').classList.remove('show'); }
+  function openSettings(){ closeWaffle(); $('settingsOverlay').classList.add('show'); }
+  function closeSettings(){ $('settingsOverlay').classList.remove('show'); }
+  function openLive(){ closeWaffle(); var url=boot.liveUrl||''; if(!url){toast('Live page unavailable');return;} window.open(url,'_blank','noopener'); }
+  function requestReviewLocked_(){return !!(S.active&&S.active.state==='ON_TRIP');}
+  function requestKey_(r){
+    r=r||{};
+    return String(r.requestId||r.id||[r.name||'',r.pickup||'',r.destination||'',r.whenISO||''].join('|')).trim();
+  }
+  function uniqueRequests_(list){
+    var order=[],byKey=Object.create(null);
+    (list||[]).forEach(function(r){var key=requestKey_(r);if(!key)return;if(!Object.prototype.hasOwnProperty.call(byKey,key))order.push(key);byKey[key]=r;});
+    return order.map(function(key){return byKey[key]});
+  }
+  function notifyHeldRequests_(count){
+    if(!count)return;
+    try{if(navigator.vibrate)navigator.vibrate([120,60,120]);}catch(e){}
+    toast(count===1?'New request held until drop-off':count+' new requests held until drop-off');
+  }
+  function reconcileRequestedRides_(incoming){
+    var list=uniqueRequests_(incoming),visibleBefore=Object.create(null),heldBefore=Object.create(null),visible=[],held=uniqueRequests_(S.heldRequests||[]),newlyHeld=0;
+    (S.requests||[]).forEach(function(r){visibleBefore[requestKey_(r)]=true;});
+    (S.heldRequests||[]).forEach(function(r){heldBefore[requestKey_(r)]=true;});
+    if(requestReviewLocked_()){
+      list.forEach(function(r){
+        var key=requestKey_(r);
+        if(visibleBefore[key])visible.push(r);
+        else{held.push(r);if(!heldBefore[key])newlyHeld++;}
+      });
+      S.requests=uniqueRequests_(visible);
+      S.heldRequests=uniqueRequests_(held);
+      persistState();
+      notifyHeldRequests_(newlyHeld);
+      renderInbox();
+      return;
+    }
+    S.requests=uniqueRequests_(list.concat(S.heldRequests||[]));
+    S.heldRequests=[];
+    persistState();
+    renderInbox();
+  }
+  function releaseHeldRequests_(){
+    var held=uniqueRequests_(S.heldRequests||[]);
+    if(!held.length)return 0;
+    S.requests=uniqueRequests_((S.requests||[]).concat(held));
+    S.heldRequests=[];
+    persistState();
+    renderInbox();
+    toast(held.length===1?'Request ready in Inbox':held.length+' requests ready in Inbox');
+    return held.length;
+  }
+  function requestsFromServer(payload){
+    var list=Array.isArray(payload)?payload:((payload&&payload.items)||[]);
+    reconcileRequestedRides_(list);
+  }
+  function refreshInbox(){
+    return srv('listRequestedRides').then(function(payload){requestsFromServer(payload)}).catch(function(){renderInbox()});
+  }
+  function openDecision(url){
+    if(requestReviewLocked_()){toast('Request held until drop-off');return;}
+    if(!url)return;
+    window.open(url,'_blank','noopener');
+  }
+  function renderInbox(){
+    var locked=requestReviewLocked_(),heldCount=(S.heldRequests||[]).length,notice=$('inboxHoldNotice');
+    if(notice){notice.textContent=locked?(heldCount?(heldCount===1?'1 new request held until drop-off':heldCount+' new requests held until drop-off'):'Request review unlocks after drop-off'):'';notice.classList.toggle('show',locked);}
+    var list=$('inboxList'); list.innerHTML='';
+    (S.requests||[]).slice().sort(function(a,b){return (Date.parse(a.whenISO)||0)-(Date.parse(b.whenISO)||0)}).forEach(function(r){
+      var card=document.createElement('div'); card.className='inbox-card';
+      var when=r.whenISO?new Date(r.whenISO).toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'';
+      card.innerHTML='<b>'+esc(r.name||'Ride request')+'</b>'+
+        (when?'<div class="inbox-time">'+esc(when)+'</div>':'')+
+        '<div class="inbox-route">'+esc(r.pickup||'')+(r.destination?' → '+esc(r.destination):'')+'</div>'+
+        (r.notes?'<div class="inbox-notes">'+esc(r.notes)+'</div>':'');
+      if(r.acceptUrl||r.declineUrl){
+        var acts=document.createElement('div'); acts.className='inbox-actions';
+        if(r.acceptUrl){var accept=document.createElement('button');accept.className='inbox-accept';accept.textContent='Accept';accept.disabled=locked;accept.onclick=function(){openDecision(r.acceptUrl)};acts.appendChild(accept);}
+        if(r.declineUrl){var decline=document.createElement('button');decline.className='inbox-decline';decline.textContent='Decline';decline.disabled=locked;decline.onclick=function(){openDecision(r.declineUrl)};acts.appendChild(decline);}
+        card.appendChild(acts);
+      }
+      list.appendChild(card);
+    });
+  }
+
+
+  function isRiderRide_(ride){return !!(ride&&ride.requestId);}
+  function riderStatus_(ride){return (ride&&ride.riderStatus)||'Confirmed';}
+  function advanceRiderStatus_(status,after){
+    var a=S.active;if(!isRiderRide_(a)||riderFlowBusy)return Promise.resolve(null);
+    riderFlowBusy=true;render();
+    var key=a.requestId+':'+String(status).toLowerCase().replace(/\s+/g,'-');
+    return srv('updateRiderStatus',a.requestId,status,key).then(function(res){
+      a.riderStatus=(res&&res.status)||status;if(after)after();riderFlowBusy=false;persistState();render();return res;
+    }).catch(function(e){riderFlowBusy=false;render();toast(e.message||'Could not update rider');throw e;});
+  }
+  function riderActionButton_(label,primary,handler){
+    var b=document.createElement('button');b.textContent=label;if(primary)b.className='primary';b.disabled=riderFlowBusy;b.onclick=handler;return b;
+  }
+  function renderRiderFlow(){
+    var box=$('riderFlow'),actions=$('riderFlowActions');actions.innerHTML='';
+    var a=S.active;if(!isRiderRide_(a)){box.classList.remove('show');return;}
+    box.classList.add('show');var st=riderStatus_(a);$('riderFlowStatus').textContent=st;
+    if(st==='Leaving'){
+      actions.appendChild(riderActionButton_('Navigate pickup',false,function(){advanceRiderStatus_('On the way');navTo(a.pickup)}));
+    }else if(st==='On the way'){
+      actions.appendChild(riderActionButton_('Navigate pickup',false,function(){navTo(a.pickup)}));
+      actions.appendChild(riderActionButton_('Arriving soon',true,function(){advanceRiderStatus_('Arriving soon')}));
+    }else if(st==='Arriving soon'){
+      actions.appendChild(riderActionButton_('Navigate pickup',false,function(){navTo(a.pickup)}));
+      actions.appendChild(riderActionButton_('Arrived',true,function(){advanceRiderStatus_('Arrived')}));
+    }else if(st==='Arrived'){
+      actions.appendChild(riderActionButton_('Start ride',true,function(){advanceRiderStatus_('Ride in progress',function(){a.state='ON_TRIP';a.pickedUpAt=now();startTrace();toast('Ride in progress')})}));
+    }else if(st==='Ride in progress'){
+      actions.appendChild(riderActionButton_('Navigate destination',false,function(){navTo(a.dest)}));
+      actions.appendChild(riderActionButton_('Complete ride',true,function(){advanceRiderStatus_('Complete',function(){dropOff()})}));
+    }else if(st==='Complete'){
+      actions.appendChild(riderActionButton_('Complete',false,function(){}));actions.firstChild.disabled=true;
+    }
+  }
+
+  /* end shift */
+  function openEndShift(){ if(!S.shift)return; $('roOnline').textContent=hm(now()-S.shift.startedAt); $('roMiles').textContent=S.shift.miles.toFixed(2); if(S.shift.earned>0&&!$('inEarnings').value)$('inEarnings').value=money(S.shift.earned); if(S.shift.tips>0&&!$('inTips').value)$('inTips').value=money(S.shift.tips); $('result').className='result';$('result').innerHTML=''; $('overlay').classList.add('show'); }
+  function closeOverlay(){ $('overlay').classList.remove('show'); }
+  function saveShift(){
+    if(!S.shift)return;
+    var rawEarnings=$('inEarnings').value.trim(), earnings=rawEarnings===''?'':parseFloat(rawEarnings);
+    if(earnings!==''&&(!isFinite(earnings)||earnings<0)){toast('Earnings must be zero or more');$('inEarnings').focus();return;}
+    var onlineHours=(now()-S.shift.startedAt)/3600000, tips=parseFloat($('inTips').value); if(!isFinite(tips))tips=0;
+    var requestNote=(S.shift.requestIds&&S.shift.requestIds.length)?(' · requests '+S.shift.requestIds.join(',')):'';
+    var pendingNote=earnings===''?' · earnings pending reconciliation':'';
+    var payload={startISO:new Date(S.shift.startedAt).toISOString(), endISO:new Date().toISOString(), onlineHours:onlineHours, miles:S.shift.miles, earnings:earnings, tips:earnings===''?'':tips, zone:$('inZone').value, notes:($('inNotes').value||'')+(S.shift.rides?(' · '+S.shift.rides+' rides'):'')+requestNote+pendingNote};
+    var btn=$('saveBtn'); btn.disabled=true; btn.textContent='Saving…';
+    srv('endShiftToSheet',payload).then(function(res){
+      showResult(res,earnings,onlineHours);
+      S.shift=null;S.active=null;S.queued=null;stopTrace();render();
+      $('inEarnings').value='';$('inTips').value='';$('inNotes').value='';$('inZone').value='';
+    }).catch(function(e){toast(e.message||'Save failed')}).then(function(){btn.disabled=false;btn.textContent='Save shift'});
+  }
+  function showResult(res,earnings,onlineHours){
+    var rowTxt=(res&&res.shift&&res.shift.row!=null)?('Shift Log row '+res.shift.row):'Shift logged';
+    var pending=!!(res&&res.earningsPending);
+    var pre=(res&&res.preview)?'preview — nothing written · ':'';
+    var el=$('result'); el.className='result show';
+    if(pending){
+      el.innerHTML='<div><span class="r-status">Shift saved</span></div><div class="r-ref">Earnings pending reconciliation</div><div class="r-meta">'+pre+rowTxt+'</div>';
+    }else{
+      var gph=onlineHours>0?Number(earnings)/onlineHours:0;
+      el.innerHTML='<div><span class="r-rate">$'+money(gph)+'</span><span class="r-status"> /hr</span></div><div class="r-ref">Normal Shift Log write</div><div class="r-meta">'+pre+rowTxt+'</div>';
+    }
+    toast((res&&res.preview)?'Preview only':'Shift saved');
+  }
+
+  function renderOpp(){
+    var o=boot.opportunity, c=$('oppCard'); if(!o||!o.event){c.style.display='none';return;}
+    c.style.display='block';
+    var dem=(o.demand||'').toLowerCase(), chip=dem.indexOf('very high')>=0?'vhigh':dem.indexOf('high')>=0?'high':dem.indexOf('med')>=0?'med':'';
+    $('oppChip').textContent=o.demand||'—'; $('oppChip').className='opp-chip '+chip;
+    $('oppDate').textContent=o.date||''; $('oppEvent').textContent=o.event||'';
+    $('oppMeta').textContent=[o.location,o.window].filter(Boolean).join(' · '); $('oppMove').textContent=o.move||'';
+  }
+  function syncModeTag_(){
+    $('modeTag').textContent=LIVE?'live':'preview';
+    $('modeTag').className='tag'+(LIVE?' live':'');
+  }
+
+  function syncBarPad(){ var b=$('actionbar'); if(b) $('app').style.paddingBottom=(b.offsetHeight+14)+'px'; }
+
+  function render(){
+    var online=!!S.shift;
+    $('goInBar').style.display=online?'none':'block';
+    $('rideBar').style.display=online?'block':'none';
+    $('onlineBar').style.display=online?'flex':'none';
+    if(online){ $('obTimer').textContent=clock(S.shift.startedAt); $('obStats').innerHTML='<span class="num">$'+money(S.shift.earned)+'</span> · '+S.shift.rides+' rides · <span class="num">'+S.shift.miles.toFixed(2)+'</span> mi'; }
+    syncModeTag_();
+    var a=S.active, st=a?a.state:'IDLE'; $('status').setAttribute('data-state',st);
+    if(!a){
+      $('status').style.display=online?'none':'block';
+      $('sEyebrow').textContent='No active ride';$('sMain').textContent='Stand by';$('sSub').textContent='Tap Accept the moment you accept the ride.';$('sTimer').style.display='none';
+    }
+    else if(a.state==='ACCEPTED'){ $('status').style.display='block';$('sEyebrow').textContent=a.name?('En route · '+a.name):'En route to pickup';$('sMain').textContent=a.pickup||'Heading to pickup';$('sSub').textContent=a.dest?('Then '+a.dest):'Passenger not yet aboard.';$('sTimer').style.display='block';$('sTimer').innerHTML=clock(a.acceptedAt)+' <span>since accept</span>'; }
+    else { $('status').style.display='block';$('sEyebrow').textContent=a.name?('On trip · '+a.name):'On trip';$('sMain').textContent=a.dest||'Passenger aboard';$('sSub').textContent='Route is tracing. Drop off on arrival.';$('sTimer').style.display='block';$('sTimer').innerHTML=clock(a.pickedUpAt)+' <span>on trip</span>'; }
+    var q=$('queue'); if(S.queued){q.style.display='flex';q.classList.add('live');$('queueTime').textContent='stacked '+ago(S.queued.acceptedAt)+' ago';}else{q.style.display='none';q.classList.remove('live');}
+    $('acceptHint').textContent=!S.active?'start ride':(!S.queued?'stack next':'queue full');
+    $('acceptBtn').style.display=isRiderRide_(a)?'none':'';
+    var riderRide=isRiderRide_(a);
+    var canPick=a&&a.state==='ACCEPTED'&&!riderRide, canDrop=a&&a.state==='ON_TRIP'&&!riderRide;
+    $('pickupBtn').disabled=!canPick;$('dropoffBtn').disabled=!canDrop;
+    $('pickupBtn').style.display=riderRide?'none':'';$('dropoffBtn').style.display=riderRide?'none':'';
+    $('pickupBtn').setAttribute('data-armed',canPick?'pickup':'');$('dropoffBtn').setAttribute('data-armed',canDrop?'dropoff':'');
+    $('cancelActiveBtn').style.display=(a&&!riderRide)?'block':'none';
+    renderRiderFlow();
+    persistState();
+    syncBarPad();
+  }
+
+  $('waffleBtn').onclick=toggleWaffle;
+  $('menuInbox').onclick=openInbox;$('menuLive').onclick=openLive;$('menuSettings').onclick=openSettings;
+  $('closeInboxBtn').onclick=closeInbox;
+  $('inboxOverlay').addEventListener('click',function(e){if(e.target===$('inboxOverlay'))closeInbox()});
+  $('settingsOverlay').addEventListener('click',function(e){if(e.target===$('settingsOverlay'))closeSettings()});
+  document.addEventListener('click',function(e){if(!$('waffleMenu').contains(e.target)&&!$('waffleBtn').contains(e.target))closeWaffle()});
+  document.addEventListener('visibilitychange',function(){if(!document.hidden){flushPendingTrips_();if($('inboxOverlay').classList.contains('show'))refreshInbox()}});
+  window.addEventListener('focus',flushPendingTrips_);
+  $('goBtn').onclick=goOnline;
+  $('endShiftBtn').onclick=openEndShift;
+  $('acceptBtn').onclick=accept;$('pickupBtn').onclick=pickedUp;$('dropoffBtn').onclick=dropOff;$('cancelActiveBtn').onclick=cancelActive;
+  $('addSchedBtn').onclick=function(){$('schedOverlay').classList.add('show')};
+  $('saveSchedBtn').onclick=saveScheduled;$('cancelSchedBtn').onclick=function(){$('schedOverlay').classList.remove('show')};
+  $('saveBtn').onclick=saveShift;$('cancelBtn').onclick=closeOverlay;
+  $('addFareBtn').onclick=addFare;$('skipFareBtn').onclick=skipFare;
+  setInterval(function(){renderSched(); if(S.shift||S.active)render();},1000);
+  window.addEventListener('resize',syncBarPad);
+  restoreState();
+  if(!requestReviewLocked_())releaseHeldRequests_();
+  try{initMap()}catch(e){$('mapNote').classList.add('show')}
+  render(); renderSched(); syncBarPad(); flushPendingTrips_();
+  srv('getCockpitBootstrap').then(function(b){ boot=b||{}; renderOpp(); syncModeTag_(); schedFromServer(boot.reservations); requestsFromServer(boot.requests); if(boot.riderReadError){toast('Rider connection: '+boot.riderReadError);} }).catch(function(e){ syncModeTag_(); toast((e&&e.message)?e.message:'Console bootstrap failed'); });
+</script>
+</body>
+</html>

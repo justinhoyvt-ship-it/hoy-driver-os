@@ -1,0 +1,23 @@
+{
+  "taskId": "PULSE-080P",
+  "title": "Stage permanent Builder task package for PULSE-080",
+  "status": "PR_OPEN_AFTER_STAGER_RUN",
+  "type": "PREREQUISITE_INFRASTRUCTURE",
+  "targetTask": "PULSE-080",
+  "reason": "PULSE-080 permanent Builder correctly failed closed because pulse-forge/tasks/PULSE-080/task-package.json was absent from main.",
+  "scope": [
+    "pulse-forge/tasks/PULSE-080/task-package.json",
+    "pulse-forge/tasks/PULSE-080/candidate/release-plan.json",
+    "pulse-forge/tests/validate-pulse-080-package.mjs",
+    "pulse-forge/package.json",
+    "pulse-forge/tasks/PULSE-080/staging/source-map.json",
+    "pulse-forge/tasks/PULSE-080/staging/request-app/*",
+    "pulse-forge/tasks/PULSE-080/staging/hoy-driver/*"
+  ],
+  "preservesOneTaskOnePullRequest": true,
+  "automaticMerge": false,
+  "automaticProductionDeployment": false,
+  "engineActivation": false,
+  "productionDataMutation": false,
+  "next": "After CI passes and this prerequisite PR is manually merged, run runNextReadyTask once to let the permanent Builder create the single PULSE-080 PR."
+}
