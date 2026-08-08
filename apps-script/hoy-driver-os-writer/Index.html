@@ -42,6 +42,8 @@
     .menu-sheet{max-height:min(78dvh,620px);overflow:auto}
     .menu-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
     .menu-head h2{margin:0}
+    .menu-head-actions{display:flex;align-items:center;gap:8px}
+    .inbox-qr{min-height:40px;padding:0 11px;border-radius:10px;border:1px solid rgba(43,212,229,.35);background:rgba(43,212,229,.08);color:var(--cyan);font-family:var(--display);font-size:.74rem;font-weight:700}
     .menu-close{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:1.35rem;line-height:1}
     .inbox-list{display:grid;gap:10px}
     .inbox-hold-notice{display:none;margin:-2px 0 10px;padding:10px 12px;border:1px solid rgba(247,178,59,.42);border-radius:10px;background:rgba(247,178,59,.09);color:var(--sun);font-family:var(--mono);font-size:.7rem;line-height:1.4}
@@ -55,6 +57,15 @@
     .inbox-actions button{min-height:43px;border-radius:10px;font-family:var(--display);font-weight:700}
     .inbox-accept{background:linear-gradient(180deg,#8ff5c1,var(--green) 55%,#1f9c63);color:#04220f}
     .inbox-decline{background:rgba(255,102,128,.08);border:1px solid rgba(255,102,128,.38);color:var(--red)}
+    .qr-sheet{text-align:center;max-height:min(84dvh,680px);overflow:auto}
+    .qr-sheet .sub{max-width:360px;margin-left:auto;margin-right:auto}
+    .qr-box{width:286px;max-width:100%;aspect-ratio:1;margin:16px auto;padding:14px;border-radius:18px;background:#fff;display:grid;place-items:center}
+    .qr-box canvas,.qr-box img{display:block;max-width:100%;height:auto!important}
+    .qr-link{font-family:var(--mono);font-size:.68rem;line-height:1.45;color:var(--muted);overflow-wrap:anywhere;margin:12px 0}
+    .qr-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
+    .qr-actions button{min-height:46px;border-radius:11px;font-family:var(--display);font-weight:700}
+    .qr-open{background:linear-gradient(180deg,#8ff5c1,var(--green) 55%,#1f9c63);color:#04220f}
+    .qr-share{background:rgba(255,255,255,.045);border:1px solid var(--line)}
     .settings-sheet{height:min(62dvh,480px);background:linear-gradient(180deg,rgba(22,28,58,.98),rgba(10,15,36,.98))}
     .rider-flow{display:none;border:1px solid rgba(69,227,148,.28);border-radius:13px;padding:10px;background:rgba(69,227,148,.055);gap:8px}
     .rider-flow.show{display:grid}
@@ -309,9 +320,23 @@
 <!-- Inbox overlay -->
 <div class="overlay" id="inboxOverlay">
   <div class="sheet menu-sheet">
-    <div class="menu-head"><h2>Inbox</h2><button class="menu-close" id="closeInboxBtn" type="button" aria-label="Close inbox">&times;</button></div>
+    <div class="menu-head"><h2>Inbox</h2><div class="menu-head-actions"><button class="inbox-qr" id="openQrFromInbox" type="button">Ride request QR</button><button class="menu-close" id="closeInboxBtn" type="button" aria-label="Close inbox">&times;</button></div></div>
     <div class="inbox-hold-notice" id="inboxHoldNotice" role="status" aria-live="polite"></div>
     <div class="inbox-list" id="inboxList"></div>
+  </div>
+</div>
+
+<!-- Ride request QR -->
+<div class="overlay" id="qrOverlay" aria-label="Ride request QR">
+  <div class="sheet qr-sheet">
+    <div class="menu-head"><h2>Ride request QR</h2><button class="menu-close" id="closeQrBtn" type="button" aria-label="Close QR">&times;</button></div>
+    <p class="sub">Have the rider scan this to open the approved ride request form.</p>
+    <div class="qr-box" id="bookingQr"></div>
+    <div class="qr-link" id="bookingQrLink">Loading ride request link…</div>
+    <div class="qr-actions">
+      <button class="qr-open" id="openRideRequestBtn" type="button">Open form</button>
+      <button class="qr-share" id="shareRideRequestBtn" type="button">Share link</button>
+    </div>
   </div>
 </div>
 
@@ -323,6 +348,7 @@
 <div class="toast" id="toast"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
   var $=function(id){return document.getElementById(id)};
   var S={shift:null, active:null, queued:null, scheduled:[], requests:[], heldRequests:[], pendingTrips:[]};
@@ -522,6 +548,31 @@
   function openSettings(){ closeWaffle(); $('settingsOverlay').classList.add('show'); }
   function closeSettings(){ $('settingsOverlay').classList.remove('show'); }
   function openLive(){ closeWaffle(); var url=boot.liveUrl||''; if(!url){toast('Live page unavailable');return;} window.open(url,'_blank','noopener'); }
+  var rideRequestQrUrl='';
+  var rideRequestFormUrl='';
+  function closeQr(){ $('qrOverlay').classList.remove('show'); }
+  function renderRideRequestQr_(url){
+    rideRequestQrUrl=String(url||'');
+    var box=$('bookingQr');box.innerHTML='';
+    $('bookingQrLink').textContent=rideRequestQrUrl||'Ride request link unavailable';
+    if(!rideRequestQrUrl){toast('Ride request link unavailable');return;}
+    if(typeof QRCode==='undefined'){toast('QR library unavailable');return;}
+    new QRCode(box,{text:rideRequestQrUrl,width:258,height:258,colorDark:'#050813',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+  }
+  function openQr(){
+    closeWaffle();closeInbox();$('qrOverlay').classList.add('show');
+    var known=rideRequestQrUrl||boot.rideRequestUrl||'';
+    rideRequestFormUrl=rideRequestFormUrl||boot.rideRequestFormUrl||'';
+    if(known){renderRideRequestQr_(known);return;}
+    srv('getRideRequestQrConfig').then(function(cfg){cfg=cfg||{};rideRequestFormUrl=String(cfg.formUrl||rideRequestFormUrl||'');renderRideRequestQr_(cfg.url)}).catch(function(e){renderRideRequestQr_('');toast(e.message||'QR unavailable')});
+  }
+  function openRideRequest(){var url=rideRequestFormUrl||boot.rideRequestFormUrl||'';if(!url){toast('Ride request form unavailable');return;}window.open(url,'_blank','noopener');}
+  function shareRideRequest(){
+    if(!rideRequestQrUrl){toast('Ride request link unavailable');return;}
+    if(navigator.share){navigator.share({title:'Request a ride',url:rideRequestQrUrl}).catch(function(){});return;}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(rideRequestQrUrl).then(function(){toast('Ride request link copied')}).catch(function(){toast('Could not copy link')});return;}
+    toast('Open the form and share from the browser');
+  }
   function requestReviewLocked_(){return !!(S.active&&S.active.state==='ON_TRIP');}
   function requestKey_(r){
     r=r||{};
@@ -715,8 +766,10 @@
 
   $('waffleBtn').onclick=toggleWaffle;
   $('menuInbox').onclick=openInbox;$('menuLive').onclick=openLive;$('menuSettings').onclick=openSettings;
-  $('closeInboxBtn').onclick=closeInbox;
+  $('closeInboxBtn').onclick=closeInbox;$('openQrFromInbox').onclick=openQr;$('closeQrBtn').onclick=closeQr;
+  $('openRideRequestBtn').onclick=openRideRequest;$('shareRideRequestBtn').onclick=shareRideRequest;
   $('inboxOverlay').addEventListener('click',function(e){if(e.target===$('inboxOverlay'))closeInbox()});
+  $('qrOverlay').addEventListener('click',function(e){if(e.target===$('qrOverlay'))closeQr()});
   $('settingsOverlay').addEventListener('click',function(e){if(e.target===$('settingsOverlay'))closeSettings()});
   document.addEventListener('click',function(e){if(!$('waffleMenu').contains(e.target)&&!$('waffleBtn').contains(e.target))closeWaffle()});
   document.addEventListener('visibilitychange',function(){if(!document.hidden){flushPendingTrips_();if($('inboxOverlay').classList.contains('show'))refreshInbox()}});
@@ -734,7 +787,7 @@
   if(!requestReviewLocked_())releaseHeldRequests_();
   try{initMap()}catch(e){$('mapNote').classList.add('show')}
   render(); renderSched(); syncBarPad(); flushPendingTrips_();
-  srv('getCockpitBootstrap').then(function(b){ boot=b||{}; renderOpp(); syncModeTag_(); schedFromServer(boot.reservations); requestsFromServer(boot.requests); if(boot.riderReadError){toast('Rider connection: '+boot.riderReadError);} }).catch(function(e){ syncModeTag_(); toast((e&&e.message)?e.message:'Console bootstrap failed'); });
+  srv('getCockpitBootstrap').then(function(b){ boot=b||{};rideRequestQrUrl=String(boot.rideRequestUrl||'');rideRequestFormUrl=String(boot.rideRequestFormUrl||''); renderOpp(); syncModeTag_(); schedFromServer(boot.reservations); requestsFromServer(boot.requests); if(boot.riderReadError){toast('Rider connection: '+boot.riderReadError);} }).catch(function(e){ syncModeTag_(); toast((e&&e.message)?e.message:'Console bootstrap failed'); });
 </script>
 </body>
 </html>

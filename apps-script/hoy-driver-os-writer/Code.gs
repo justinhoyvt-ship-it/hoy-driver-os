@@ -99,6 +99,8 @@ function getCockpitBootstrap() {
     requests: linked.items,
     requestDecisionError: linked.error || '',
     liveUrl: pulseLiveUrl_(),
+    rideRequestUrl: qrLiveRideRequestUrl_(),
+    rideRequestFormUrl: fullRideRequestUrl_(),
     riderReadError: rider.error || null,
     normalFlow: true,
     testWorkbookTargeted: false
@@ -829,4 +831,39 @@ function round2_(n) { return Math.round((Number(n) + Number.EPSILON) * 100) / 10
 
 function showWiring() {
   console.log(JSON.stringify(checkWiring(), null, 2));
+}
+
+/* PULSE-080Q QR route adapter. Canonical source fails closed unless both Request App URL and token are configured. */
+/* PULSE-080Q QR route adapter. Canonical source fails closed unless both Request App URL and token are configured. */
+function pulse080QrRequestRoute_() {
+  const cfg = requestDecisionBridge_();
+  const url = String(cfg.url || '').trim();
+  const token = String(cfg.token || '').trim();
+  if (!url || !token) return { url: '', token: '' };
+  return { url: url, token: token };
+}
+function fullRideRequestUrl_() {
+  const cfg = pulse080QrRequestRoute_();
+  if (!cfg.url || !cfg.token) return '';
+  const sep = cfg.url.indexOf('?') >= 0 ? '&' : '?';
+  return cfg.url + sep + 'request=' + encodeURIComponent(cfg.token) + '&view=form';
+}
+function qrLiveRideRequestUrl_() {
+  const cfg = pulse080QrRequestRoute_();
+  if (!cfg.url || !cfg.token) return '';
+  const sep = cfg.url.indexOf('?') >= 0 ? '&' : '?';
+  return cfg.url + sep + 'request=' + encodeURIComponent(cfg.token) + '&view=qr&source=qr_live';
+}
+function getRideRequestQrConfig() {
+  const qrUrl = qrLiveRideRequestUrl_();
+  const formUrl = fullRideRequestUrl_();
+  return {
+    ok: !!(qrUrl && formUrl),
+    url: qrUrl,
+    formUrl: formUrl,
+    configured: !!(qrUrl && formUrl),
+    qrTarget: 'QR_LIVE',
+    buttonTarget: 'REQUEST_FORM',
+    writesPerformed: false
+  };
 }
