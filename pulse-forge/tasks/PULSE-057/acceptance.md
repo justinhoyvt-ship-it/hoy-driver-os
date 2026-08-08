@@ -9,4 +9,4 @@
 - [x] Existing Inbox, held-request, lifecycle, and request-writer boundaries are protected.
 - [x] Competitor fares are excluded.
 - [x] No automatic production deployment or merge.
-- [ ] Pulse Forge CI passes on the PR head.
+- [x] Pulse Forge CI passed on the reviewed PR head before final merge approval.
