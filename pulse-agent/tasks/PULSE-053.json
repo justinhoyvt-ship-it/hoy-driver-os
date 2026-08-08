@@ -12,7 +12,13 @@
     "duplicateGpsThresholdMeters": 8,
     "routeLookup": "Apps Script Maps DirectionFinder",
     "routeLookupWrites": false,
-    "phoneNavigationHandoffPreserved": true
+    "phoneNavigationHandoffPreserved": true,
+    "routeFailureBackoff": {
+      "perRide": true,
+      "initialMs": 15000,
+      "maxMs": 300000
+    },
+    "idleTraceStyleReset": true
   },
   "acceptanceCriteria": [
     "Existing Leaflet map remains the only map instance.",
@@ -23,12 +29,24 @@
     "Route lookup failure does not block ride lifecycle or phone navigation.",
     "Inbox QR and current/queued ride hold behavior remain present.",
     "No direct Ride Requests write is added.",
-    "No automatic merge, deployment, Engine A/B activation, or production mutation."
+    "No automatic merge, deployment, Engine A/B activation, or production mutation.",
+    "Idle/no-active-ride state restores the existing trace style instead of retaining active-trip styling.",
+    "Failed route previews back off per ride from 15 seconds up to 5 minutes instead of retrying every 1.2 seconds."
   ],
   "branch": "pulse/pulse-053-route-layer",
   "automaticMerge": false,
   "automaticProductionDeployment": false,
   "engineActivation": false,
   "productionDataMutation": false,
-  "createdAt": "2026-08-08T12:21:19.849Z"
+  "createdAt": "2026-08-08T12:21:19.849Z",
+  "reviewRepair": {
+    "reason": "Copilot review: trace styling applied while idle and failed route preview retried every ~1.2s.",
+    "idleTraceStyleReset": true,
+    "activeTraceStyleOnlyWithRide": true,
+    "routeFailureBackoffPerRide": true,
+    "initialBackoffMs": 15000,
+    "maxBackoffMs": 300000,
+    "productionTouched": false,
+    "repairedAt": "2026-08-08T12:33:00.123Z"
+  }
 }
