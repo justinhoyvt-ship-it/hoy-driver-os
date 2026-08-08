@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>PULSE-055 MapLibre Sandbox</title>
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <style>
+    :root{color-scheme:dark;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#07120e;color:#f4fff8}
+    *{box-sizing:border-box}body{margin:0;padding:16px;min-height:100vh}.shell{max-width:760px;margin:0 auto}.eyebrow{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:#78e7aa}.note{color:#bad0c4;line-height:1.45}.guard{padding:10px 12px;border:1px solid rgba(120,231,170,.28);border-radius:12px;background:rgba(120,231,170,.06);margin:12px 0}
+    #maplibreSandbox{height:min(58vh,460px);min-height:320px;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.14)}
+    .ml-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}.ml-metrics div{padding:9px;border:1px solid rgba(255,255,255,.12);border-radius:9px}.ml-metrics small{display:block;color:#9fb5a8}.ml-metrics b{display:block;margin-top:3px}.status{margin-top:10px;min-height:1.4em;color:#9fb5a8}.status.error{color:#ffb3b3}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <p class="eyebrow">PULSE-055 · Innovation Lab only</p>
+    <h1>MapLibre comparison sandbox</h1>
+    <p class="note">This page uses deterministic copied coordinates only. It has no Pulse production endpoints, rider data, Sheet IDs, or write handlers. The working Leaflet driver map remains the baseline.</p>
+    <div class="guard"><strong>Sandbox rule:</strong> compare rendering and phone performance only. Do not promote this file into the driver app.</div>
+    <div id="maplibreSandbox" aria-label="MapLibre sandbox map"></div>
+    <div class="ml-metrics" aria-live="polite">
+      <div><small>Load</small><b id="mlLoad">—</b></div>
+      <div><small>FPS</small><b id="mlFps">—</b></div>
+      <div><small>Memory</small><b id="mlMem">n/a</b></div>
+    </div>
+    <p id="mlStatus" class="status">Starting sandbox…</p>
+  </main>
+  <script>
+  window.PulseMapLibreSandbox=(function(){
+    'use strict';
+    var map=null,start=0,frames=0,lastSample=0,rafId=0,destroyed=false,pendingRoute=null;
+    var FIXTURE_CENTER=[-73.2121,44.4759];
+    var FIXTURE_ROUTE=[[-73.2182,44.4721],[-73.2148,44.4742],[-73.2121,44.4759],[-73.2079,44.4784],[-73.2047,44.4806]];
+    function text(id,value){var node=document.getElementById(id);if(node)node.textContent=value;}
+    function status(message,isError){var node=document.getElementById('mlStatus');if(!node)return;node.textContent=message;node.classList.toggle('error',!!isError);}
+    function sample(t){if(destroyed)return;frames++;if(!lastSample)lastSample=t;if(t-lastSample>=1000){text('mlFps',String(frames));frames=0;lastSample=t;if(performance&&performance.memory&&Number.isFinite(performance.memory.usedJSHeapSize)){text('mlMem',Math.round(performance.memory.usedJSHeapSize/1048576)+' MB');}}rafId=requestAnimationFrame(sample);}
+    function routeFeature(coords){return{type:'Feature',geometry:{type:'LineString',coordinates:coords},properties:{fixture:true}};}
+    function applyRoute(coords){if(!map||!map.loaded()){pendingRoute=coords;return false;}var data=routeFeature(coords);var source=map.getSource('pulse-route');if(source){source.setData(data);}else{map.addSource('pulse-route',{type:'geojson',data:data});map.addLayer({id:'pulse-route',type:'line',source:'pulse-route',paint:{'line-color':'#2bd4e5','line-width':5,'line-opacity':.92}});}pendingRoute=null;return true;}
+    function init(center){if(!window.maplibregl)throw new Error('MapLibre unavailable');destroyed=false;start=performance.now();status('Loading MapLibre demo tiles…',false);map=new maplibregl.Map({container:'maplibreSandbox',style:'https://demotiles.maplibre.org/style.json',center:center||FIXTURE_CENTER,zoom:11,attributionControl:true});map.addControl(new maplibregl.NavigationControl({showCompass:false}));map.on('load',function(){text('mlLoad',Math.round(performance.now()-start)+' ms');applyRoute(pendingRoute||FIXTURE_ROUTE);status('Sandbox loaded with deterministic route geometry.',false);});map.on('error',function(event){status('MapLibre reported a sandbox map error: '+String(event&&event.error&&event.error.message||'unknown'),true);});rafId=requestAnimationFrame(sample);return map;}
+    function setRoute(coords){if(!Array.isArray(coords)||coords.length<2)throw new Error('Route needs at least two coordinates.');return applyRoute(coords);}
+    function destroy(){destroyed=true;if(rafId)cancelAnimationFrame(rafId);rafId=0;if(map){map.remove();map=null;}pendingRoute=null;}
+    return{init:init,setRoute:setRoute,destroy:destroy,fixtureRoute:function(){return FIXTURE_ROUTE.map(function(p){return p.slice();});}};
+  })();
+  try{window.PulseMapLibreSandbox.init();}catch(error){var node=document.getElementById('mlStatus');if(node){node.textContent='Sandbox failed to start: '+error.message;node.classList.add('error');}}
+  </script>
+</body>
+</html>
