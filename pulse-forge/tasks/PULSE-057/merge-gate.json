@@ -1,0 +1,9 @@
+{
+  "taskId": "PULSE-057",
+  "mergeAllowedWhen": [
+    "Pulse Forge CI passes",
+    "PR review finds no regression to QR entry, Inbox, held requests, lifecycle, or request writer boundary",
+    "No production deployment is performed by the PR"
+  ],
+  "manualMergeOnly": true
+}

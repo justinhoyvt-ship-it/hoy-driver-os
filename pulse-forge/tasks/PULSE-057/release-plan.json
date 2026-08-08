@@ -1,0 +1,16 @@
+{
+  "taskId": "PULSE-057",
+  "releaseType": "MANUAL_REVIEWED_INTEGRATION",
+  "runtimeCodeChangeRequired": false,
+  "reason": "The fare engine and request-form fare UI already exist on main from PULSE-059/PULSE-061. This task prevents duplicate implementation and validates them as the source for the working QR lane.",
+  "ownerVerifiedLiveBehavior": {
+    "qrSameDayOnly": true,
+    "qrNowLater": true,
+    "futureSchedulingSeparate": true
+  },
+  "afterMerge": {
+    "productionDeploymentAutomatic": false,
+    "requiredNextStep": "Stage the current canonical request-app package against an isolated/test deployment before any production Apps Script release.",
+    "productionReleaseRequiresOwnerApproval": true
+  }
+}

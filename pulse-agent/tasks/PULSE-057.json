@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "taskId": "PULSE-057",
+  "title": "Surface the existing Pulse fare estimate in the working same-day QR booking lane",
+  "status": "STAGED_FOR_REVIEW",
+  "target": "Existing live same-day QR booking form using the merged PULSE-059 fare engine",
+  "existingLiveQrUrl": "https://script.google.com/macros/s/AKfycbxyLcruVHrkxLBGkLcP3kxoE2EhILlJS_0SK5ybj1l5BMGPDrKIPiK_jO4P4EudXXYuBQ/exec",
+  "automaticMerge": false,
+  "productionDeployment": false,
+  "productionMutation": false,
+  "engineActivation": false,
+  "alreadyWorking": {
+    "qrScanOpensForm": true,
+    "qrBookingIsSameDayOnly": true,
+    "qrSupportsNowLater": true,
+    "futureSchedulingUsesSeparateRiderForm": true,
+    "hoyInboxExists": true,
+    "midRideRequestHoldExists": true,
+    "fareEngineMergedAsPulse059": true,
+    "requestWriterBoundaryPreserved": true
+  },
+  "scope": {
+    "preserveExistingQrForm": true,
+    "preserveSameDayQrRule": true,
+    "preserveSeparateFutureSchedulingForm": true,
+    "reusePulse059FareEngine": true,
+    "quoteCreatesRequest": false,
+    "quoteMustPrecedeQrConfirmation": true,
+    "competitorFare": "NOT_IN_SCOPE",
+    "newFareCalculator": false
+  },
+  "acceptanceCriteria": [
+    "Do not rebuild or replace the working QR form, NOW/LATER selector, Inbox, request hold, lifecycle, or request writer.",
+    "The same-day QR rider sees a Pulse fare after pickup, destination, and same-day pickup time are available and before confirming the request.",
+    "Fare calculation reuses pulseGetFareQuote from PULSE-059 and does not create a Ride Requests row, email, Calendar event, or trip.",
+    "Changing pickup, destination, date, or time invalidates the prior quote and requires recalculation.",
+    "The rider cannot submit through the fare-enabled flow with an expired or missing quote.",
+    "The existing standalone request app remains the only Ride Requests writer.",
+    "The existing QR lane remains same-day only; future-date scheduling remains on the separate rider form and is not changed by this task.",
+    "No competitor fare, payment, automatic dispatch, production deployment, production mutation, or engine activation is introduced.",
+    "Pulse Forge CI passes before merge."
+  ]
+}
