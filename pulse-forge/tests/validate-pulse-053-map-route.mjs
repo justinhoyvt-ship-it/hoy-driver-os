@@ -19,7 +19,8 @@ if (html) {
     'dashArray:"8 8"',
     'color:"#45e394"',
     'PULSE053_MIN_TRACE_MILES=0.00497097',
-    'if(lastTracePoint&&stepMiles<PULSE053_MIN_TRACE_MILES)return;',
+    'var shouldAddTracePoint=!lastTracePoint||stepMiles>=PULSE053_MIN_TRACE_MILES;',
+    'if(shouldAddTracePoint){',
     'function syncTrace(active)',
     'syncTrace(false)',
     'syncTrace(true)',
@@ -34,6 +35,13 @@ if (html) {
   ]) if (!html.includes(marker)) problems.push(`PULSE-053 client marker missing: ${marker}`);
   if ((html.match(/L\.map\('map'/g) || []).length !== 1) problems.push('PULSE-053 must preserve exactly one Leaflet map creation.');
   if (html.includes('mapboxgl.')) problems.push('PULSE-053 must not replace Leaflet with MapLibre/Mapbox.');
+  if (html.includes('if(lastTracePoint&&stepMiles<PULSE053_MIN_TRACE_MILES)return;')) problems.push('PULSE-053 duplicate filtering must not return before live marker/map UI updates.');
+  const traceFilterPos = html.indexOf('var shouldAddTracePoint=!lastTracePoint||stepMiles>=PULSE053_MIN_TRACE_MILES;');
+  const traceAppendPos = html.indexOf('trace.pts.push(pt);', traceFilterPos);
+  const liveMarkerPos = html.indexOf('if(meMarker)meMarker.setLatLng(pt)', traceFilterPos);
+  const mapViewPos = html.indexOf('map.setView(pt,Math.max(map.getZoom(),15))', traceFilterPos);
+  const rideMilesPos = html.indexOf("$('rideMiles').textContent=trace.miles.toFixed(2)", traceFilterPos);
+  if (traceFilterPos < 0 || traceAppendPos < traceFilterPos || liveMarkerPos < traceAppendPos || mapViewPos < liveMarkerPos || rideMilesPos < mapViewPos) problems.push('PULSE-053 must filter breadcrumb accumulation while still updating live position, viewport, and ride-mile UI.');
   const ridePos = html.indexOf('var ride=activeRide();');
   const idleTracePos = html.indexOf('syncTrace(false)', ridePos);
   const activeTracePos = html.indexOf('syncTrace(true)', ridePos);
@@ -52,6 +60,6 @@ if (code) {
   if (code.includes('SpreadsheetApp.openById(RIDER_SHEET_ID).getSheetByName(RIDER_SHEET_NAME).appendRow')) problems.push('Pulse Drive Mode must remain read-only toward Ride Requests.');
 }
 
-const report = { ok: problems.length === 0, taskId: 'PULSE-053', map: 'Leaflet', routePreviewWrites: false, reviewRepair: 'idle-trace-reset-and-route-backoff', problems };
+const report = { ok: problems.length === 0, taskId: 'PULSE-053', map: 'Leaflet', routePreviewWrites: false, reviewRepair: 'gps-filter-live-position-and-route-backoff', problems };
 console.log(JSON.stringify(report, null, 2));
 if (problems.length) process.exit(1);
