@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "taskId": "PULSE-057",
+  "title": "Add live QR ride queue and silent driver decline",
+  "status": "BUILDING",
+  "target": "Hoy Driver Inbox + standalone request app",
+  "sourceType": "QR_LIVE",
+  "automaticMerge": false,
+  "productionDeployment": false,
+  "productionMutation": false,
+  "engineActivation": false,
+  "scope": {
+    "scheduledFormPreserved": true,
+    "requestAppSoleRideRequestsWriter": true,
+    "requestAppSoleRiderEmailSender": true,
+    "sameDayOnly": true,
+    "timingChoices": ["NOW", "LATER"],
+    "laterExpiryMinutesBeforePickup": 30,
+    "nowResponseWindow": "SCRIPT_PROPERTY_CONFIGURABLE",
+    "driverDeclineNavigation": "INLINE_ONLY"
+  },
+  "acceptanceCriteria": [
+    "Decline completes inside Hoy Driver Inbox without navigating the driver away.",
+    "Repeated accept or decline actions are idempotent and one tap produces one authoritative action.",
+    "The rider receives at most one decline email from the standalone request app.",
+    "The QR form supports typed pickup, optional explicit browser location, required destination, and NOW or LATER timing.",
+    "QR_LIVE requests are limited to today in America/New_York and remain distinct from scheduled/private form rides.",
+    "A valid QR_LIVE request creates exactly one REQUESTED row through the existing standalone request app.",
+    "LATER requests appear in Hoy Driver Inbox and send one driver email.",
+    "Accept preserves the existing request row and enters the existing Scheduled/active lifecycle without creating a duplicate reservation or trip.",
+    "Unresolved LATER requests auto-decline 30 minutes before pickup through a request-app-owned trigger.",
+    "Scheduled-form rides are excluded from QR_LIVE expiry processing.",
+    "NOW response-window behavior is configurable through Script Properties and is not permanently hard-coded.",
+    "No fare, payment, automatic dispatch, background location, direct Hoy Driver Ride Requests write, production deployment, or production mutation is introduced.",
+    "Phone validation and Pulse Forge CI pass before merge."
+  ]
+}
