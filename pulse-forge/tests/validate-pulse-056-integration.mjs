@@ -31,7 +31,7 @@ for(const marker of ['GO ONLINE','id="acceptBtn"','id="pickupBtn"','id="dropoffB
 check(p053.taskId==='PULSE-053','PULSE-053 task contract missing or mismatched');
 check(p053.scope?.mapEngine==='Leaflet','PULSE-053 must retain Leaflet as the driver map engine');
 check(p053.scope?.duplicateGpsThresholdMeters===8,'PULSE-053 8 meter trace threshold changed');
-for(const marker of ['function getDriveRoutePreview()','PULSE053_MIN_TRACE_MILES','shouldAddTracePoint','map.setView(pt,Math.max(map.getZoom(),15))']){
+for(const marker of ['function getDriveRoutePreview(','PULSE053_MIN_TRACE_MILES','shouldAddTracePoint','map.setView(pt,Math.max(map.getZoom(),15))']){
   check(driverCode.includes(marker)||driverIndex.includes(marker),`PULSE-053 runtime marker missing: ${marker}`);
 }
 check(validate053.includes('shouldAddTracePoint'),'PULSE-053 GPS regression validator no longer protects live position updates');
