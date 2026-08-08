@@ -430,10 +430,12 @@
       var PULSE053_MIN_TRACE_MILES=0.00497097; /* 8 meters */
       var lastTracePoint=trace.pts.length?trace.pts[trace.pts.length-1]:null;
       var stepMiles=lastTracePoint?seg(lastTracePoint,pt):0;
-      if(lastTracePoint&&stepMiles<PULSE053_MIN_TRACE_MILES)return;
-      if(lastTracePoint)trace.miles+=stepMiles;
-      trace.pts.push(pt);
-      if(!trace.line)trace.line=L.polyline(trace.pts,{color:'#42dcff',weight:5,opacity:.9}).addTo(map);else trace.line.setLatLngs(trace.pts);
+      var shouldAddTracePoint=!lastTracePoint||stepMiles>=PULSE053_MIN_TRACE_MILES;
+      if(shouldAddTracePoint){
+        if(lastTracePoint)trace.miles+=stepMiles;
+        trace.pts.push(pt);
+        if(!trace.line)trace.line=L.polyline(trace.pts,{color:'#42dcff',weight:5,opacity:.9}).addTo(map);else trace.line.setLatLngs(trace.pts);
+      }
       if(meMarker)meMarker.setLatLng(pt);else meMarker=L.circleMarker(pt,{radius:8,color:'#fff',weight:3,fillColor:'#42dcff',fillOpacity:1}).addTo(map);
       map.setView(pt,Math.max(map.getZoom(),15)); $('rideMiles').textContent=trace.miles.toFixed(2);
     },function(){$('mapNote').classList.add('show')},{enableHighAccuracy:true,maximumAge:2000,timeout:12000});
