@@ -383,6 +383,7 @@ function listRequestedRides_(knownRiderRows) {
       destination: r.destination || '',
       whenISO: r.whenISO,
       notes: r.notes || '',
+      quotedFare: r.quotedFare,
       status: 'REQUESTED'
     }))
     .sort((a, b) => (Date.parse(a.whenISO) || 0) - (Date.parse(b.whenISO) || 0));
@@ -674,7 +675,8 @@ function readRiderRequests_() {
     pickup: String(row[at('Pickup Address')] || '').trim(),
     destination: String(row[at('Destination')] || '').trim(),
     whenISO: isoValue_(row[at('Pickup At')]),
-    notes: at('Notes') >= 0 ? String(row[at('Notes')] || '').trim() : ''
+    notes: at('Notes') >= 0 ? String(row[at('Notes')] || '').trim() : '',
+    quotedFare: at('Quoted Fare') >= 0 ? numOrNull_(row[at('Quoted Fare')]) : null
   })).filter(r => r.requestId && r.whenISO && (r.status === 'REQUESTED' || r.status === 'CONFIRMED'));
 }
 function isoValue_(value) {

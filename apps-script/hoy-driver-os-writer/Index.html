@@ -53,6 +53,7 @@
     .inbox-time{font-family:var(--mono);font-size:.7rem;color:var(--sun);margin-bottom:7px}
     .inbox-route{font-size:.82rem;line-height:1.45}
     .inbox-notes{font-size:.74rem;color:var(--muted);margin-top:7px}
+    .inbox-fare{font-family:var(--display);font-size:1.05rem;font-weight:700;color:var(--green);margin-top:8px}
     .inbox-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
     .inbox-actions button{min-height:43px;border-radius:10px;font-family:var(--display);font-weight:700}
     .inbox-accept{background:linear-gradient(180deg,#8ff5c1,var(--green) 55%,#1f9c63);color:#04220f}
@@ -648,6 +649,7 @@
       card.innerHTML='<b>'+esc(r.name||'Ride request')+'</b>'+
         (when?'<div class="inbox-time">'+esc(when)+'</div>':'')+
         '<div class="inbox-route">'+esc(r.pickup||'')+(r.destination?' → '+esc(r.destination):'')+'</div>'+
+        (r.quotedFare!=null?'<div class="inbox-fare">Pulse fare $'+money(r.quotedFare)+'</div>':'')+
         (r.notes?'<div class="inbox-notes">'+esc(r.notes)+'</div>':'');
       if(r.acceptUrl||r.declineUrl){
         var acts=document.createElement('div'); acts.className='inbox-actions';
