@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "taskId": "PULSE-056",
+  "title": "Validate the integrated 052-055 Pulse build sequence",
+  "status": "STAGED_FOR_REVIEW",
+  "target": "Repository integration validation only",
+  "featureFlag": "FEATURE_INTEGRATION_VALIDATOR=false",
+  "automaticMerge": false,
+  "productionDeployment": false,
+  "productionMutation": false,
+  "engineActivation": false,
+  "scope": {
+    "sequence": ["PULSE-052", "PULSE-053", "PULSE-054", "PULSE-055"],
+    "pulse052CurrentMapping": "Current Hoy Driver mobile controls and safe-area/reduced-motion behavior",
+    "pulse053CurrentMapping": "Merged Leaflet active-ride route layer and GPS trace repair",
+    "pulse054CurrentMapping": "Current authoritative rider-flow Start ride / Complete ride lifecycle UI",
+    "pulse055CurrentMapping": "Merged isolated MapLibre comparison sandbox",
+    "releaseDecision": "READY_FOR_RELEASE_REVIEW_ONLY"
+  },
+  "acceptanceCriteria": [
+    "Current Hoy Driver retains visible GO ONLINE, Accept ride, Picked up, and Drop off controls plus safe-area and reduced-motion handling.",
+    "PULSE-053 remains wired into Forge validation and the driver stays route-aware on Leaflet.",
+    "Current rider-flow exposes Start ride and Complete ride through the existing authoritative lifecycle rather than a duplicate trip writer.",
+    "Inbox QR and PULSE-079 held-request behavior remain present.",
+    "PULSE-055 remains isolated, uses fixture coordinates only, and MapLibre does not appear in Hoy Driver Index.html.",
+    "Standalone request-app writer boundary remains preserved; integration validation introduces no new writer.",
+    "Forge CI passes before merge.",
+    "PULSE-056 does not deploy, activate an engine, mutate production, or automatically merge."
+  ]
+}
