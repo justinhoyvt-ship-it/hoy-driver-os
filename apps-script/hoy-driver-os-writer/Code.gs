@@ -833,32 +833,35 @@ function showWiring() {
   console.log(JSON.stringify(checkWiring(), null, 2));
 }
 
-/* PULSE-080Q QR route adapter. Production uses existing request bridge; isolated staging may provide PULSE080_STAGE_REQUEST_URL. */
+/* PULSE-080Q QR route adapter. Canonical source fails closed unless both Request App URL and token are configured. */
+/* PULSE-080Q QR route adapter. Canonical source fails closed unless both Request App URL and token are configured. */
 function pulse080QrRequestRoute_() {
   const cfg = requestDecisionBridge_();
-  const stageUrl = (typeof PULSE080_STAGE_REQUEST_URL !== 'undefined') ? String(PULSE080_STAGE_REQUEST_URL || '').trim() : '';
-  return { url: String(cfg.url || stageUrl || '').trim(), token: String(cfg.token || '').trim() };
+  const url = String(cfg.url || '').trim();
+  const token = String(cfg.token || '').trim();
+  if (!url || !token) return { url: '', token: '' };
+  return { url: url, token: token };
 }
 function fullRideRequestUrl_() {
   const cfg = pulse080QrRequestRoute_();
-  if (!cfg.url) return '';
+  if (!cfg.url || !cfg.token) return '';
   const sep = cfg.url.indexOf('?') >= 0 ? '&' : '?';
-  return cfg.url + (cfg.token ? sep + 'request=' + encodeURIComponent(cfg.token) + '&view=form' : sep + 'view=form');
+  return cfg.url + sep + 'request=' + encodeURIComponent(cfg.token) + '&view=form';
 }
 function qrLiveRideRequestUrl_() {
   const cfg = pulse080QrRequestRoute_();
-  if (!cfg.url) return '';
+  if (!cfg.url || !cfg.token) return '';
   const sep = cfg.url.indexOf('?') >= 0 ? '&' : '?';
-  return cfg.url + (cfg.token ? sep + 'request=' + encodeURIComponent(cfg.token) + '&view=qr&source=qr_live' : sep + 'view=qr&source=qr_live');
+  return cfg.url + sep + 'request=' + encodeURIComponent(cfg.token) + '&view=qr&source=qr_live';
 }
 function getRideRequestQrConfig() {
   const qrUrl = qrLiveRideRequestUrl_();
   const formUrl = fullRideRequestUrl_();
   return {
-    ok: !!qrUrl,
+    ok: !!(qrUrl && formUrl),
     url: qrUrl,
     formUrl: formUrl,
-    configured: !!qrUrl,
+    configured: !!(qrUrl && formUrl),
     qrTarget: 'QR_LIVE',
     buttonTarget: 'REQUEST_FORM',
     writesPerformed: false
