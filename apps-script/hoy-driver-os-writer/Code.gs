@@ -867,3 +867,44 @@ function getRideRequestQrConfig() {
     writesPerformed: false
   };
 }
+
+/* ===== PULSE-053 read-only route preview ===== */
+function getDriveRoutePreview(pickupAddress, destinationAddress) {
+  const pickup = String(pickupAddress || '').trim();
+  const destination = String(destinationAddress || '').trim();
+  if (!pickup || !destination) {
+    return { ok: false, available: false, reason: 'ROUTE_INPUT_MISSING', writesPerformed: false };
+  }
+  try {
+    const result = Maps.newDirectionFinder()
+      .setOrigin(pickup)
+      .setDestination(destination)
+      .setMode(Maps.DirectionFinder.Mode.DRIVING)
+      .getDirections();
+    const route = result && result.routes && result.routes[0];
+    const leg = route && route.legs && route.legs[0];
+    const encoded = route && route.overview_polyline && route.overview_polyline.points;
+    const start = leg && leg.start_location;
+    const end = leg && leg.end_location;
+    if (!leg || !encoded || !start || !end) {
+      return { ok: false, available: false, reason: 'ROUTE_UNAVAILABLE', writesPerformed: false };
+    }
+    return {
+      ok: true,
+      available: true,
+      pickup: [Number(start.lat), Number(start.lng)],
+      destination: [Number(end.lat), Number(end.lng)],
+      encodedPolyline: String(encoded),
+      distanceMeters: Number(leg.distance && leg.distance.value || 0),
+      durationSeconds: Number(leg.duration && leg.duration.value || 0),
+      writesPerformed: false
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      available: false,
+      reason: 'ROUTE_LOOKUP_FAILED',
+      writesPerformed: false
+    };
+  }
+}

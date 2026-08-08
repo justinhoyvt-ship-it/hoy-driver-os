@@ -427,7 +427,11 @@
     if(!navigator.geolocation){$('mapNote').classList.add('show');return;}
     trace.watch=navigator.geolocation.watchPosition(function(p){
       var pt=[p.coords.latitude,p.coords.longitude];
-      if(trace.pts.length)trace.miles+=seg(trace.pts[trace.pts.length-1],pt);
+      var PULSE053_MIN_TRACE_MILES=0.00497097; /* 8 meters */
+      var lastTracePoint=trace.pts.length?trace.pts[trace.pts.length-1]:null;
+      var stepMiles=lastTracePoint?seg(lastTracePoint,pt):0;
+      if(lastTracePoint&&stepMiles<PULSE053_MIN_TRACE_MILES)return;
+      if(lastTracePoint)trace.miles+=stepMiles;
       trace.pts.push(pt);
       if(!trace.line)trace.line=L.polyline(trace.pts,{color:'#42dcff',weight:5,opacity:.9}).addTo(map);else trace.line.setLatLngs(trace.pts);
       if(meMarker)meMarker.setLatLng(pt);else meMarker=L.circleMarker(pt,{radius:8,color:'#fff',weight:3,fillColor:'#42dcff',fillOpacity:1}).addTo(map);
@@ -788,6 +792,31 @@
   try{initMap()}catch(e){$('mapNote').classList.add('show')}
   render(); renderSched(); syncBarPad(); flushPendingTrips_();
   srv('getCockpitBootstrap').then(function(b){ boot=b||{};rideRequestQrUrl=String(boot.rideRequestUrl||'');rideRequestFormUrl=String(boot.rideRequestFormUrl||''); renderOpp(); syncModeTag_(); schedFromServer(boot.reservations); requestsFromServer(boot.requests); if(boot.riderReadError){toast('Rider connection: '+boot.riderReadError);} }).catch(function(e){ syncModeTag_(); toast((e&&e.message)?e.message:'Console bootstrap failed'); });
+</script>
+<style id="pulse053RouteStyles">
+  .pulse053-stop{width:18px;height:18px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.42)}
+  .pulse053-stop.pickup{background:#f7b23b}.pulse053-stop.destination{background:#ff6680}
+</style>
+<script id="pulse053RouteLayer">
+(function(){
+  'use strict';
+  var routeState={key:"",pending:"",pickup:null,destination:null,preview:null};
+  function mapReady(){return !!(window.L&&window.map&&map.addLayer);}
+  function removeLayer(layer){if(layer&&mapReady()){try{map.removeLayer(layer)}catch(e){}}}
+  function clearTrip(){removeLayer(routeState.pickup);removeLayer(routeState.destination);removeLayer(routeState.preview);routeState.pickup=null;routeState.destination=null;routeState.preview=null;routeState.key="";routeState.pending="";}
+  function pointOk(p){return Array.isArray(p)&&p.length===2&&isFinite(Number(p[0]))&&isFinite(Number(p[1]));}
+  function marker(point,label,kind){if(!mapReady()||!pointOk(point))return null;var html="<div class=\"pulse053-stop "+kind+"\" aria-label=\""+label+"\"></div>";return L.marker(point,{icon:L.divIcon({className:"pulse053-marker-wrap",html:html,iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map).bindTooltip(label);}
+  function decodePolyline(encoded){var pts=[],index=0,lat=0,lng=0;encoded=String(encoded||"");while(index<encoded.length){var b,shift=0,result=0;do{b=encoded.charCodeAt(index++)-63;result|=(b&31)<<shift;shift+=5;}while(b>=32&&index<=encoded.length);var dlat=(result&1)?~(result>>1):(result>>1);lat+=dlat;shift=0;result=0;do{b=encoded.charCodeAt(index++)-63;result|=(b&31)<<shift;shift+=5;}while(b>=32&&index<=encoded.length);var dlng=(result&1)?~(result>>1):(result>>1);lng+=dlng;pts.push([lat/1e5,lng/1e5]);}return pts;}
+  function activeRide(){return window.S&&S.active?S.active:null;}
+  function rideKey(ride,pickup,destination){return String(ride.requestId||ride.id||ride.acceptedAt||"")+"|"+pickup+"|"+destination;}
+  function syncTrace(){if(window.trace&&trace.line&&trace.line.setStyle)trace.line.setStyle({color:"#45e394",weight:6,opacity:.95});}
+  function drawRoute(res,key){if(!mapReady()||!res||res.ok!==true)return;var points=decodePolyline(res.encodedPolyline);if(!pointOk(res.pickup)||!pointOk(res.destination)||points.length<2)return;if(routeState.key!==key){clearTrip();routeState.key=key;}routeState.pickup=marker(res.pickup,"Pickup","pickup");routeState.destination=marker(res.destination,"Destination","destination");routeState.preview=L.polyline(points,{color:"#2bd4e5",weight:5,opacity:.88,dashArray:"8 8"}).addTo(map);var layers=[routeState.pickup,routeState.destination,routeState.preview].filter(Boolean);if(layers.length){try{map.fitBounds(L.featureGroup(layers).getBounds().pad(.18),{maxZoom:15})}catch(e){}}}
+  function syncRide(){if(!mapReady())return;syncTrace();var ride=activeRide();if(!ride){if(routeState.key||routeState.pending)clearTrip();return;}var pickup=String(ride.pickup||"").trim();var destination=String(ride.dest||ride.destination||"").trim();if(!pickup||!destination)return;var key=rideKey(ride,pickup,destination);if(routeState.key===key&&routeState.preview)return;if(routeState.pending===key)return;if(routeState.key&&routeState.key!==key)clearTrip();routeState.pending=key;srv("getDriveRoutePreview",pickup,destination).then(function(res){if(routeState.pending!==key)return;routeState.pending="";if(!res||res.ok!==true)return;drawRoute(res,key);}).catch(function(){if(routeState.pending===key)routeState.pending="";});}
+  var baseRender=window.render;
+  if(typeof baseRender==="function"){window.render=function(){var out=baseRender.apply(this,arguments);setTimeout(syncRide,0);return out;};}
+  setInterval(syncRide,1200);setTimeout(syncRide,250);
+  window.PulseRouteLayer={sync:syncRide,clearTrip:clearTrip};
+})();
 </script>
 </body>
 </html>
