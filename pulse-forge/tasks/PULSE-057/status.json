@@ -1,0 +1,9 @@
+{
+  "taskId": "PULSE-057",
+  "status": "STAGED_FOR_REVIEW",
+  "branch": "pulse/pulse-057-qr-live-intake",
+  "automaticMerge": false,
+  "productionDeployment": false,
+  "productionMutation": false,
+  "engineActivation": false
+}
