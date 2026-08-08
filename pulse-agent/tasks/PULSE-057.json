@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "taskId": "PULSE-057",
   "title": "Surface the existing Pulse fare estimate in the working same-day QR booking lane",
-  "status": "BUILDING",
+  "status": "STAGED_FOR_REVIEW",
   "target": "Existing live same-day QR booking form using the merged PULSE-059 fare engine",
   "existingLiveQrUrl": "https://script.google.com/macros/s/AKfycbxyLcruVHrkxLBGkLcP3kxoE2EhILlJS_0SK5ybj1l5BMGPDrKIPiK_jO4P4EudXXYuBQ/exec",
   "automaticMerge": false,
