@@ -1,0 +1,1 @@
+Review only the fare-integration package and validator. Any proposed runtime rewrite of QR, Inbox, lifecycle, held-request handling, or request writing is out of scope and should be rejected as duplication.
