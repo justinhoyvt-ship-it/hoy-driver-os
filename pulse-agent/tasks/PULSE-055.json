@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "taskId": "PULSE-055",
+  "title": "Compare MapLibre GL JS in an isolated sandbox",
+  "status": "STAGED_FOR_REVIEW",
+  "target": "Pulse Forge innovation sandbox only",
+  "featureFlag": "FEATURE_MAPLIBRE=false",
+  "productionDeployment": false,
+  "productionMutation": false,
+  "engineActivation": false,
+  "liveRiderData": false,
+  "leafletBaselinePreserved": true,
+  "scope": {
+    "sandboxFile": "pulse-forge/sandboxes/pulse-055-maplibre/MapLibreSandbox.html",
+    "mapLibrary": "MapLibre GL JS 4.7.1",
+    "style": "https://demotiles.maplibre.org/style.json",
+    "fixtureCoordinatesOnly": true,
+    "metrics": ["load-time", "approximate-fps", "memory-when-supported", "map-errors", "phone-heat-manual"],
+    "routeGeometry": true
+  },
+  "acceptanceCriteria": [
+    "Sandbox opens independently from the working driver app.",
+    "No production endpoints, spreadsheet IDs, Apps Script writers, Ride Requests writer, or live rider data exist in the sandbox.",
+    "Deterministic route geometry renders after the MapLibre map loads.",
+    "Load time, approximate FPS, supported memory usage, and map failures are surfaced for comparison.",
+    "Destroy stops the metrics animation loop and removes the map.",
+    "Hoy Driver remains on the existing Leaflet baseline with no MapLibre code introduced into its Index.html.",
+    "FEATURE_MAPLIBRE remains false outside this isolated sandbox.",
+    "Forge CI passes before merge; no automatic merge or deployment occurs."
+  ],
+  "automaticMerge": false
+}
