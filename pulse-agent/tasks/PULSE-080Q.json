@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "taskId": "PULSE-080Q",
+  "parentTaskId": "PULSE-080",
+  "title": "Restore Ride request QR in Pulse Drive Mode Inbox",
+  "discoveredDuring": "PULSE-080 isolated phone test",
+  "acceptanceCriteria": [
+    "Inbox visibly exposes Ride request QR.",
+    "QR overlay renders the rider request QR URL.",
+    "Open form and Share link are available.",
+    "Server exposes getRideRequestQrConfig and QR/form bootstrap URLs.",
+    "PULSE-079 mid-ride request hold behavior remains intact.",
+    "validate-forge guards the QR contract.",
+    "No automatic merge, production deployment, Engine A/B activation, or production data mutation."
+  ],
+  "branch": "pulse/pulse-080q-qr-repair",
+  "automaticMerge": false,
+  "automaticProductionDeployment": false,
+  "engineActivation": false,
+  "productionDataMutation": false,
+  "createdAt": "2026-08-08T02:11:44.076Z"
+}

@@ -99,6 +99,8 @@ function getCockpitBootstrap() {
     requests: linked.items,
     requestDecisionError: linked.error || '',
     liveUrl: pulseLiveUrl_(),
+    rideRequestUrl: qrLiveRideRequestUrl_(),
+    rideRequestFormUrl: fullRideRequestUrl_(),
     riderReadError: rider.error || null,
     normalFlow: true,
     testWorkbookTargeted: false
@@ -829,4 +831,36 @@ function round2_(n) { return Math.round((Number(n) + Number.EPSILON) * 100) / 10
 
 function showWiring() {
   console.log(JSON.stringify(checkWiring(), null, 2));
+}
+
+/* PULSE-080Q QR route adapter. Production uses existing request bridge; isolated staging may provide PULSE080_STAGE_REQUEST_URL. */
+function pulse080QrRequestRoute_() {
+  const cfg = requestDecisionBridge_();
+  const stageUrl = (typeof PULSE080_STAGE_REQUEST_URL !== 'undefined') ? String(PULSE080_STAGE_REQUEST_URL || '').trim() : '';
+  return { url: String(cfg.url || stageUrl || '').trim(), token: String(cfg.token || '').trim() };
+}
+function fullRideRequestUrl_() {
+  const cfg = pulse080QrRequestRoute_();
+  if (!cfg.url) return '';
+  const sep = cfg.url.indexOf('?') >= 0 ? '&' : '?';
+  return cfg.url + (cfg.token ? sep + 'request=' + encodeURIComponent(cfg.token) + '&view=form' : sep + 'view=form');
+}
+function qrLiveRideRequestUrl_() {
+  const cfg = pulse080QrRequestRoute_();
+  if (!cfg.url) return '';
+  const sep = cfg.url.indexOf('?') >= 0 ? '&' : '?';
+  return cfg.url + (cfg.token ? sep + 'request=' + encodeURIComponent(cfg.token) + '&view=qr&source=qr_live' : sep + 'view=qr&source=qr_live');
+}
+function getRideRequestQrConfig() {
+  const qrUrl = qrLiveRideRequestUrl_();
+  const formUrl = fullRideRequestUrl_();
+  return {
+    ok: !!qrUrl,
+    url: qrUrl,
+    formUrl: formUrl,
+    configured: !!qrUrl,
+    qrTarget: 'QR_LIVE',
+    buttonTarget: 'REQUEST_FORM',
+    writesPerformed: false
+  };
 }
