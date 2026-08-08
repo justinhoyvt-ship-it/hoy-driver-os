@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "taskId": "PULSE-058",
   "title": "Carry the rider-visible Pulse fare through request confirmation into Hoy Driver Inbox",
-  "status": "BUILDING",
+  "status": "STAGED_FOR_REVIEW",
   "automaticMerge": false,
   "productionDeployment": false,
   "productionMutation": false,
