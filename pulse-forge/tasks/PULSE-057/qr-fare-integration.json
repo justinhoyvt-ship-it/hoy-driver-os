@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "taskId": "PULSE-057",
+  "packageType": "QR_FARE_INTEGRATION",
+  "sourceOfTruth": {
+    "fareEngine": "pulse-autobuild/request-app/FareQuote.gs",
+    "fareUi": "pulse-autobuild/request-app/RequestForm.html",
+    "requestWriter": "pulse-autobuild/request-app/Code.gs",
+    "driverSurface": "apps-script/hoy-driver-os-writer/Index.html"
+  },
+  "reuse": {
+    "pulse059FareEngine": true,
+    "pulse061RiderUi": true,
+    "pulse050Inbox": true,
+    "pulse079HeldRequests": true,
+    "pulse080qQrEntry": true
+  },
+  "protectedBehavior": {
+    "liveQrSameDayOnly": true,
+    "liveQrNowLater": true,
+    "futureSchedulingSeparate": true,
+    "standaloneRequestAppSoleWriter": true,
+    "noQuoteWrite": true,
+    "noCompetitorEstimate": true
+  },
+  "requiredFareUiMarkers": [
+    "id=\"quotePanel\"",
+    "id=\"quoteBtn\"",
+    "id=\"quoteResult\"",
+    "id=\"quoteFare\"",
+    ".pulseGetFareQuote({",
+    "Get fare first",
+    "quoteIsCurrent_()"
+  ],
+  "release": {
+    "automaticMerge": false,
+    "productionDeployment": false,
+    "productionMutation": false,
+    "engineActivation": false,
+    "ownerMergeRequired": true
+  }
+}
