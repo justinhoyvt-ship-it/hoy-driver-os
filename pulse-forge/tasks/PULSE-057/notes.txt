@@ -1,0 +1,1 @@
+PULSE-057 intentionally contains no new fare algorithm and no QR form replacement. It validates and packages the already-merged fare estimate path for the existing same-day QR lane.
