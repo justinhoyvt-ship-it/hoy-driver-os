@@ -267,12 +267,84 @@
   </div>
 </div>
 
-<div class="overlay" id="overlay"><div class="sheet"><h2>End shift</h2><p class="sub">Time and miles are captured. Earnings can be added now or reconciled later.</p><div class="result" id="result"></div><div class="readouts"><div class="ro"><small>Online</small><b id="roOnline">0h 00m</b></div><div class="ro"><small>Traced miles</small><b id="roMiles">0.00</b></div></div><div class="fld two"><div><label for="inEarnings">Total earnings</label><input id="inEarnings" type="number" inputmode="decimal" min="0" step="0.01" placeholder="optional — reconcile later"></div><div><label for="inTips">Of that, tips</label><input id="inTips" type="number" inputmode="decimal" min="0" step="0.01" placeholder="optional"></div></div><div class="fld"><label for="inZone">Primary zone</label><select id="inZone"><option value="">—</option><option>BTV Airport</option><option>Church Street / Downtown</option><option>UVM</option><option>Essex Junction</option><option>South Burlington hotels</option><option>Winooski</option><option>Waterfront</option></select></div><div class="fld"><label for="inNotes">Notes</label><input id="inNotes" type="text" placeholder="optional"></div><button class="save" id="saveBtn">Save shift</button><button class="cancel" id="cancelBtn">Keep driving</button></div></div>
-<div class="overlay" id="fareOverlay"><div class="sheet"><h2>Ride paid?</h2><p class="sub">Drop the fare in now and the shift total fills itself in. <span class="num" id="fareMiles">0.00</span> mi traced.</p><div class="fld two"><div><label for="fareAmt">Fare</label><input id="fareAmt" class="bignum" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00"></div><div><label for="fareTip">Tip</label><input id="fareTip" class="bignum" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00"></div></div><button class="save" id="addFareBtn">Add to shift</button><button class="cancel" id="skipFareBtn">Skip</button></div></div>
-<div class="overlay" id="schedOverlay"><div class="sheet"><h2>Schedule a ride</h2><p class="sub">Reservations surface below and come due at their time.</p><div class="fld"><label for="inSchedName">Name</label><input id="inSchedName" type="text" placeholder="e.g. Airport run — Dana"></div><div class="fld"><label for="inSchedWhen">When</label><input id="inSchedWhen" type="datetime-local"></div><div class="fld"><label for="inSchedPickup">Pickup</label><input id="inSchedPickup" type="text" placeholder="optional"></div><button class="save" id="saveSchedBtn" style="background:linear-gradient(180deg,var(--blue),#2f6fd0);color:#fff">Add to schedule</button><button class="cancel" id="cancelSchedBtn">Close</button></div></div>
-<div class="overlay" id="inboxOverlay"><div class="sheet menu-sheet"><div class="menu-head"><h2>Inbox</h2><div class="menu-head-actions"><button class="inbox-qr" id="openQrFromInbox" type="button">Ride request QR</button><button class="menu-close" id="closeInboxBtn" type="button" aria-label="Close inbox">&times;</button></div></div><div class="inbox-hold-notice" id="inboxHoldNotice" role="status" aria-live="polite"></div><div class="inbox-list" id="inboxList"></div></div></div>
-<div class="overlay" id="qrOverlay" aria-label="Ride request QR"><div class="sheet qr-sheet"><div class="menu-head"><h2>Ride request QR</h2><button class="menu-close" id="closeQrBtn" type="button" aria-label="Close QR">&times;</button></div><p class="sub">Have the rider scan this to open the approved ride request form.</p><div class="qr-box" id="bookingQr"></div><div class="qr-link" id="bookingQrLink">Loading ride request link…</div><div class="qr-actions"><button class="qr-open" id="openRideRequestBtn" type="button">Open form</button><button class="qr-share" id="shareRideRequestBtn" type="button">Share link</button></div></div></div>
-<div class="overlay" id="settingsOverlay" aria-label="Settings"><div class="sheet settings-sheet"></div></div>
+<!-- End-shift overlay -->
+<div class="overlay" id="overlay">
+  <div class="sheet">
+    <h2>End shift</h2>
+    <p class="sub">Time and miles are captured. Earnings can be added now or reconciled later.</p>
+    <div class="result" id="result"></div>
+    <div class="readouts">
+      <div class="ro"><small>Online</small><b id="roOnline">0h 00m</b></div>
+      <div class="ro"><small>Traced miles</small><b id="roMiles">0.00</b></div>
+    </div>
+    <div class="fld two">
+      <div><label for="inEarnings">Total earnings</label><input id="inEarnings" type="number" inputmode="decimal" min="0" step="0.01" placeholder="optional — reconcile later"></div>
+      <div><label for="inTips">Of that, tips</label><input id="inTips" type="number" inputmode="decimal" min="0" step="0.01" placeholder="optional"></div>
+    </div>
+    <div class="fld"><label for="inZone">Primary zone</label>
+      <select id="inZone"><option value="">—</option><option>BTV Airport</option><option>Church Street / Downtown</option><option>UVM</option><option>Essex Junction</option><option>South Burlington hotels</option><option>Winooski</option><option>Waterfront</option></select>
+    </div>
+    <div class="fld"><label for="inNotes">Notes</label><input id="inNotes" type="text" placeholder="optional"></div>
+    <button class="save" id="saveBtn">Save shift</button>
+    <button class="cancel" id="cancelBtn">Keep driving</button>
+  </div>
+</div>
+
+<!-- Per-ride fare overlay -->
+<div class="overlay" id="fareOverlay">
+  <div class="sheet">
+    <h2>Ride paid?</h2>
+    <p class="sub">Drop the fare in now and the shift total fills itself in. <span class="num" id="fareMiles">0.00</span> mi traced.</p>
+    <div class="fld two">
+      <div><label for="fareAmt">Fare</label><input id="fareAmt" class="bignum" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00"></div>
+      <div><label for="fareTip">Tip</label><input id="fareTip" class="bignum" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00"></div>
+    </div>
+    <button class="save" id="addFareBtn">Add to shift</button>
+    <button class="cancel" id="skipFareBtn">Skip</button>
+  </div>
+</div>
+
+<!-- Schedule overlay -->
+<div class="overlay" id="schedOverlay">
+  <div class="sheet">
+    <h2>Schedule a ride</h2>
+    <p class="sub">Reservations surface below and come due at their time.</p>
+    <div class="fld"><label for="inSchedName">Name</label><input id="inSchedName" type="text" placeholder="e.g. Airport run — Dana"></div>
+    <div class="fld"><label for="inSchedWhen">When</label><input id="inSchedWhen" type="datetime-local"></div>
+    <div class="fld"><label for="inSchedPickup">Pickup</label><input id="inSchedPickup" type="text" placeholder="optional"></div>
+    <button class="save" id="saveSchedBtn" style="background:linear-gradient(180deg,var(--blue),#2f6fd0);color:#fff">Add to schedule</button>
+    <button class="cancel" id="cancelSchedBtn">Close</button>
+  </div>
+</div>
+
+<!-- Inbox overlay -->
+<div class="overlay" id="inboxOverlay">
+  <div class="sheet menu-sheet">
+    <div class="menu-head"><h2>Inbox</h2><div class="menu-head-actions"><button class="inbox-qr" id="openQrFromInbox" type="button">Ride request QR</button><button class="menu-close" id="closeInboxBtn" type="button" aria-label="Close inbox">&times;</button></div></div>
+    <div class="inbox-hold-notice" id="inboxHoldNotice" role="status" aria-live="polite"></div>
+    <div class="inbox-list" id="inboxList"></div>
+  </div>
+</div>
+
+<!-- Ride request QR -->
+<div class="overlay" id="qrOverlay" aria-label="Ride request QR">
+  <div class="sheet qr-sheet">
+    <div class="menu-head"><h2>Ride request QR</h2><button class="menu-close" id="closeQrBtn" type="button" aria-label="Close QR">&times;</button></div>
+    <p class="sub">Have the rider scan this to open the approved ride request form.</p>
+    <div class="qr-box" id="bookingQr"></div>
+    <div class="qr-link" id="bookingQrLink">Loading ride request link…</div>
+    <div class="qr-actions">
+      <button class="qr-open" id="openRideRequestBtn" type="button">Open form</button>
+      <button class="qr-share" id="shareRideRequestBtn" type="button">Share link</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings intentionally blank -->
+<div class="overlay" id="settingsOverlay" aria-label="Settings">
+  <div class="sheet settings-sheet"></div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -288,18 +360,31 @@
   var RIDER_STATUS_SEQUENCE=['Confirmed','Leaving','On the way','Arriving soon','Arrived','Ride in progress','Complete'];
   var mockRequestList=[{requestId:'FR-PREVIEW1',name:'Preview rider',pickup:'Essex Junction',destination:'BTV Airport',whenISO:new Date(Date.now()+7200000).toISOString(),notes:'',status:'REQUESTED',acceptUrl:'',declineUrl:''}];
 
-  function srv(fn){var args=[].slice.call(arguments,1);if(LIVE){return new Promise(function(res,rej){google.script.run.withSuccessHandler(res).withFailureHandler(function(e){rej(new Error(e&&e.message?e.message:String(e)))})[fn].apply(google.script.run,args);});}return Promise.resolve(mockSrv_(fn,args));}
+  function srv(fn){
+    var args=[].slice.call(arguments,1);
+    if(LIVE){ return new Promise(function(res,rej){ google.script.run.withSuccessHandler(res).withFailureHandler(function(e){rej(new Error(e&&e.message?e.message:String(e)))})[fn].apply(google.script.run,args); }); }
+    return Promise.resolve(mockSrv_(fn,args));
+  }
   function mockSrv_(fn,args){
-    if(fn==='getCockpitBootstrap') return {ok:true, preview:true, normalFlow:true, testWorkbookTargeted:false,cost:{fuelPerGal:3.5,mpg:25,maintPerMile:0.10,taxRate:0.22},reservations:mockResList.slice(),requests:mockRequestList.slice(),liveUrl:'https://script.google.com/macros/s/AKfycbyde9C6y6iIoJO8AfWxt5z-D2FxwKXXMonpypmW8xaI7BZaAwChYBXM4JO7zqYvmw7Y/exec',opportunity:{date:'Sat Jul 18',event:'SlipBizkit + Sex With Jenna',location:'Higher Ground, South Burlington',demand:'High',window:'10:00 PM-12:00 AM est.',move:'Two same-night events may create staggered exits; work the corridor, not the curb.'}};
+    if(fn==='getCockpitBootstrap') return {ok:true, preview:true, normalFlow:true, testWorkbookTargeted:false,
+      cost:{fuelPerGal:3.5,mpg:25,maintPerMile:0.10,taxRate:0.22},
+      reservations:mockResList.slice(),
+      requests:mockRequestList.slice(),
+      liveUrl:'https://script.google.com/macros/s/AKfycbyde9C6y6iIoJO8AfWxt5z-D2FxwKXXMonpypmW8xaI7BZaAwChYBXM4JO7zqYvmw7Y/exec',
+      opportunity:{date:'Sat Jul 18',event:'SlipBizkit + Sex With Jenna',location:'Higher Ground, South Burlington',demand:'High',window:'10:00 PM-12:00 AM est.',move:'Two same-night events may create staggered exits; work the corridor, not the curb.'}};
     if(fn==='listReservations') return mockResList.slice();
     if(fn==='listRequestedRides') return {items:mockRequestList.slice(),error:''};
     if(fn==='updateRiderStatus') return {ok:true,requestId:args[0],status:args[1],occurredAt:new Date().toISOString(),duplicate:false};
-    if(fn==='addReservation'){var r=args[0]||{};mockResList.push({id:'r'+Date.now()+Math.floor(Math.random()*1000),name:r.name||'Ride',pickup:r.pickup||'',dest:r.dest||'',phone:r.phone||'',notes:r.notes||'',whenISO:r.whenISO,source:r.source||'manual'});return mockResList.slice();}
-    if(fn==='removeReservation'||fn==='startReservation'){var id=args[0];mockResList=mockResList.filter(function(x){return x.id!==id});return mockResList.slice();}
+    if(fn==='addReservation'){ var r=args[0]||{}; mockResList.push({id:'r'+Date.now()+Math.floor(Math.random()*1000),name:r.name||'Ride',pickup:r.pickup||'',dest:r.dest||'',phone:r.phone||'',notes:r.notes||'',whenISO:r.whenISO,source:r.source||'manual'}); return mockResList.slice(); }
+    if(fn==='removeReservation'||fn==='startReservation'){ var id=args[0]; mockResList=mockResList.filter(function(x){return x.id!==id}); return mockResList.slice(); }
     if(fn==='logCompletedTrip') return {ok:true,preview:true,duplicate:false,rideId:(args[0]||{}).rideId||'',row:'(preview)'};
-    if(fn==='endShiftToSheet'){var p=args[0]||{},provided=p.earnings!==''&&p.earnings!=null&&isFinite(Number(p.earnings));return {ok:true,preview:true,earningsPending:!provided,shift:{row:'(preview)',grossPerHr:provided&&p.onlineHours>0?Number(p.earnings)/p.onlineHours:null}};}
+    if(fn==='endShiftToSheet'){
+      var p=args[0]||{}, provided=p.earnings!==''&&p.earnings!=null&&isFinite(Number(p.earnings));
+      return {ok:true, preview:true, earningsPending:!provided, shift:{row:'(preview)',grossPerHr:provided&&p.onlineHours>0?Number(p.earnings)/p.onlineHours:null}};
+    }
     return {ok:false};
   }
+
   function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
   function toast(m){var t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show')},2100)}
   function now(){return Date.now()}
@@ -313,85 +398,427 @@
   function restoreState(){try{var x=JSON.parse(localStorage.getItem(STATE_KEY)||'null');if(x&&typeof x==='object'){S.shift=x.shift||null;S.active=x.active||null;S.queued=x.queued||null;S.heldRequests=Array.isArray(x.heldRequests)?x.heldRequests:[];S.pendingTrips=Array.isArray(x.pendingTrips)?x.pendingTrips:[]}}catch(e){}}
   function navTo(address){if(!address){toast('Address unavailable');return;}var url='https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(address);window.open(url,'_blank','noopener');}
   function scheduledTripState(s){return {rideId:s.requestId?('request-'+s.requestId):newRideId_('scheduled'),state:'ACCEPTED',acceptedAt:now(),pickedUpAt:null,requestId:s.requestId||'',source:s.source||'scheduled',name:s.name||'Ride',pickup:s.pickup||'',dest:s.dest||'',riderStatus:s.riderStatus||'Confirmed'};}
-  function queueTripLog_(payload){if(!payload||!payload.rideId)return;S.pendingTrips=S.pendingTrips||[];if(!S.pendingTrips.some(function(x){return x.rideId===payload.rideId}))S.pendingTrips.push(payload);persistState();flushPendingTrips_();}
-  function flushPendingTrips_(){if(!LIVE||!S.pendingTrips||!S.pendingTrips.length)return Promise.resolve();var payload=S.pendingTrips[0];return srv('logCompletedTrip',payload).then(function(){S.pendingTrips.shift();persistState();return flushPendingTrips_();}).catch(function(e){toast(e.message||'Trip log pending');});}
+  function queueTripLog_(payload){
+    if(!payload||!payload.rideId)return;
+    S.pendingTrips=S.pendingTrips||[];
+    if(!S.pendingTrips.some(function(x){return x.rideId===payload.rideId}))S.pendingTrips.push(payload);
+    persistState();flushPendingTrips_();
+  }
+  function flushPendingTrips_(){
+    if(!LIVE||!S.pendingTrips||!S.pendingTrips.length)return Promise.resolve();
+    var payload=S.pendingTrips[0];
+    return srv('logCompletedTrip',payload).then(function(){
+      S.pendingTrips.shift();persistState();return flushPendingTrips_();
+    }).catch(function(e){toast(e.message||'Trip log pending');});
+  }
 
-  function initMap(){map=L.map('map',{zoomControl:false,attributionControl:true,preferCanvas:true}).setView([44.49,-73.10],11);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'© OpenStreetMap'}).addTo(map);setTimeout(function(){map.invalidateSize(true)},120);if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(p){var pt=[p.coords.latitude,p.coords.longitude];meMarker=L.circleMarker(pt,{radius:8,color:'#fff',weight:3,fillColor:'#42dcff',fillOpacity:1}).addTo(map);map.setView(pt,14);},function(){$('mapNote').classList.add('show')},{enableHighAccuracy:true,timeout:8000,maximumAge:30000});}else{$('mapNote').classList.add('show');}}
+  function initMap(){
+    map=L.map('map',{zoomControl:false,attributionControl:true,preferCanvas:true}).setView([44.49,-73.10],11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'© OpenStreetMap'}).addTo(map);
+    setTimeout(function(){map.invalidateSize(true)},120);
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(function(p){var pt=[p.coords.latitude,p.coords.longitude];meMarker=L.circleMarker(pt,{radius:8,color:'#fff',weight:3,fillColor:'#42dcff',fillOpacity:1}).addTo(map);map.setView(pt,14);},
+        function(){$('mapNote').classList.add('show')},{enableHighAccuracy:true,timeout:8000,maximumAge:30000});
+    } else { $('mapNote').classList.add('show'); }
+  }
   function seg(a,b){var la1=a[0]*Math.PI/180,la2=b[0]*Math.PI/180,dLa=la2-la1,dLo=(b[1]-a[1])*Math.PI/180;var h=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(la1)*Math.cos(la2)*Math.sin(dLo/2)*Math.sin(dLo/2);return 3958.8*2*Math.asin(Math.min(1,Math.sqrt(h)));}
   function startTrace(){
-    trace.pts=[];trace.miles=0;if(trace.line){map.removeLayer(trace.line);trace.line=null;}$('rideMiles').textContent='0.00';
+    trace.pts=[];trace.miles=0; if(trace.line){map.removeLayer(trace.line);trace.line=null;} $('rideMiles').textContent='0.00';
     if(!navigator.geolocation){$('mapNote').classList.add('show');return;}
     trace.watch=navigator.geolocation.watchPosition(function(p){
       var pt=[p.coords.latitude,p.coords.longitude];
       var PULSE053_MIN_TRACE_MILES=0.00497097; /* 8 meters */
       var lastTracePoint=trace.pts.length?trace.pts[trace.pts.length-1]:null;
       var stepMiles=lastTracePoint?seg(lastTracePoint,pt):0;
-      var shouldAddTracePoint=!lastTracePoint||stepMiles>=PULSE053_MIN_TRACE_MILES;
-      if(shouldAddTracePoint){
-        if(lastTracePoint)trace.miles+=stepMiles;
-        trace.pts.push(pt);
-        if(!trace.line)trace.line=L.polyline(trace.pts,{color:'#42dcff',weight:5,opacity:.9}).addTo(map);else trace.line.setLatLngs(trace.pts);
-      }
+      if(lastTracePoint&&stepMiles<PULSE053_MIN_TRACE_MILES)return;
+      if(lastTracePoint)trace.miles+=stepMiles;
+      trace.pts.push(pt);
+      if(!trace.line)trace.line=L.polyline(trace.pts,{color:'#42dcff',weight:5,opacity:.9}).addTo(map);else trace.line.setLatLngs(trace.pts);
       if(meMarker)meMarker.setLatLng(pt);else meMarker=L.circleMarker(pt,{radius:8,color:'#fff',weight:3,fillColor:'#42dcff',fillOpacity:1}).addTo(map);
-      map.setView(pt,Math.max(map.getZoom(),15));$('rideMiles').textContent=trace.miles.toFixed(2);
+      map.setView(pt,Math.max(map.getZoom(),15)); $('rideMiles').textContent=trace.miles.toFixed(2);
     },function(){$('mapNote').classList.add('show')},{enableHighAccuracy:true,maximumAge:2000,timeout:12000});
   }
-  function stopTrace(){if(trace.watch!=null){navigator.geolocation.clearWatch(trace.watch);trace.watch=null;}return Math.round(trace.miles*100)/100;}
+  function stopTrace(){ if(trace.watch!=null){navigator.geolocation.clearWatch(trace.watch);trace.watch=null;} return Math.round(trace.miles*100)/100; }
 
-  function goOnline(){S.shift={startedAt:now(),miles:0,rides:0,earned:0,tips:0};toast('Online');render();}
-  function accept(){if(!S.shift)goOnline();if(!S.active){S.active={rideId:newRideId_('app'),source:'app',state:'ACCEPTED',acceptedAt:now(),pickedUpAt:null,pickup:'',dest:''};toast('Accepted');}else if(!S.queued){S.queued={rideId:newRideId_('app'),source:'app',state:'ACCEPTED',acceptedAt:now(),pickedUpAt:null,pickup:'',dest:''};toast('Next ride stacked');}else{toast('Queue full');}render();}
-  function pickedUp(){if(S.active&&S.active.state==='ACCEPTED'){S.active.state='ON_TRIP';S.active.pickedUpAt=now();startTrace();toast('Tracing route');}render();}
-  function dropOff(){if(S.active&&S.active.state==='ON_TRIP'){var completed=S.active,completedAt=now(),miles=stopTrace();queueTripLog_({rideId:completed.rideId||newRideId_('completed'),requestId:completed.requestId||'',source:completed.source||'app',acceptedISO:new Date(completed.acceptedAt||completed.pickedUpAt||completedAt).toISOString(),pickedUpISO:new Date(completed.pickedUpAt||completed.acceptedAt||completedAt).toISOString(),completedISO:new Date(completedAt).toISOString(),pickup:completed.pickup||'',destination:completed.dest||'',miles:miles,fare:'',tip:''});if(S.shift){S.shift.miles+=miles;S.shift.rides++;if(completed.requestId){S.shift.requestIds=S.shift.requestIds||[];if(S.shift.requestIds.indexOf(completed.requestId)<0)S.shift.requestIds.push(completed.requestId);}}if(S.queued){S.active=S.queued;S.queued=null;toast('Dropped · '+miles.toFixed(2)+' mi · next up');}else{S.active=null;toast('Dropped · '+miles.toFixed(2)+' mi');}releaseHeldRequests_();setTimeout(refreshInbox,0);}render();}
-  function openFare(miles){if(!S.shift)return;$('fareMiles').textContent=miles.toFixed(2);$('fareAmt').value='';$('fareTip').value='';$('fareOverlay').classList.add('show');setTimeout(function(){try{$('fareAmt').focus();}catch(e){}},60);}
-  function closeFare(){$('fareOverlay').classList.remove('show');}
-  function addFare(){var f=parseFloat($('fareAmt').value);if(!isFinite(f)||f<0)f=0;var t=parseFloat($('fareTip').value);if(!isFinite(t)||t<0)t=0;if(S.shift){S.shift.earned=Math.round((S.shift.earned+f+t)*100)/100;S.shift.tips=Math.round((S.shift.tips+t)*100)/100;}closeFare();toast('Shift $'+money(S.shift?S.shift.earned:0));render();}
-  function skipFare(){closeFare();}
-  function cancelActive(){if(!S.active)return;stopTrace();if(S.queued){S.active=S.queued;S.queued=null;toast('Cancelled · next up');}else{S.active=null;toast('Ride cancelled');}releaseHeldRequests_();setTimeout(refreshInbox,0);render();}
-  function schedFromServer(list){S.scheduled=(list||[]).map(function(r){return {id:r.id,requestId:r.requestId||'',name:r.name,pickup:r.pickup||'',dest:r.dest||'',notes:r.notes||'',whenTS:Date.parse(r.whenISO),source:r.source||'manual',riderStatus:r.riderStatus||''};});renderSched();}
-  function saveScheduled(){var when=$('inSchedWhen').value;if(!when){toast('Pick a time');return;}var d=new Date(when);if(isNaN(d.getTime())){toast('Bad time');return;}var payload={name:$('inSchedName').value.trim()||'Ride',pickup:$('inSchedPickup').value.trim(),whenISO:d.toISOString(),source:'manual'};var b=$('saveSchedBtn');b.disabled=true;srv('addReservation',payload).then(function(list){schedFromServer(list);$('inSchedName').value='';$('inSchedWhen').value='';$('inSchedPickup').value='';$('schedOverlay').classList.remove('show');toast('Scheduled');}).catch(function(e){toast(e.message||'Failed')}).then(function(){b.disabled=false});}
-  function startScheduled(id){var s=S.scheduled.filter(function(x){return x.id===id})[0];if(!s||scheduledStartBusy[id])return;if(s.requestId&&((S.active&&S.active.requestId===s.requestId)||(S.queued&&S.queued.requestId===s.requestId))){toast('Ride already started');return;}if(S.active||S.queued){toast('Finish current ride first');return;}if(!S.shift)goOnline();scheduledStartBusy[id]=true;renderSched();function release(){delete scheduledStartBusy[id];renderSched();}function begin(status,list){var ride=scheduledTripState(s);if(s.source==='rider')ride.riderStatus=status||'On the way';S.active=ride;persistState();schedFromServer(list||[]);release();toast('Pickup started: '+s.name);render();}var pickupCall=srv('beginScheduledPickup',s.requestId||'',id);if(s.pickup)navTo(s.pickup);pickupCall.then(function(result){begin((result&&result.status)||'',(result&&result.reservations)||[]);}).catch(function(e){release();toast(e.message||'Could not begin pickup')});}
-  function renderSched(){var lane=$('schedList');lane.innerHTML='';if(!S.scheduled.length){return;}S.scheduled.slice().sort(function(a,b){return a.whenTS-b.whenTS}).forEach(function(s){var diff=s.whenTS-now(),mins=Math.round(diff/60000);var when=mins>90?new Date(s.whenTS).toLocaleString([],{weekday:'short',hour:'numeric',minute:'2-digit'}):(mins>=0?('in '+mins+'m'):(Math.abs(mins)+'m ago'));var due=diff<=30*60000&&diff>-60*60000;var sub=[s.pickup,s.dest?('→ '+s.dest):'',(s.source==='rider'?'confirmed rider':'')].filter(Boolean).join(' · ');var card=document.createElement('div');card.className='sched-card'+(due?' due':'');card.innerHTML='<div class="sc-main"><b>'+esc(s.name)+'</b>'+(sub?'<small>'+esc(sub)+'</small>':'')+'</div><div class="sc-when">'+when+(due?'<em>DUE</em>':'')+'</div>';var acts=document.createElement('div');acts.className='sc-acts';var start=document.createElement('button');start.className='sc-start';start.textContent='Begin pickup';start.disabled=!!scheduledStartBusy[s.id]||!!S.active||!!S.queued;start.onclick=function(){startScheduled(s.id)};acts.appendChild(start);if(s.dest){var navD=document.createElement('button');navD.className='sc-nav';navD.textContent='Drop';navD.onclick=function(){navTo(s.dest)};acts.appendChild(navD);}if(s.source!=='rider'){var del=document.createElement('button');del.className='sc-del';del.innerHTML='&times;';del.onclick=function(){srv('removeReservation',s.id).then(function(list){schedFromServer(list)}).catch(function(){});};acts.appendChild(del);}card.appendChild(acts);lane.appendChild(card);});}
-  function closeWaffle(){$('waffleMenu').classList.remove('show');$('waffleBtn').setAttribute('aria-expanded','false');}
-  function toggleWaffle(){var open=$('waffleMenu').classList.toggle('show');$('waffleBtn').setAttribute('aria-expanded',String(open));}
-  function openInbox(){closeWaffle();$('inboxOverlay').classList.add('show');refreshInbox();}
-  function closeInbox(){$('inboxOverlay').classList.remove('show');}
-  function openSettings(){closeWaffle();$('settingsOverlay').classList.add('show');}
-  function closeSettings(){$('settingsOverlay').classList.remove('show');}
-  function openLive(){closeWaffle();var url=boot.liveUrl||'';if(!url){toast('Live page unavailable');return;}window.open(url,'_blank','noopener');}
-  var rideRequestQrUrl='',rideRequestFormUrl='';
-  function closeQr(){$('qrOverlay').classList.remove('show');}
-  function renderRideRequestQr_(url){rideRequestQrUrl=String(url||'');var box=$('bookingQr');box.innerHTML='';$('bookingQrLink').textContent=rideRequestQrUrl||'Ride request link unavailable';if(!rideRequestQrUrl){toast('Ride request link unavailable');return;}if(typeof QRCode==='undefined'){toast('QR library unavailable');return;}new QRCode(box,{text:rideRequestQrUrl,width:258,height:258,colorDark:'#050813',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}
-  function openQr(){closeWaffle();closeInbox();$('qrOverlay').classList.add('show');var known=rideRequestQrUrl||boot.rideRequestUrl||'';rideRequestFormUrl=rideRequestFormUrl||boot.rideRequestFormUrl||'';if(known){renderRideRequestQr_(known);return;}srv('getRideRequestQrConfig').then(function(cfg){cfg=cfg||{};rideRequestFormUrl=String(cfg.formUrl||rideRequestFormUrl||'');renderRideRequestQr_(cfg.url)}).catch(function(e){renderRideRequestQr_('');toast(e.message||'QR unavailable')});}
+  /* shift = online */
+  function goOnline(){ S.shift={startedAt:now(), miles:0, rides:0, earned:0, tips:0}; toast('Online'); render(); }
+
+  /* ride lifecycle */
+  function accept(){
+    if(!S.shift)goOnline();
+    if(!S.active){ S.active={rideId:newRideId_('app'),source:'app',state:'ACCEPTED',acceptedAt:now(),pickedUpAt:null,pickup:'',dest:''}; toast('Accepted'); }
+    else if(!S.queued){ S.queued={rideId:newRideId_('app'),source:'app',state:'ACCEPTED',acceptedAt:now(),pickedUpAt:null,pickup:'',dest:''}; toast('Next ride stacked'); }
+    else { toast('Queue full'); }
+    render();
+  }
+  function pickedUp(){ if(S.active&&S.active.state==='ACCEPTED'){ S.active.state='ON_TRIP'; S.active.pickedUpAt=now(); startTrace(); toast('Tracing route'); } render(); }
+  function dropOff(){
+    if(S.active&&S.active.state==='ON_TRIP'){
+      var completed=S.active, completedAt=now(), miles=stopTrace();
+      queueTripLog_({
+        rideId:completed.rideId||newRideId_('completed'),
+        requestId:completed.requestId||'',
+        source:completed.source||'app',
+        acceptedISO:new Date(completed.acceptedAt||completed.pickedUpAt||completedAt).toISOString(),
+        pickedUpISO:new Date(completed.pickedUpAt||completed.acceptedAt||completedAt).toISOString(),
+        completedISO:new Date(completedAt).toISOString(),
+        pickup:completed.pickup||'',
+        destination:completed.dest||'',
+        miles:miles,
+        fare:'',
+        tip:''
+      });
+      if(S.shift){
+        S.shift.miles+=miles;S.shift.rides++;
+        if(completed.requestId){S.shift.requestIds=S.shift.requestIds||[];if(S.shift.requestIds.indexOf(completed.requestId)<0)S.shift.requestIds.push(completed.requestId);}
+      }
+      if(S.queued){ S.active=S.queued; S.queued=null; toast('Dropped · '+miles.toFixed(2)+' mi · next up'); }
+      else { S.active=null; toast('Dropped · '+miles.toFixed(2)+' mi'); }
+      releaseHeldRequests_();
+      setTimeout(refreshInbox,0);
+    } render();
+  }
+
+  /* per-ride fare capture — the shift total fills itself in so end-shift is one tap */
+  function openFare(miles){ if(!S.shift)return; $('fareMiles').textContent=miles.toFixed(2); $('fareAmt').value=''; $('fareTip').value=''; $('fareOverlay').classList.add('show'); setTimeout(function(){try{$('fareAmt').focus();}catch(e){}},60); }
+  function closeFare(){ $('fareOverlay').classList.remove('show'); }
+  function addFare(){
+    var f=parseFloat($('fareAmt').value); if(!isFinite(f)||f<0)f=0;
+    var t=parseFloat($('fareTip').value); if(!isFinite(t)||t<0)t=0;
+    if(S.shift){ S.shift.earned=Math.round((S.shift.earned+f+t)*100)/100; S.shift.tips=Math.round((S.shift.tips+t)*100)/100; }
+    closeFare(); toast('Shift $'+money(S.shift?S.shift.earned:0)); render();
+  }
+  function skipFare(){ closeFare(); }
+  function cancelActive(){ if(!S.active)return; stopTrace(); if(S.queued){S.active=S.queued;S.queued=null;toast('Cancelled · next up');}else{S.active=null;toast('Ride cancelled');} releaseHeldRequests_();setTimeout(refreshInbox,0);render(); }
+
+  /* scheduled lane — persisted server-side */
+  function schedFromServer(list){ S.scheduled=(list||[]).map(function(r){return {id:r.id,requestId:r.requestId||'',name:r.name,pickup:r.pickup||'',dest:r.dest||'',notes:r.notes||'',whenTS:Date.parse(r.whenISO),source:r.source||'manual',riderStatus:r.riderStatus||''};}); renderSched(); }
+  function saveScheduled(){
+    var when=$('inSchedWhen').value; if(!when){toast('Pick a time');return;}
+    var d=new Date(when); if(isNaN(d.getTime())){toast('Bad time');return;}
+    var payload={name:$('inSchedName').value.trim()||'Ride', pickup:$('inSchedPickup').value.trim(), whenISO:d.toISOString(), source:'manual'};
+    var b=$('saveSchedBtn'); b.disabled=true;
+    srv('addReservation',payload).then(function(list){ schedFromServer(list); $('inSchedName').value='';$('inSchedWhen').value='';$('inSchedPickup').value=''; $('schedOverlay').classList.remove('show'); toast('Scheduled'); })
+      .catch(function(e){toast(e.message||'Failed')}).then(function(){b.disabled=false});
+  }
+  function startScheduled(id){
+    var s=S.scheduled.filter(function(x){return x.id===id})[0]; if(!s||scheduledStartBusy[id])return;
+    if(s.requestId&&((S.active&&S.active.requestId===s.requestId)||(S.queued&&S.queued.requestId===s.requestId))){toast('Ride already started');return;}
+    if(S.active||S.queued){toast('Finish current ride first');return;}
+    if(!S.shift)goOnline();
+    scheduledStartBusy[id]=true;renderSched();
+    function release(){delete scheduledStartBusy[id];renderSched();}
+    function begin(status,list){
+      var ride=scheduledTripState(s);
+      if(s.source==='rider')ride.riderStatus=status||'On the way';
+      S.active=ride;
+      persistState();
+      schedFromServer(list||[]);
+      release();
+      toast('Pickup started: '+s.name); render();
+    }
+    var pickupCall=srv('beginScheduledPickup',s.requestId||'',id);
+    if(s.pickup)navTo(s.pickup);
+    pickupCall.then(function(result){
+      begin((result&&result.status)||'',(result&&result.reservations)||[]);
+    }).catch(function(e){release();toast(e.message||'Could not begin pickup')});
+  }
+
+  function renderSched(){
+    var lane=$('schedList'); lane.innerHTML='';
+    if(!S.scheduled.length){ return; }
+    S.scheduled.slice().sort(function(a,b){return a.whenTS-b.whenTS}).forEach(function(s){
+      var diff=s.whenTS-now(), mins=Math.round(diff/60000);
+      var when = mins>90 ? new Date(s.whenTS).toLocaleString([], {weekday:'short',hour:'numeric',minute:'2-digit'}) : (mins>=0 ? ('in '+mins+'m') : (Math.abs(mins)+'m ago'));
+      var due = diff<=30*60000 && diff> -60*60000;
+      var sub=[s.pickup, s.dest?('→ '+s.dest):'', (s.source==='rider'?'confirmed rider':'')].filter(Boolean).join(' · ');
+      var card=document.createElement('div'); card.className='sched-card'+(due?' due':'');
+      card.innerHTML='<div class="sc-main"><b>'+esc(s.name)+'</b>'+(sub?'<small>'+esc(sub)+'</small>':'')+'</div><div class="sc-when">'+when+(due?'<em>DUE</em>':'')+'</div>';
+      var acts=document.createElement('div'); acts.className='sc-acts';
+      var start=document.createElement('button'); start.className='sc-start'; start.textContent='Begin pickup'; start.disabled=!!scheduledStartBusy[s.id]||!!S.active||!!S.queued; start.onclick=function(){startScheduled(s.id)};
+      acts.appendChild(start);
+      if(s.dest){var navD=document.createElement('button');navD.className='sc-nav';navD.textContent='Drop';navD.onclick=function(){navTo(s.dest)};acts.appendChild(navD);}
+      if(s.source!=='rider'){var del=document.createElement('button'); del.className='sc-del'; del.innerHTML='&times;'; del.onclick=function(){ srv('removeReservation',s.id).then(function(list){schedFromServer(list)}).catch(function(){}); };acts.appendChild(del);}
+      card.appendChild(acts); lane.appendChild(card);
+    });
+  }
+
+
+  /* waffle + Inbox */
+  function closeWaffle(){ $('waffleMenu').classList.remove('show'); $('waffleBtn').setAttribute('aria-expanded','false'); }
+  function toggleWaffle(){ var open=$('waffleMenu').classList.toggle('show'); $('waffleBtn').setAttribute('aria-expanded',String(open)); }
+  function openInbox(){ closeWaffle(); $('inboxOverlay').classList.add('show'); refreshInbox(); }
+  function closeInbox(){ $('inboxOverlay').classList.remove('show'); }
+  function openSettings(){ closeWaffle(); $('settingsOverlay').classList.add('show'); }
+  function closeSettings(){ $('settingsOverlay').classList.remove('show'); }
+  function openLive(){ closeWaffle(); var url=boot.liveUrl||''; if(!url){toast('Live page unavailable');return;} window.open(url,'_blank','noopener'); }
+  var rideRequestQrUrl='';
+  var rideRequestFormUrl='';
+  function closeQr(){ $('qrOverlay').classList.remove('show'); }
+  function renderRideRequestQr_(url){
+    rideRequestQrUrl=String(url||'');
+    var box=$('bookingQr');box.innerHTML='';
+    $('bookingQrLink').textContent=rideRequestQrUrl||'Ride request link unavailable';
+    if(!rideRequestQrUrl){toast('Ride request link unavailable');return;}
+    if(typeof QRCode==='undefined'){toast('QR library unavailable');return;}
+    new QRCode(box,{text:rideRequestQrUrl,width:258,height:258,colorDark:'#050813',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+  }
+  function openQr(){
+    closeWaffle();closeInbox();$('qrOverlay').classList.add('show');
+    var known=rideRequestQrUrl||boot.rideRequestUrl||'';
+    rideRequestFormUrl=rideRequestFormUrl||boot.rideRequestFormUrl||'';
+    if(known){renderRideRequestQr_(known);return;}
+    srv('getRideRequestQrConfig').then(function(cfg){cfg=cfg||{};rideRequestFormUrl=String(cfg.formUrl||rideRequestFormUrl||'');renderRideRequestQr_(cfg.url)}).catch(function(e){renderRideRequestQr_('');toast(e.message||'QR unavailable')});
+  }
   function openRideRequest(){var url=rideRequestFormUrl||boot.rideRequestFormUrl||'';if(!url){toast('Ride request form unavailable');return;}window.open(url,'_blank','noopener');}
-  function shareRideRequest(){if(!rideRequestQrUrl){toast('Ride request link unavailable');return;}if(navigator.share){navigator.share({title:'Request a ride',url:rideRequestQrUrl}).catch(function(){});return;}if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(rideRequestQrUrl).then(function(){toast('Ride request link copied')}).catch(function(){toast('Could not copy link')});return;}toast('Open the form and share from the browser');}
+  function shareRideRequest(){
+    if(!rideRequestQrUrl){toast('Ride request link unavailable');return;}
+    if(navigator.share){navigator.share({title:'Request a ride',url:rideRequestQrUrl}).catch(function(){});return;}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(rideRequestQrUrl).then(function(){toast('Ride request link copied')}).catch(function(){toast('Could not copy link')});return;}
+    toast('Open the form and share from the browser');
+  }
   function requestReviewLocked_(){return !!(S.active&&S.active.state==='ON_TRIP');}
-  function requestKey_(r){r=r||{};return String(r.requestId||r.id||[r.name||'',r.pickup||'',r.destination||'',r.whenISO||''].join('|')).trim();}
-  function uniqueRequests_(list){var order=[],byKey=Object.create(null);(list||[]).forEach(function(r){var key=requestKey_(r);if(!key)return;if(!Object.prototype.hasOwnProperty.call(byKey,key))order.push(key);byKey[key]=r;});return order.map(function(key){return byKey[key]});}
-  function notifyHeldRequests_(count){if(!count)return;try{if(navigator.vibrate)navigator.vibrate([120,60,120]);}catch(e){}toast(count===1?'New request held until drop-off':count+' new requests held until drop-off');}
-  function reconcileRequestedRides_(incoming){var list=uniqueRequests_(incoming),visibleBefore=Object.create(null),heldBefore=Object.create(null),visible=[],held=uniqueRequests_(S.heldRequests||[]),newlyHeld=0;(S.requests||[]).forEach(function(r){visibleBefore[requestKey_(r)]=true;});(S.heldRequests||[]).forEach(function(r){heldBefore[requestKey_(r)]=true;});if(requestReviewLocked_()){list.forEach(function(r){var key=requestKey_(r);if(visibleBefore[key])visible.push(r);else{held.push(r);if(!heldBefore[key])newlyHeld++;}});S.requests=uniqueRequests_(visible);S.heldRequests=uniqueRequests_(held);persistState();notifyHeldRequests_(newlyHeld);renderInbox();return;}S.requests=uniqueRequests_(list.concat(S.heldRequests||[]));S.heldRequests=[];persistState();renderInbox();}
-  function releaseHeldRequests_(){var held=uniqueRequests_(S.heldRequests||[]);if(!held.length)return 0;S.requests=uniqueRequests_((S.requests||[]).concat(held));S.heldRequests=[];persistState();renderInbox();toast(held.length===1?'Request ready in Inbox':held.length+' requests ready in Inbox');return held.length;}
-  function requestsFromServer(payload){var list=Array.isArray(payload)?payload:((payload&&payload.items)||[]);reconcileRequestedRides_(list);}
-  function refreshInbox(){return srv('listRequestedRides').then(function(payload){requestsFromServer(payload)}).catch(function(){renderInbox()});}
-  function openDecision(url){if(requestReviewLocked_()){toast('Request held until drop-off');return;}if(!url)return;window.open(url,'_blank','noopener');}
-  function renderInbox(){var locked=requestReviewLocked_(),heldCount=(S.heldRequests||[]).length,notice=$('inboxHoldNotice');if(notice){notice.textContent=locked?(heldCount?(heldCount===1?'1 new request held until drop-off':heldCount+' new requests held until drop-off'):'Request review unlocks after drop-off'):'';notice.classList.toggle('show',locked);}var list=$('inboxList');list.innerHTML='';(S.requests||[]).slice().sort(function(a,b){return (Date.parse(a.whenISO)||0)-(Date.parse(b.whenISO)||0)}).forEach(function(r){var card=document.createElement('div');card.className='inbox-card';var when=r.whenISO?new Date(r.whenISO).toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'';card.innerHTML='<b>'+esc(r.name||'Ride request')+'</b>'+(when?'<div class="inbox-time">'+esc(when)+'</div>':'')+'<div class="inbox-route">'+esc(r.pickup||'')+(r.destination?' → '+esc(r.destination):'')+'</div>'+(r.notes?'<div class="inbox-notes">'+esc(r.notes)+'</div>':'');if(r.acceptUrl||r.declineUrl){var acts=document.createElement('div');acts.className='inbox-actions';if(r.acceptUrl){var accept=document.createElement('button');accept.className='inbox-accept';accept.textContent='Accept';accept.disabled=locked;accept.onclick=function(){openDecision(r.acceptUrl)};acts.appendChild(accept);}if(r.declineUrl){var decline=document.createElement('button');decline.className='inbox-decline';decline.textContent='Decline';decline.disabled=locked;decline.onclick=function(){openDecision(r.declineUrl)};acts.appendChild(decline);}card.appendChild(acts);}list.appendChild(card);});}
+  function requestKey_(r){
+    r=r||{};
+    return String(r.requestId||r.id||[r.name||'',r.pickup||'',r.destination||'',r.whenISO||''].join('|')).trim();
+  }
+  function uniqueRequests_(list){
+    var order=[],byKey=Object.create(null);
+    (list||[]).forEach(function(r){var key=requestKey_(r);if(!key)return;if(!Object.prototype.hasOwnProperty.call(byKey,key))order.push(key);byKey[key]=r;});
+    return order.map(function(key){return byKey[key]});
+  }
+  function notifyHeldRequests_(count){
+    if(!count)return;
+    try{if(navigator.vibrate)navigator.vibrate([120,60,120]);}catch(e){}
+    toast(count===1?'New request held until drop-off':count+' new requests held until drop-off');
+  }
+  function reconcileRequestedRides_(incoming){
+    var list=uniqueRequests_(incoming),visibleBefore=Object.create(null),heldBefore=Object.create(null),visible=[],held=uniqueRequests_(S.heldRequests||[]),newlyHeld=0;
+    (S.requests||[]).forEach(function(r){visibleBefore[requestKey_(r)]=true;});
+    (S.heldRequests||[]).forEach(function(r){heldBefore[requestKey_(r)]=true;});
+    if(requestReviewLocked_()){
+      list.forEach(function(r){
+        var key=requestKey_(r);
+        if(visibleBefore[key])visible.push(r);
+        else{held.push(r);if(!heldBefore[key])newlyHeld++;}
+      });
+      S.requests=uniqueRequests_(visible);
+      S.heldRequests=uniqueRequests_(held);
+      persistState();
+      notifyHeldRequests_(newlyHeld);
+      renderInbox();
+      return;
+    }
+    S.requests=uniqueRequests_(list.concat(S.heldRequests||[]));
+    S.heldRequests=[];
+    persistState();
+    renderInbox();
+  }
+  function releaseHeldRequests_(){
+    var held=uniqueRequests_(S.heldRequests||[]);
+    if(!held.length)return 0;
+    S.requests=uniqueRequests_((S.requests||[]).concat(held));
+    S.heldRequests=[];
+    persistState();
+    renderInbox();
+    toast(held.length===1?'Request ready in Inbox':held.length+' requests ready in Inbox');
+    return held.length;
+  }
+  function requestsFromServer(payload){
+    var list=Array.isArray(payload)?payload:((payload&&payload.items)||[]);
+    reconcileRequestedRides_(list);
+  }
+  function refreshInbox(){
+    return srv('listRequestedRides').then(function(payload){requestsFromServer(payload)}).catch(function(){renderInbox()});
+  }
+  function openDecision(url){
+    if(requestReviewLocked_()){toast('Request held until drop-off');return;}
+    if(!url)return;
+    window.open(url,'_blank','noopener');
+  }
+  function renderInbox(){
+    var locked=requestReviewLocked_(),heldCount=(S.heldRequests||[]).length,notice=$('inboxHoldNotice');
+    if(notice){notice.textContent=locked?(heldCount?(heldCount===1?'1 new request held until drop-off':heldCount+' new requests held until drop-off'):'Request review unlocks after drop-off'):'';notice.classList.toggle('show',locked);}
+    var list=$('inboxList'); list.innerHTML='';
+    (S.requests||[]).slice().sort(function(a,b){return (Date.parse(a.whenISO)||0)-(Date.parse(b.whenISO)||0)}).forEach(function(r){
+      var card=document.createElement('div'); card.className='inbox-card';
+      var when=r.whenISO?new Date(r.whenISO).toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'';
+      card.innerHTML='<b>'+esc(r.name||'Ride request')+'</b>'+
+        (when?'<div class="inbox-time">'+esc(when)+'</div>':'')+
+        '<div class="inbox-route">'+esc(r.pickup||'')+(r.destination?' → '+esc(r.destination):'')+'</div>'+
+        (r.notes?'<div class="inbox-notes">'+esc(r.notes)+'</div>':'');
+      if(r.acceptUrl||r.declineUrl){
+        var acts=document.createElement('div'); acts.className='inbox-actions';
+        if(r.acceptUrl){var accept=document.createElement('button');accept.className='inbox-accept';accept.textContent='Accept';accept.disabled=locked;accept.onclick=function(){openDecision(r.acceptUrl)};acts.appendChild(accept);}
+        if(r.declineUrl){var decline=document.createElement('button');decline.className='inbox-decline';decline.textContent='Decline';decline.disabled=locked;decline.onclick=function(){openDecision(r.declineUrl)};acts.appendChild(decline);}
+        card.appendChild(acts);
+      }
+      list.appendChild(card);
+    });
+  }
+
+
   function isRiderRide_(ride){return !!(ride&&ride.requestId);}
   function riderStatus_(ride){return (ride&&ride.riderStatus)||'Confirmed';}
-  function advanceRiderStatus_(status,after){var a=S.active;if(!isRiderRide_(a)||riderFlowBusy)return Promise.resolve(null);riderFlowBusy=true;render();var key=a.requestId+':'+String(status).toLowerCase().replace(/\s+/g,'-');return srv('updateRiderStatus',a.requestId,status,key).then(function(res){a.riderStatus=(res&&res.status)||status;if(after)after();riderFlowBusy=false;persistState();render();return res;}).catch(function(e){riderFlowBusy=false;render();toast(e.message||'Could not update rider');throw e;});}
-  function riderActionButton_(label,primary,handler){var b=document.createElement('button');b.textContent=label;if(primary)b.className='primary';b.disabled=riderFlowBusy;b.onclick=handler;return b;}
-  function renderRiderFlow(){var box=$('riderFlow'),actions=$('riderFlowActions');actions.innerHTML='';var a=S.active;if(!isRiderRide_(a)){box.classList.remove('show');return;}box.classList.add('show');var st=riderStatus_(a);$('riderFlowStatus').textContent=st;if(st==='Leaving'){actions.appendChild(riderActionButton_('Navigate pickup',false,function(){advanceRiderStatus_('On the way');navTo(a.pickup)}));}else if(st==='On the way'){actions.appendChild(riderActionButton_('Navigate pickup',false,function(){navTo(a.pickup)}));actions.appendChild(riderActionButton_('Arriving soon',true,function(){advanceRiderStatus_('Arriving soon')}));}else if(st==='Arriving soon'){actions.appendChild(riderActionButton_('Navigate pickup',false,function(){navTo(a.pickup)}));actions.appendChild(riderActionButton_('Arrived',true,function(){advanceRiderStatus_('Arrived')}));}else if(st==='Arrived'){actions.appendChild(riderActionButton_('Start ride',true,function(){advanceRiderStatus_('Ride in progress',function(){a.state='ON_TRIP';a.pickedUpAt=now();startTrace();toast('Ride in progress')})}));}else if(st==='Ride in progress'){actions.appendChild(riderActionButton_('Navigate destination',false,function(){navTo(a.dest)}));actions.appendChild(riderActionButton_('Complete ride',true,function(){advanceRiderStatus_('Complete',function(){dropOff()})}));}else if(st==='Complete'){actions.appendChild(riderActionButton_('Complete',false,function(){}));actions.firstChild.disabled=true;}}
-  function openEndShift(){if(!S.shift)return;$('roOnline').textContent=hm(now()-S.shift.startedAt);$('roMiles').textContent=S.shift.miles.toFixed(2);if(S.shift.earned>0&&!$('inEarnings').value)$('inEarnings').value=money(S.shift.earned);if(S.shift.tips>0&&!$('inTips').value)$('inTips').value=money(S.shift.tips);$('result').className='result';$('result').innerHTML='';$('overlay').classList.add('show');}
-  function closeOverlay(){$('overlay').classList.remove('show');}
-  function saveShift(){if(!S.shift)return;var rawEarnings=$('inEarnings').value.trim(),earnings=rawEarnings===''?'':parseFloat(rawEarnings);if(earnings!==''&&(!isFinite(earnings)||earnings<0)){toast('Earnings must be zero or more');$('inEarnings').focus();return;}var onlineHours=(now()-S.shift.startedAt)/3600000,tips=parseFloat($('inTips').value);if(!isFinite(tips))tips=0;var requestNote=(S.shift.requestIds&&S.shift.requestIds.length)?(' · requests '+S.shift.requestIds.join(',')):'';var pendingNote=earnings===''?' · earnings pending reconciliation':'';var payload={startISO:new Date(S.shift.startedAt).toISOString(),endISO:new Date().toISOString(),onlineHours:onlineHours,miles:S.shift.miles,earnings:earnings,tips:earnings===''?'':tips,zone:$('inZone').value,notes:($('inNotes').value||'')+(S.shift.rides?(' · '+S.shift.rides+' rides'):'')+requestNote+pendingNote};var btn=$('saveBtn');btn.disabled=true;btn.textContent='Saving…';srv('endShiftToSheet',payload).then(function(res){showResult(res,earnings,onlineHours);S.shift=null;S.active=null;S.queued=null;stopTrace();render();$('inEarnings').value='';$('inTips').value='';$('inNotes').value='';$('inZone').value='';}).catch(function(e){toast(e.message||'Save failed')}).then(function(){btn.disabled=false;btn.textContent='Save shift'});}
-  function showResult(res,earnings,onlineHours){var rowTxt=(res&&res.shift&&res.shift.row!=null)?('Shift Log row '+res.shift.row):'Shift logged';var pending=!!(res&&res.earningsPending);var pre=(res&&res.preview)?'preview — nothing written · ':'';var el=$('result');el.className='result show';if(pending){el.innerHTML='<div><span class="r-status">Shift saved</span></div><div class="r-ref">Earnings pending reconciliation</div><div class="r-meta">'+pre+rowTxt+'</div>';}else{var gph=onlineHours>0?Number(earnings)/onlineHours:0;el.innerHTML='<div><span class="r-rate">$'+money(gph)+'</span><span class="r-status"> /hr</span></div><div class="r-ref">Normal Shift Log write</div><div class="r-meta">'+pre+rowTxt+'</div>';}toast((res&&res.preview)?'Preview only':'Shift saved');}
-  function renderOpp(){var o=boot.opportunity,c=$('oppCard');if(!o||!o.event){c.style.display='none';return;}c.style.display='block';var dem=(o.demand||'').toLowerCase(),chip=dem.indexOf('very high')>=0?'vhigh':dem.indexOf('high')>=0?'high':dem.indexOf('med')>=0?'med':'';$('oppChip').textContent=o.demand||'—';$('oppChip').className='opp-chip '+chip;$('oppDate').textContent=o.date||'';$('oppEvent').textContent=o.event||'';$('oppMeta').textContent=[o.location,o.window].filter(Boolean).join(' · ');$('oppMove').textContent=o.move||'';}
-  function syncModeTag_(){$('modeTag').textContent=LIVE?'live':'preview';$('modeTag').className='tag'+(LIVE?' live':'');}
-  function syncBarPad(){var b=$('actionbar');if(b)$('app').style.paddingBottom=(b.offsetHeight+14)+'px';}
-  function render(){var online=!!S.shift;$('goInBar').style.display=online?'none':'block';$('rideBar').style.display=online?'block':'none';$('onlineBar').style.display=online?'flex':'none';if(online){$('obTimer').textContent=clock(S.shift.startedAt);$('obStats').innerHTML='<span class="num">$'+money(S.shift.earned)+'</span> · '+S.shift.rides+' rides · <span class="num">'+S.shift.miles.toFixed(2)+'</span> mi';}syncModeTag_();var a=S.active,st=a?a.state:'IDLE';$('status').setAttribute('data-state',st);if(!a){$('status').style.display=online?'none':'block';$('sEyebrow').textContent='No active ride';$('sMain').textContent='Stand by';$('sSub').textContent='Tap Accept the moment you accept the ride.';$('sTimer').style.display='none';}else if(a.state==='ACCEPTED'){$('status').style.display='block';$('sEyebrow').textContent=a.name?('En route · '+a.name):'En route to pickup';$('sMain').textContent=a.pickup||'Heading to pickup';$('sSub').textContent=a.dest?('Then '+a.dest):'Passenger not yet aboard.';$('sTimer').style.display='block';$('sTimer').innerHTML=clock(a.acceptedAt)+' <span>since accept</span>';}else{$('status').style.display='block';$('sEyebrow').textContent=a.name?('On trip · '+a.name):'On trip';$('sMain').textContent=a.dest||'Passenger aboard';$('sSub').textContent='Route is tracing. Drop off on arrival.';$('sTimer').style.display='block';$('sTimer').innerHTML=clock(a.pickedUpAt)+' <span>on trip</span>';}var q=$('queue');if(S.queued){q.style.display='flex';q.classList.add('live');$('queueTime').textContent='stacked '+ago(S.queued.acceptedAt)+' ago';}else{q.style.display='none';q.classList.remove('live');}$('acceptHint').textContent=!S.active?'start ride':(!S.queued?'stack next':'queue full');$('acceptBtn').style.display=isRiderRide_(a)?'none':'';var riderRide=isRiderRide_(a);var canPick=a&&a.state==='ACCEPTED'&&!riderRide,canDrop=a&&a.state==='ON_TRIP'&&!riderRide;$('pickupBtn').disabled=!canPick;$('dropoffBtn').disabled=!canDrop;$('pickupBtn').style.display=riderRide?'none':'';$('dropoffBtn').style.display=riderRide?'none':'';$('pickupBtn').setAttribute('data-armed',canPick?'pickup':'');$('dropoffBtn').setAttribute('data-armed',canDrop?'dropoff':'');$('cancelActiveBtn').style.display=(a&&!riderRide)?'block':'none';renderRiderFlow();persistState();syncBarPad();}
-  $('waffleBtn').onclick=toggleWaffle;$('menuInbox').onclick=openInbox;$('menuLive').onclick=openLive;$('menuSettings').onclick=openSettings;$('closeInboxBtn').onclick=closeInbox;$('openQrFromInbox').onclick=openQr;$('closeQrBtn').onclick=closeQr;$('openRideRequestBtn').onclick=openRideRequest;$('shareRideRequestBtn').onclick=shareRideRequest;$('inboxOverlay').addEventListener('click',function(e){if(e.target===$('inboxOverlay'))closeInbox()});$('qrOverlay').addEventListener('click',function(e){if(e.target===$('qrOverlay'))closeQr()});$('settingsOverlay').addEventListener('click',function(e){if(e.target===$('settingsOverlay'))closeSettings()});document.addEventListener('click',function(e){if(!$('waffleMenu').contains(e.target)&&!$('waffleBtn').contains(e.target))closeWaffle()});document.addEventListener('visibilitychange',function(){if(!document.hidden){flushPendingTrips_();if($('inboxOverlay').classList.contains('show'))refreshInbox()}});window.addEventListener('focus',flushPendingTrips_);$('goBtn').onclick=goOnline;$('endShiftBtn').onclick=openEndShift;$('acceptBtn').onclick=accept;$('pickupBtn').onclick=pickedUp;$('dropoffBtn').onclick=dropOff;$('cancelActiveBtn').onclick=cancelActive;$('addSchedBtn').onclick=function(){$('schedOverlay').classList.add('show')};$('saveSchedBtn').onclick=saveScheduled;$('cancelSchedBtn').onclick=function(){$('schedOverlay').classList.remove('show')};$('saveBtn').onclick=saveShift;$('cancelBtn').onclick=closeOverlay;$('addFareBtn').onclick=addFare;$('skipFareBtn').onclick=skipFare;setInterval(function(){renderSched();if(S.shift||S.active)render();},1000);window.addEventListener('resize',syncBarPad);restoreState();if(!requestReviewLocked_())releaseHeldRequests_();try{initMap()}catch(e){$('mapNote').classList.add('show')}render();renderSched();syncBarPad();flushPendingTrips_();srv('getCockpitBootstrap').then(function(b){boot=b||{};rideRequestQrUrl=String(boot.rideRequestUrl||'');rideRequestFormUrl=String(boot.rideRequestFormUrl||'');renderOpp();syncModeTag_();schedFromServer(boot.reservations);requestsFromServer(boot.requests);if(boot.riderReadError){toast('Rider connection: '+boot.riderReadError);}}).catch(function(e){syncModeTag_();toast((e&&e.message)?e.message:'Console bootstrap failed');});
+  function advanceRiderStatus_(status,after){
+    var a=S.active;if(!isRiderRide_(a)||riderFlowBusy)return Promise.resolve(null);
+    riderFlowBusy=true;render();
+    var key=a.requestId+':'+String(status).toLowerCase().replace(/\s+/g,'-');
+    return srv('updateRiderStatus',a.requestId,status,key).then(function(res){
+      a.riderStatus=(res&&res.status)||status;if(after)after();riderFlowBusy=false;persistState();render();return res;
+    }).catch(function(e){riderFlowBusy=false;render();toast(e.message||'Could not update rider');throw e;});
+  }
+  function riderActionButton_(label,primary,handler){
+    var b=document.createElement('button');b.textContent=label;if(primary)b.className='primary';b.disabled=riderFlowBusy;b.onclick=handler;return b;
+  }
+  function renderRiderFlow(){
+    var box=$('riderFlow'),actions=$('riderFlowActions');actions.innerHTML='';
+    var a=S.active;if(!isRiderRide_(a)){box.classList.remove('show');return;}
+    box.classList.add('show');var st=riderStatus_(a);$('riderFlowStatus').textContent=st;
+    if(st==='Leaving'){
+      actions.appendChild(riderActionButton_('Navigate pickup',false,function(){advanceRiderStatus_('On the way');navTo(a.pickup)}));
+    }else if(st==='On the way'){
+      actions.appendChild(riderActionButton_('Navigate pickup',false,function(){navTo(a.pickup)}));
+      actions.appendChild(riderActionButton_('Arriving soon',true,function(){advanceRiderStatus_('Arriving soon')}));
+    }else if(st==='Arriving soon'){
+      actions.appendChild(riderActionButton_('Navigate pickup',false,function(){navTo(a.pickup)}));
+      actions.appendChild(riderActionButton_('Arrived',true,function(){advanceRiderStatus_('Arrived')}));
+    }else if(st==='Arrived'){
+      actions.appendChild(riderActionButton_('Start ride',true,function(){advanceRiderStatus_('Ride in progress',function(){a.state='ON_TRIP';a.pickedUpAt=now();startTrace();toast('Ride in progress')})}));
+    }else if(st==='Ride in progress'){
+      actions.appendChild(riderActionButton_('Navigate destination',false,function(){navTo(a.dest)}));
+      actions.appendChild(riderActionButton_('Complete ride',true,function(){advanceRiderStatus_('Complete',function(){dropOff()})}));
+    }else if(st==='Complete'){
+      actions.appendChild(riderActionButton_('Complete',false,function(){}));actions.firstChild.disabled=true;
+    }
+  }
+
+  /* end shift */
+  function openEndShift(){ if(!S.shift)return; $('roOnline').textContent=hm(now()-S.shift.startedAt); $('roMiles').textContent=S.shift.miles.toFixed(2); if(S.shift.earned>0&&!$('inEarnings').value)$('inEarnings').value=money(S.shift.earned); if(S.shift.tips>0&&!$('inTips').value)$('inTips').value=money(S.shift.tips); $('result').className='result';$('result').innerHTML=''; $('overlay').classList.add('show'); }
+  function closeOverlay(){ $('overlay').classList.remove('show'); }
+  function saveShift(){
+    if(!S.shift)return;
+    var rawEarnings=$('inEarnings').value.trim(), earnings=rawEarnings===''?'':parseFloat(rawEarnings);
+    if(earnings!==''&&(!isFinite(earnings)||earnings<0)){toast('Earnings must be zero or more');$('inEarnings').focus();return;}
+    var onlineHours=(now()-S.shift.startedAt)/3600000, tips=parseFloat($('inTips').value); if(!isFinite(tips))tips=0;
+    var requestNote=(S.shift.requestIds&&S.shift.requestIds.length)?(' · requests '+S.shift.requestIds.join(',')):'';
+    var pendingNote=earnings===''?' · earnings pending reconciliation':'';
+    var payload={startISO:new Date(S.shift.startedAt).toISOString(), endISO:new Date().toISOString(), onlineHours:onlineHours, miles:S.shift.miles, earnings:earnings, tips:earnings===''?'':tips, zone:$('inZone').value, notes:($('inNotes').value||'')+(S.shift.rides?(' · '+S.shift.rides+' rides'):'')+requestNote+pendingNote};
+    var btn=$('saveBtn'); btn.disabled=true; btn.textContent='Saving…';
+    srv('endShiftToSheet',payload).then(function(res){
+      showResult(res,earnings,onlineHours);
+      S.shift=null;S.active=null;S.queued=null;stopTrace();render();
+      $('inEarnings').value='';$('inTips').value='';$('inNotes').value='';$('inZone').value='';
+    }).catch(function(e){toast(e.message||'Save failed')}).then(function(){btn.disabled=false;btn.textContent='Save shift'});
+  }
+  function showResult(res,earnings,onlineHours){
+    var rowTxt=(res&&res.shift&&res.shift.row!=null)?('Shift Log row '+res.shift.row):'Shift logged';
+    var pending=!!(res&&res.earningsPending);
+    var pre=(res&&res.preview)?'preview — nothing written · ':'';
+    var el=$('result'); el.className='result show';
+    if(pending){
+      el.innerHTML='<div><span class="r-status">Shift saved</span></div><div class="r-ref">Earnings pending reconciliation</div><div class="r-meta">'+pre+rowTxt+'</div>';
+    }else{
+      var gph=onlineHours>0?Number(earnings)/onlineHours:0;
+      el.innerHTML='<div><span class="r-rate">$'+money(gph)+'</span><span class="r-status"> /hr</span></div><div class="r-ref">Normal Shift Log write</div><div class="r-meta">'+pre+rowTxt+'</div>';
+    }
+    toast((res&&res.preview)?'Preview only':'Shift saved');
+  }
+
+  function renderOpp(){
+    var o=boot.opportunity, c=$('oppCard'); if(!o||!o.event){c.style.display='none';return;}
+    c.style.display='block';
+    var dem=(o.demand||'').toLowerCase(), chip=dem.indexOf('very high')>=0?'vhigh':dem.indexOf('high')>=0?'high':dem.indexOf('med')>=0?'med':'';
+    $('oppChip').textContent=o.demand||'—'; $('oppChip').className='opp-chip '+chip;
+    $('oppDate').textContent=o.date||''; $('oppEvent').textContent=o.event||'';
+    $('oppMeta').textContent=[o.location,o.window].filter(Boolean).join(' · '); $('oppMove').textContent=o.move||'';
+  }
+  function syncModeTag_(){
+    $('modeTag').textContent=LIVE?'live':'preview';
+    $('modeTag').className='tag'+(LIVE?' live':'');
+  }
+
+  function syncBarPad(){ var b=$('actionbar'); if(b) $('app').style.paddingBottom=(b.offsetHeight+14)+'px'; }
+
+  function render(){
+    var online=!!S.shift;
+    $('goInBar').style.display=online?'none':'block';
+    $('rideBar').style.display=online?'block':'none';
+    $('onlineBar').style.display=online?'flex':'none';
+    if(online){ $('obTimer').textContent=clock(S.shift.startedAt); $('obStats').innerHTML='<span class="num">$'+money(S.shift.earned)+'</span> · '+S.shift.rides+' rides · <span class="num">'+S.shift.miles.toFixed(2)+'</span> mi'; }
+    syncModeTag_();
+    var a=S.active, st=a?a.state:'IDLE'; $('status').setAttribute('data-state',st);
+    if(!a){
+      $('status').style.display=online?'none':'block';
+      $('sEyebrow').textContent='No active ride';$('sMain').textContent='Stand by';$('sSub').textContent='Tap Accept the moment you accept the ride.';$('sTimer').style.display='none';
+    }
+    else if(a.state==='ACCEPTED'){ $('status').style.display='block';$('sEyebrow').textContent=a.name?('En route · '+a.name):'En route to pickup';$('sMain').textContent=a.pickup||'Heading to pickup';$('sSub').textContent=a.dest?('Then '+a.dest):'Passenger not yet aboard.';$('sTimer').style.display='block';$('sTimer').innerHTML=clock(a.acceptedAt)+' <span>since accept</span>'; }
+    else { $('status').style.display='block';$('sEyebrow').textContent=a.name?('On trip · '+a.name):'On trip';$('sMain').textContent=a.dest||'Passenger aboard';$('sSub').textContent='Route is tracing. Drop off on arrival.';$('sTimer').style.display='block';$('sTimer').innerHTML=clock(a.pickedUpAt)+' <span>on trip</span>'; }
+    var q=$('queue'); if(S.queued){q.style.display='flex';q.classList.add('live');$('queueTime').textContent='stacked '+ago(S.queued.acceptedAt)+' ago';}else{q.style.display='none';q.classList.remove('live');}
+    $('acceptHint').textContent=!S.active?'start ride':(!S.queued?'stack next':'queue full');
+    $('acceptBtn').style.display=isRiderRide_(a)?'none':'';
+    var riderRide=isRiderRide_(a);
+    var canPick=a&&a.state==='ACCEPTED'&&!riderRide, canDrop=a&&a.state==='ON_TRIP'&&!riderRide;
+    $('pickupBtn').disabled=!canPick;$('dropoffBtn').disabled=!canDrop;
+    $('pickupBtn').style.display=riderRide?'none':'';$('dropoffBtn').style.display=riderRide?'none':'';
+    $('pickupBtn').setAttribute('data-armed',canPick?'pickup':'');$('dropoffBtn').setAttribute('data-armed',canDrop?'dropoff':'');
+    $('cancelActiveBtn').style.display=(a&&!riderRide)?'block':'none';
+    renderRiderFlow();
+    persistState();
+    syncBarPad();
+  }
+
+  $('waffleBtn').onclick=toggleWaffle;
+  $('menuInbox').onclick=openInbox;$('menuLive').onclick=openLive;$('menuSettings').onclick=openSettings;
+  $('closeInboxBtn').onclick=closeInbox;$('openQrFromInbox').onclick=openQr;$('closeQrBtn').onclick=closeQr;
+  $('openRideRequestBtn').onclick=openRideRequest;$('shareRideRequestBtn').onclick=shareRideRequest;
+  $('inboxOverlay').addEventListener('click',function(e){if(e.target===$('inboxOverlay'))closeInbox()});
+  $('qrOverlay').addEventListener('click',function(e){if(e.target===$('qrOverlay'))closeQr()});
+  $('settingsOverlay').addEventListener('click',function(e){if(e.target===$('settingsOverlay'))closeSettings()});
+  document.addEventListener('click',function(e){if(!$('waffleMenu').contains(e.target)&&!$('waffleBtn').contains(e.target))closeWaffle()});
+  document.addEventListener('visibilitychange',function(){if(!document.hidden){flushPendingTrips_();if($('inboxOverlay').classList.contains('show'))refreshInbox()}});
+  window.addEventListener('focus',flushPendingTrips_);
+  $('goBtn').onclick=goOnline;
+  $('endShiftBtn').onclick=openEndShift;
+  $('acceptBtn').onclick=accept;$('pickupBtn').onclick=pickedUp;$('dropoffBtn').onclick=dropOff;$('cancelActiveBtn').onclick=cancelActive;
+  $('addSchedBtn').onclick=function(){$('schedOverlay').classList.add('show')};
+  $('saveSchedBtn').onclick=saveScheduled;$('cancelSchedBtn').onclick=function(){$('schedOverlay').classList.remove('show')};
+  $('saveBtn').onclick=saveShift;$('cancelBtn').onclick=closeOverlay;
+  $('addFareBtn').onclick=addFare;$('skipFareBtn').onclick=skipFare;
+  setInterval(function(){renderSched(); if(S.shift||S.active)render();},1000);
+  window.addEventListener('resize',syncBarPad);
+  restoreState();
+  if(!requestReviewLocked_())releaseHeldRequests_();
+  try{initMap()}catch(e){$('mapNote').classList.add('show')}
+  render(); renderSched(); syncBarPad(); flushPendingTrips_();
+  srv('getCockpitBootstrap').then(function(b){ boot=b||{};rideRequestQrUrl=String(boot.rideRequestUrl||'');rideRequestFormUrl=String(boot.rideRequestFormUrl||''); renderOpp(); syncModeTag_(); schedFromServer(boot.reservations); requestsFromServer(boot.requests); if(boot.riderReadError){toast('Rider connection: '+boot.riderReadError);} }).catch(function(e){ syncModeTag_(); toast((e&&e.message)?e.message:'Console bootstrap failed'); });
 </script>
-<style id="pulse053RouteStyles">.pulse053-stop{width:18px;height:18px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.42)}.pulse053-stop.pickup{background:#f7b23b}.pulse053-stop.destination{background:#ff6680}</style>
+<style id="pulse053RouteStyles">
+  .pulse053-stop{width:18px;height:18px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.42)}
+  .pulse053-stop.pickup{background:#f7b23b}.pulse053-stop.destination{background:#ff6680}
+</style>
 <script id="pulse053RouteLayer">
-(function(){'use strict';var routeState={key:"",pending:"",pickup:null,destination:null,preview:null,failKey:"",failures:0,nextRetryAt:0};function mapReady(){return !!(window.L&&window.map&&map.addLayer);}function removeLayer(layer){if(layer&&mapReady()){try{map.removeLayer(layer)}catch(e){}}}function resetRetry(){routeState.failKey="";routeState.failures=0;routeState.nextRetryAt=0;}function clearTrip(){removeLayer(routeState.pickup);removeLayer(routeState.destination);removeLayer(routeState.preview);routeState.pickup=null;routeState.destination=null;routeState.preview=null;routeState.key="";routeState.pending="";resetRetry();}function pointOk(p){return Array.isArray(p)&&p.length===2&&isFinite(Number(p[0]))&&isFinite(Number(p[1]));}function marker(point,label,kind){if(!mapReady()||!pointOk(point))return null;var html="<div class=\"pulse053-stop "+kind+"\" aria-label=\""+label+"\"></div>";return L.marker(point,{icon:L.divIcon({className:"pulse053-marker-wrap",html:html,iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map).bindTooltip(label);}function decodePolyline(encoded){var pts=[],index=0,lat=0,lng=0;encoded=String(encoded||"");while(index<encoded.length){var b,shift=0,result=0;do{b=encoded.charCodeAt(index++)-63;result|=(b&31)<<shift;shift+=5;}while(b>=32&&index<=encoded.length);var dlat=(result&1)?~(result>>1):(result>>1);lat+=dlat;shift=0;result=0;do{b=encoded.charCodeAt(index++)-63;result|=(b&31)<<shift;shift+=5;}while(b>=32&&index<=encoded.length);var dlng=(result&1)?~(result>>1):(result>>1);lng+=dlng;pts.push([lat/1e5,lng/1e5]);}return pts;}function activeRide(){return window.S&&S.active?S.active:null;}function rideKey(ride,pickup,destination){return String(ride.requestId||ride.id||ride.acceptedAt||"")+"|"+pickup+"|"+destination;}function syncTrace(active){if(!(window.trace&&trace.line&&trace.line.setStyle))return;trace.line.setStyle(active?{color:"#45e394",weight:6,opacity:.95}:{color:"#42dcff",weight:5,opacity:.9});}function markRouteFailure(key){if(routeState.failKey!==key){routeState.failKey=key;routeState.failures=0;}routeState.failures+=1;var delay=Math.min(300000,15000*Math.pow(2,routeState.failures-1));routeState.nextRetryAt=Date.now()+delay;}function drawRoute(res,key){if(!mapReady()||!res||res.ok!==true)return false;var points=decodePolyline(res.encodedPolyline);if(!pointOk(res.pickup)||!pointOk(res.destination)||points.length<2)return false;if(routeState.key!==key){clearTrip();routeState.key=key;}routeState.pickup=marker(res.pickup,"Pickup","pickup");routeState.destination=marker(res.destination,"Destination","destination");routeState.preview=L.polyline(points,{color:"#2bd4e5",weight:5,opacity:.88,dashArray:"8 8"}).addTo(map);resetRetry();var layers=[routeState.pickup,routeState.destination,routeState.preview].filter(Boolean);if(layers.length){try{map.fitBounds(L.featureGroup(layers).getBounds().pad(.18),{maxZoom:15})}catch(e){}}return true;}function syncRide(){if(!mapReady())return;var ride=activeRide();if(!ride){syncTrace(false);if(routeState.key||routeState.pending||routeState.failKey)clearTrip();return;}syncTrace(true);var pickup=String(ride.pickup||"").trim();var destination=String(ride.dest||ride.destination||"").trim();if(!pickup||!destination)return;var key=rideKey(ride,pickup,destination);if(routeState.key===key&&routeState.preview)return;if(routeState.pending===key)return;if(routeState.failKey===key&&Date.now()<routeState.nextRetryAt)return;if(routeState.key&&routeState.key!==key)clearTrip();if(routeState.failKey&&routeState.failKey!==key)resetRetry();routeState.pending=key;srv("getDriveRoutePreview",pickup,destination).then(function(res){if(routeState.pending!==key)return;routeState.pending="";if(!drawRoute(res,key))markRouteFailure(key);}).catch(function(){if(routeState.pending!==key)return;routeState.pending="";markRouteFailure(key);});}var baseRender=window.render;if(typeof baseRender==="function"){window.render=function(){var out=baseRender.apply(this,arguments);setTimeout(syncRide,0);return out;};}setInterval(syncRide,1200);setTimeout(syncRide,250);window.PulseRouteLayer={sync:syncRide,clearTrip:clearTrip};})();
+(function(){
+  'use strict';
+  var routeState={key:"",pending:"",pickup:null,destination:null,preview:null,failKey:"",failures:0,nextRetryAt:0};
+  function mapReady(){return !!(window.L&&window.map&&map.addLayer);}
+  function removeLayer(layer){if(layer&&mapReady()){try{map.removeLayer(layer)}catch(e){}}}
+  function resetRetry(){routeState.failKey="";routeState.failures=0;routeState.nextRetryAt=0;}
+  function clearTrip(){removeLayer(routeState.pickup);removeLayer(routeState.destination);removeLayer(routeState.preview);routeState.pickup=null;routeState.destination=null;routeState.preview=null;routeState.key="";routeState.pending="";resetRetry();}
+  function pointOk(p){return Array.isArray(p)&&p.length===2&&isFinite(Number(p[0]))&&isFinite(Number(p[1]));}
+  function marker(point,label,kind){if(!mapReady()||!pointOk(point))return null;var html="<div class=\"pulse053-stop "+kind+"\" aria-label=\""+label+"\"></div>";return L.marker(point,{icon:L.divIcon({className:"pulse053-marker-wrap",html:html,iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map).bindTooltip(label);}
+  function decodePolyline(encoded){var pts=[],index=0,lat=0,lng=0;encoded=String(encoded||"");while(index<encoded.length){var b,shift=0,result=0;do{b=encoded.charCodeAt(index++)-63;result|=(b&31)<<shift;shift+=5;}while(b>=32&&index<=encoded.length);var dlat=(result&1)?~(result>>1):(result>>1);lat+=dlat;shift=0;result=0;do{b=encoded.charCodeAt(index++)-63;result|=(b&31)<<shift;shift+=5;}while(b>=32&&index<=encoded.length);var dlng=(result&1)?~(result>>1):(result>>1);lng+=dlng;pts.push([lat/1e5,lng/1e5]);}return pts;}
+  function activeRide(){return window.S&&S.active?S.active:null;}
+  function rideKey(ride,pickup,destination){return String(ride.requestId||ride.id||ride.acceptedAt||"")+"|"+pickup+"|"+destination;}
+  function syncTrace(active){if(!(window.trace&&trace.line&&trace.line.setStyle))return;trace.line.setStyle(active?{color:"#45e394",weight:6,opacity:.95}:{color:"#42dcff",weight:5,opacity:.9});}
+  function markRouteFailure(key){if(routeState.failKey!==key){routeState.failKey=key;routeState.failures=0;}routeState.failures+=1;var delay=Math.min(300000,15000*Math.pow(2,routeState.failures-1));routeState.nextRetryAt=Date.now()+delay;}
+  function drawRoute(res,key){if(!mapReady()||!res||res.ok!==true)return false;var points=decodePolyline(res.encodedPolyline);if(!pointOk(res.pickup)||!pointOk(res.destination)||points.length<2)return false;if(routeState.key!==key){clearTrip();routeState.key=key;}routeState.pickup=marker(res.pickup,"Pickup","pickup");routeState.destination=marker(res.destination,"Destination","destination");routeState.preview=L.polyline(points,{color:"#2bd4e5",weight:5,opacity:.88,dashArray:"8 8"}).addTo(map);resetRetry();var layers=[routeState.pickup,routeState.destination,routeState.preview].filter(Boolean);if(layers.length){try{map.fitBounds(L.featureGroup(layers).getBounds().pad(.18),{maxZoom:15})}catch(e){}}return true;}
+  function syncRide(){if(!mapReady())return;var ride=activeRide();if(!ride){syncTrace(false);if(routeState.key||routeState.pending||routeState.failKey)clearTrip();return;}syncTrace(true);var pickup=String(ride.pickup||"").trim();var destination=String(ride.dest||ride.destination||"").trim();if(!pickup||!destination)return;var key=rideKey(ride,pickup,destination);if(routeState.key===key&&routeState.preview)return;if(routeState.pending===key)return;if(routeState.failKey===key&&Date.now()<routeState.nextRetryAt)return;if(routeState.key&&routeState.key!==key)clearTrip();if(routeState.failKey&&routeState.failKey!==key)resetRetry();routeState.pending=key;srv("getDriveRoutePreview",pickup,destination).then(function(res){if(routeState.pending!==key)return;routeState.pending="";if(!drawRoute(res,key))markRouteFailure(key);}).catch(function(){if(routeState.pending!==key)return;routeState.pending="";markRouteFailure(key);});}
+  var baseRender=window.render;
+  if(typeof baseRender==="function"){window.render=function(){var out=baseRender.apply(this,arguments);setTimeout(syncRide,0);return out;};}
+  setInterval(syncRide,1200);setTimeout(syncRide,250);
+  window.PulseRouteLayer={sync:syncRide,clearTrip:clearTrip};
+})();
 </script>
 </body>
 </html>
