@@ -25,6 +25,7 @@ check(request.includes("'Quoted Fare': fareQuote.fare"),'authoritative Ride Requ
 check(index.includes("Pulse fare $'+money(r.quotedFare)"),'driver Inbox fare display missing');
 check(foreground.includes("PULSE081_FARE_KEY='pulse-direct-ride-fares-v1'"),'direct-ride fare cache missing');
 check(foreground.includes('requestsFromServer=function(payload){p081RememberRequests_(payload);'),'Inbox fare capture missing');
+check(foreground.includes("raw===null||raw===''||raw===undefined"),'absent quoted fares must not become zero-dollar fares');
 check(foreground.includes('scheduledTripState=function(s){'),'active rider ride fare restoration missing');
 check(foreground.includes("payload.fare===''||payload.fare==null"),'Trip Log fare injection missing');
 check(index.includes("advanceRiderStatus_('Ride in progress'")||foreground.includes("advanceRiderStatus_('Ride in progress'"),'pickup-to-trip lifecycle missing');
