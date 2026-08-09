@@ -421,7 +421,7 @@
       return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
     }
     function setQrNowTime_(){
-      var d=new Date(Date.now()+15*60000);
+      var d=new Date(Date.now()+16*60000);
       $('date').value=qrLocalDate_(d);
       $('time').value=qrLocalTime_(d);
     }
