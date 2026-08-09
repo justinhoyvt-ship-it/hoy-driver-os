@@ -22,7 +22,7 @@
   }
   function p081RememberRequests_(payload){
     var list=Array.isArray(payload)?payload:((payload&&payload.items)||[]),map=p081FareMap_(),changed=false;
-    (list||[]).forEach(function(r){var id=String((r&&r.requestId)||'').trim(),fare=Number(r&&r.quotedFare);if(id&&isFinite(fare)&&fare>=0){map[id]={fare:fare,at:now()};changed=true;}});
+    (list||[]).forEach(function(r){var id=String((r&&r.requestId)||'').trim(),raw=r&&r.quotedFare;if(raw===null||raw===''||raw===undefined)return;var fare=Number(raw);if(id&&isFinite(fare)&&fare>=0){map[id]={fare:fare,at:now()};changed=true;}});
     if(changed){try{localStorage.setItem(PULSE081_FARE_KEY,JSON.stringify(map));}catch(e){}}
   }
   function p081FareFor_(requestId){var id=String(requestId||'').trim(),entry=p081FareMap_()[id]||{},fare=Number(entry.fare);return id&&isFinite(fare)&&fare>=0?fare:null;}
