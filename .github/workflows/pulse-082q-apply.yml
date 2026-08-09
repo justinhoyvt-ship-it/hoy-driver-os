@@ -1,0 +1,68 @@
+name: PULSE-082Q Apply QR Live Repair
+on:
+  push:
+    branches: [pulse/pulse-082q-qr-live-repair]
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: pulse/pulse-082q-qr-live-repair
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Apply scoped QR live repair
+        run: |
+          cat > /tmp/apply-082q.mjs <<'EOF'
+          import fs from 'node:fs';
+          const replaceOnce=(s,a,b,label)=>{const n=s.split(a).length-1;if(n!==1)throw new Error(`${label}: expected 1 match, found ${n}`);return s.replace(a,b)};
+
+          // Driver QR copy: remove teaching language and name the actual today-only lane.
+          {
+            const p='apps-script/hoy-driver-os-writer/Index.html';
+            let s=fs.readFileSync(p,'utf8');
+            s=replaceOnce(s,'<div class="menu-head"><h2>Ride request QR</h2><button class="menu-close" id="closeQrBtn" type="button" aria-label="Close QR">&times;</button></div>\n    <p class="sub">Have the rider scan this to open the approved ride request form.</p>','<div class="menu-head"><h2>Pulse ride · today</h2><button class="menu-close" id="closeQrBtn" type="button" aria-label="Close QR">&times;</button></div>\n    <p class="sub">Book now or later today.</p>','driver QR copy');
+            s=replaceOnce(s,'<button class="qr-open" id="openRideRequestBtn" type="button">Open form</button>','<button class="qr-open" id="openRideRequestBtn" type="button">Open today request</button>','driver QR button');
+            fs.writeFileSync(p,s);
+          }
+
+          // Rider form: make ?view=qr&source=qr_live a dedicated same-day NOW/LATER mode.
+          {
+            const p='pulse-autobuild/request-app/RequestForm.html';
+            let s=fs.readFileSync(p,'utf8');
+            s=replaceOnce(s,'.quote-meta{margin-top:4px;color:var(--muted);font-size:.75rem}\n',`.quote-meta{margin-top:4px;color:var(--muted);font-size:.75rem}\n    .qr-live-choice{margin:0 0 18px;padding:16px;border:1px solid var(--line);background:var(--surface-2)}\n    .qr-live-choice .choice-label{font-family:var(--mono);font-size:.62rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}\n    .qr-live-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}\n    .qr-live-buttons button{min-height:48px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:var(--display);font-weight:700}\n    .qr-live-buttons button[aria-pressed="true"]{border-color:var(--signal);background:color-mix(in srgb,var(--signal) 14%,var(--surface));box-shadow:inset 0 0 0 1px var(--signal)}\n    html[data-qr-live="on"] .hero-note{display:none}\n    html[data-qr-live="on"] .nav-tag{color:var(--green)}\n`,'QR live CSS');
+            s=replaceOnce(s,"    var submittedQuote=null;\n","    var submittedQuote=null;\n    var qrLiveMode=false;\n    var qrTiming='NOW';\n",'QR vars');
+            s=replaceOnce(s,"    function resetQuote_(){\n",`    function qrLocalDate_(d){\n      d=d||new Date();\n      var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');\n      return y+'-'+m+'-'+day;\n    }\n    function qrLocalTime_(d){\n      d=d||new Date();\n      return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');\n    }\n    function setQrNowTime_(){\n      var d=new Date(Date.now()+15*60000);\n      $('date').value=qrLocalDate_(d);\n      $('time').value=qrLocalTime_(d);\n    }\n    function setQrTiming_(mode){\n      if(!qrLiveMode)return;\n      qrTiming=mode==='LATER'?'LATER':'NOW';\n      var nowBtn=$('qrNowBtn'),laterBtn=$('qrLaterBtn');\n      if(nowBtn)nowBtn.setAttribute('aria-pressed',String(qrTiming==='NOW'));\n      if(laterBtn)laterBtn.setAttribute('aria-pressed',String(qrTiming==='LATER'));\n      $('timeField').hidden=qrTiming==='NOW';\n      if(qrTiming==='NOW')setQrNowTime_(); else $('time').value='';\n      resetQuote_();\n    }\n    function activateQrLiveMode_(){\n      document.documentElement.setAttribute('data-qr-live','on');\n      var today=qrLocalDate_();\n      $('date').value=today;$('date').min=today;$('date').max=today;$('dateField').hidden=true;\n      var hero=document.querySelector('.hero h1');if(hero)hero.innerHTML='Ride <span>today.</span>';\n      var lede=document.querySelector('.hero-lede');if(lede)lede.innerHTML='Choose <b>now</b> or a time later today, see your Pulse fare, then request the ride.';\n      var nav=document.querySelector('.nav-tag');if(nav)nav.textContent='Today ride request';\n      var kicker=document.querySelector('#requestCard .card-kicker span:first-child');if(kicker)kicker.textContent='Today request';\n      if(!$('qrTimingChoice')){\n        var box=document.createElement('div');box.id='qrTimingChoice';box.className='qr-live-choice';\n        box.innerHTML='<div class="choice-label">When do you need the ride?</div><div class="qr-live-buttons"><button id="qrNowBtn" type="button" aria-pressed="true">Now</button><button id="qrLaterBtn" type="button" aria-pressed="false">Later today</button></div>';\n        $('pickupTimeFields').parentNode.insertBefore(box,$('pickupTimeFields'));\n        $('qrNowBtn').addEventListener('click',function(){setQrTiming_('NOW')});\n        $('qrLaterBtn').addEventListener('click',function(){setQrTiming_('LATER')});\n      }\n      if(!riderExperience)activateRiderExperience_();\n      setQrTiming_('NOW');\n    }\n\n    function resetQuote_(){\n`,'QR functions');
+            s=replaceOnce(s,"    function requestFareQuote_(){\n      clearError();","    function requestFareQuote_(){\n      clearError();\n      if(qrLiveMode&&qrTiming==='NOW')setQrNowTime_();",'NOW quote refresh');
+            s=replaceOnce(s,"    function activateRiderExperience_(){\n      riderExperience=true;","    function activateRiderExperience_(){\n      if(riderExperience)return;\n      riderExperience=true;",'experience guard');
+            s=replaceOnce(s,"        consent:$('consent').checked,requestToken:requestToken,testMode:testMode\n","        consent:$('consent').checked,requestToken:requestToken,testMode:testMode,\n        source:qrLiveMode?'QR_LIVE':'PRIVATE_LINK',timing:qrLiveMode?qrTiming:''\n",'QR payload');
+            s=replaceOnce(s,"        requestToken=String(params.request||'');\n        testMode=String(params.mode||'').toLowerCase()==='test';","        requestToken=String(params.request||'');\n        testMode=String(params.mode||'').toLowerCase()==='test';\n        qrLiveMode=String(params.source||'').toLowerCase()==='qr_live'||String(params.view||'').toLowerCase()==='qr';\n        if(qrLiveMode)activateQrLiveMode_();",'QR route activation');
+            fs.writeFileSync(p,s);
+          }
+
+          // Request writer: preserve source and enforce same-day server-side for QR_LIVE.
+          {
+            const p='pulse-autobuild/request-app/Code.gs';
+            let s=fs.readFileSync(p,'utf8');
+            s=replaceOnce(s,"      'Source': 'PRIVATE_LINK',","      'Source': customer.source,",'writer source');
+            s=replaceOnce(s,"  const notes = String(payload.notes || '').trim();\n\n  if (!name || !phone || !email || !pickup || !destination || !date || !time) {","  const notes = String(payload.notes || '').trim();\n  const requestedSource = String(payload.source || 'PRIVATE_LINK').trim().toUpperCase();\n  const source = requestedSource === 'QR_LIVE' ? 'QR_LIVE' : 'PRIVATE_LINK';\n  const timing = String(payload.timing || '').trim().toUpperCase();\n\n  if (!name || !phone || !email || !pickup || !destination || !date || !time) {",'server source vars');
+            s=replaceOnce(s,"  if (!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(email)) throw new Error('That email address does not look right.');\n\n  const pickupAt = parseRideStart_(date, time);","  if (!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(email)) throw new Error('That email address does not look right.');\n  if (source === 'QR_LIVE') {\n    const today = Utilities.formatDate(new Date(), RIDE.TIMEZONE, 'yyyy-MM-dd');\n    if (date !== today) throw new Error('QR ride requests are for today only.');\n    if (timing !== 'NOW' && timing !== 'LATER') throw new Error('Choose Now or Later today.');\n  }\n\n  const pickupAt = parseRideStart_(date, time);",'server same-day guard');
+            s=replaceOnce(s,"  return { name: name, phone: phone, email: email, pickup: pickup, destination: destination, pickupAt: pickupAt, passengers: passengers, notes: notes, dedupKey: dedupKey };","  return { name: name, phone: phone, email: email, pickup: pickup, destination: destination, pickupAt: pickupAt, passengers: passengers, notes: notes, dedupKey: dedupKey, source: source, timing: timing };",'server normalized source');
+            fs.writeFileSync(p,s);
+          }
+
+          // Regression validator.
+          fs.writeFileSync('pulse-forge/tests/validate-pulse-082q-qr-live-repair.mjs',`import fs from 'node:fs';\nconst driver=fs.readFileSync('apps-script/hoy-driver-os-writer/Index.html','utf8');\nconst form=fs.readFileSync('pulse-autobuild/request-app/RequestForm.html','utf8');\nconst code=fs.readFileSync('pulse-autobuild/request-app/Code.gs','utf8');\nconst need=(s,x)=>{if(!s.includes(x))throw new Error('missing '+x)};\nneed(driver,'Book now or later today.');\nif(driver.includes('Have the rider scan this'))throw new Error('teaching QR copy returned');\nneed(form,\"qrLiveMode=String(params.source||'').toLowerCase()==='qr_live'\");\nneed(form,\"setQrTiming_('NOW')\");need(form,\"setQrTiming_('LATER')\");\nneed(form,\"source:qrLiveMode?'QR_LIVE':'PRIVATE_LINK'\");\nneed(code,\"if (date !== today) throw new Error('QR ride requests are for today only.')\");\nneed(code,\"'Source': customer.source\");\nconsole.log('PULSE-082Q QR live repair validation passed');\n`);
+          EOF
+          node /tmp/apply-082q.mjs
+      - name: Remove temporary workflow and commit
+        run: |
+          rm .github/workflows/pulse-082q-apply.yml
+          git config user.name pulse-forge
+          git config user.email pulse-forge@users.noreply.github.com
+          git add apps-script/hoy-driver-os-writer/Index.html pulse-autobuild/request-app/RequestForm.html pulse-autobuild/request-app/Code.gs pulse-forge/tests/validate-pulse-082q-qr-live-repair.mjs .github/workflows/pulse-082q-apply.yml
+          git commit -m "PULSE-082Q: restore same-day QR NOW/LATER flow"
+          git push
