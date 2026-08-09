@@ -612,7 +612,7 @@ function submitRideRequest(payload) {
       'Received At': now,
       'Updated At': now,
       'Status': 'REQUESTED',
-      'Source': 'PRIVATE_LINK',
+      'Source': customer.source,
       'Customer Name': customer.name,
       'Customer Phone': customer.phone,
       'Customer Email': customer.email,
@@ -652,16 +652,24 @@ function normalizeRidePayload_(payload) {
   const time = String(payload.time || '').trim();
   const passengers = Math.max(1, Math.min(7, Number(payload.passengers) || 1));
   const notes = String(payload.notes || '').trim();
+  const requestedSource = String(payload.source || 'PRIVATE_LINK').trim().toUpperCase();
+  const source = requestedSource === 'QR_LIVE' ? 'QR_LIVE' : 'PRIVATE_LINK';
+  const timing = String(payload.timing || '').trim().toUpperCase();
 
   if (!name || !phone || !email || !pickup || !destination || !date || !time) {
     throw new Error('Name, phone, email, pickup, destination, date, and time are required.');
   }
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new Error('That email address does not look right.');
+  if (source === 'QR_LIVE') {
+    const today = Utilities.formatDate(new Date(), RIDE.TIMEZONE, 'yyyy-MM-dd');
+    if (date !== today) throw new Error('QR ride requests are for today only.');
+    if (timing !== 'NOW' && timing !== 'LATER') throw new Error('Choose Now or Later today.');
+  }
 
   const pickupAt = parseRideStart_(date, time);
   if (pickupAt.getTime() < Date.now() + 15 * 60000) throw new Error('Pickup time must be at least 15 minutes in the future.');
   const dedupKey = [email, pickupAt.toISOString(), pickup.toLowerCase(), destination.toLowerCase()].join('|');
-  return { name: name, phone: phone, email: email, pickup: pickup, destination: destination, pickupAt: pickupAt, passengers: passengers, notes: notes, dedupKey: dedupKey };
+  return { name: name, phone: phone, email: email, pickup: pickup, destination: destination, pickupAt: pickupAt, passengers: passengers, notes: notes, dedupKey: dedupKey, source: source, timing: timing };
 }
 
 function findDuplicateRide_(dedupKey) {

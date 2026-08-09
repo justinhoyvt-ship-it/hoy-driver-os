@@ -141,6 +141,13 @@
     .quote-result.show{display:block}
     .quote-fare{font-family:var(--display);font-size:2rem;font-weight:700}
     .quote-meta{margin-top:4px;color:var(--muted);font-size:.75rem}
+    .qr-live-choice{margin:0 0 18px;padding:16px;border:1px solid var(--line);background:var(--surface-2)}
+    .qr-live-choice .choice-label{font-family:var(--mono);font-size:.62rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+    .qr-live-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .qr-live-buttons button{min-height:48px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:var(--display);font-weight:700}
+    .qr-live-buttons button[aria-pressed="true"]{border-color:var(--signal);background:color-mix(in srgb,var(--signal) 14%,var(--surface));box-shadow:inset 0 0 0 1px var(--signal)}
+    html[data-qr-live="on"] .hero-note{display:none}
+    html[data-qr-live="on"] .nav-tag{color:var(--green)}
 
 
     /* PULSE-061 rider experience — inactive unless explicitly enabled */
@@ -401,6 +408,51 @@
     var submissionState='idle';
     var stagedRequestData=null;
     var submittedQuote=null;
+    var qrLiveMode=false;
+    var qrTiming='NOW';
+
+    function qrLocalDate_(d){
+      d=d||new Date();
+      var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
+      return y+'-'+m+'-'+day;
+    }
+    function qrLocalTime_(d){
+      d=d||new Date();
+      return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    }
+    function setQrNowTime_(){
+      var d=new Date(Date.now()+15*60000);
+      $('date').value=qrLocalDate_(d);
+      $('time').value=qrLocalTime_(d);
+    }
+    function setQrTiming_(mode){
+      if(!qrLiveMode)return;
+      qrTiming=mode==='LATER'?'LATER':'NOW';
+      var nowBtn=$('qrNowBtn'),laterBtn=$('qrLaterBtn');
+      if(nowBtn)nowBtn.setAttribute('aria-pressed',String(qrTiming==='NOW'));
+      if(laterBtn)laterBtn.setAttribute('aria-pressed',String(qrTiming==='LATER'));
+      $('timeField').hidden=qrTiming==='NOW';
+      if(qrTiming==='NOW')setQrNowTime_(); else $('time').value='';
+      resetQuote_();
+    }
+    function activateQrLiveMode_(){
+      document.documentElement.setAttribute('data-qr-live','on');
+      var today=qrLocalDate_();
+      $('date').value=today;$('date').min=today;$('date').max=today;$('dateField').hidden=true;
+      var hero=document.querySelector('.hero h1');if(hero)hero.innerHTML='Ride <span>today.</span>';
+      var lede=document.querySelector('.hero-lede');if(lede)lede.innerHTML='Choose <b>now</b> or a time later today, see your Pulse fare, then request the ride.';
+      var nav=document.querySelector('.nav-tag');if(nav)nav.textContent='Today ride request';
+      var kicker=document.querySelector('#requestCard .card-kicker span:first-child');if(kicker)kicker.textContent='Today request';
+      if(!$('qrTimingChoice')){
+        var box=document.createElement('div');box.id='qrTimingChoice';box.className='qr-live-choice';
+        box.innerHTML='<div class="choice-label">When do you need the ride?</div><div class="qr-live-buttons"><button id="qrNowBtn" type="button" aria-pressed="true">Now</button><button id="qrLaterBtn" type="button" aria-pressed="false">Later today</button></div>';
+        $('pickupTimeFields').parentNode.insertBefore(box,$('pickupTimeFields'));
+        $('qrNowBtn').addEventListener('click',function(){setQrTiming_('NOW')});
+        $('qrLaterBtn').addEventListener('click',function(){setQrTiming_('LATER')});
+      }
+      if(!riderExperience)activateRiderExperience_();
+      setQrTiming_('NOW');
+    }
 
     function resetQuote_(){
       if(submissionState==='submitting'||submissionState==='submitted')return;
@@ -429,6 +481,7 @@
 
     function requestFareQuote_(){
       clearError();
+      if(qrLiveMode&&qrTiming==='NOW')setQrNowTime_();
       clearFieldErrors_();
       var pickup=$('pickup').value.trim();
       var destination=$('destination').value.trim();
@@ -532,6 +585,7 @@
     }
 
     function activateRiderExperience_(){
+      if(riderExperience)return;
       riderExperience=true;
       document.documentElement.setAttribute('data-rider-experience','on');
       var card=$('requestCard');
@@ -726,7 +780,8 @@
         pickup:$('pickup').value.trim(),destination:$('destination').value.trim(),
         date:$('date').value.trim(),time:$('time').value.trim(),
         passengers:$('passengers').value.trim(),notes:$('notes').value.trim(),
-        consent:$('consent').checked,requestToken:requestToken,testMode:testMode
+        consent:$('consent').checked,requestToken:requestToken,testMode:testMode,
+        source:qrLiveMode?'QR_LIVE':'PRIVATE_LINK',timing:qrLiveMode?qrTiming:''
       };
     }
 
@@ -743,6 +798,8 @@
         var params=(route&&route.parameter)||{};
         requestToken=String(params.request||'');
         testMode=String(params.mode||'').toLowerCase()==='test';
+        qrLiveMode=String(params.source||'').toLowerCase()==='qr_live'||String(params.view||'').toLowerCase()==='qr';
+        if(qrLiveMode)activateQrLiveMode_();
         if(testMode)$('testBadge').classList.add('show');
         google.script.run
           .withSuccessHandler(function(config){
