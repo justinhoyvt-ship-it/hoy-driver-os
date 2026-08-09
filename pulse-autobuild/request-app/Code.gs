@@ -27,7 +27,7 @@ const RIDE = Object.freeze({
     'Pickup Address','Destination','Pickup At','Passengers','Notes','Consent',
     'Confirmed At','Cancelled At','Completed At','Calendar Event ID','Driver Notes','Dedup Key',
     'Ride ID','PIN Salt','PIN Verifier','Access Issued At','Access Email Sent At',
-    'Quoted Fare','Quote ID','Quote Expires At','Pricing Version'
+    'Quoted Fare','Quote ID','Quote Expires At','Pricing Version','Receipt Email Sent At'
   ])
 });
 
@@ -42,7 +42,8 @@ function rideCfg_() {
     calendarId: String(p.getProperty('CALENDAR_ID') || 'primary'),
     confirmSecret: String(p.getProperty('CONFIRM_SECRET') || ''),
     webAppUrl: String(p.getProperty('WEB_APP_URL') || ''),
-    requestToken: String(p.getProperty('REQUEST_TOKEN') || '')
+    requestToken: String(p.getProperty('REQUEST_TOKEN') || ''),
+    emailHeroImageUrl: String(p.getProperty('EMAIL_HERO_IMAGE_URL') || 'https://drive.google.com/uc?export=view&id=1qclLLlc33_I9q6nzbwziUQvKQhbhktPJ')
   };
 }
 
@@ -318,7 +319,9 @@ function appendRideStatusEventUnlocked_(requestId, status, source, idempotencyKe
 
   if (next === 'Complete' && rideState !== 'COMPLETED') {
     updateRideCells_(found.rowIndex, { 'Status':'COMPLETED', 'Updated At':now, 'Completed At':now });
+    found.obj.Status = 'COMPLETED'; found.obj['Updated At'] = now; found.obj['Completed At'] = now;
   }
+  if (next === 'Complete') ensureCompletionReceiptSafe_(found);
   return Object.assign({ ok:true, duplicate:false }, event);
 }
 
@@ -850,42 +853,12 @@ function notifyDriverOfRequest_(row) {
   });
 }
 
-function notifyCustomerReceived_(row) {
-  const cfg = rideCfg_();
-  MailApp.sendEmail({
-    to: row['Customer Email'],
-    subject: 'Ride request received',
-    body:
-      'Hi ' + row['Customer Name'] + ',\n\n' +
-      cfg.driverName + ' received your request. It is not confirmed yet.\n\n' +
-      'Requested pickup: ' + formatPickup_(row['Pickup At']) + '\n' +
-      'From: ' + row['Pickup Address'] + '\n' +
-      'To: ' + row['Destination'] + '\n\n' +
-      'You will receive another email after the driver confirms or declines it.\n'
-  });
-}
-
-function notifyCustomerConfirmed_(obj, access) {
-  const cfg = rideCfg_();
-  if (!access || !access.rideId || !access.pin) throw new Error('Ride access details are required for confirmation email.');
-  MailApp.sendEmail({
-    to: obj['Customer Email'],
-    subject: 'Ride confirmed — ' + formatPickup_(obj['Pickup At']),
-    body:
-      'Hi ' + obj['Customer Name'] + ',\n\nYour ride is confirmed.\n\n' +
-      'Driver: ' + cfg.driverName + (cfg.vehicle ? ' · ' + cfg.vehicle : '') + '\n' +
-      (cfg.driverPhone ? 'Driver phone: ' + cfg.driverPhone + '\n' : '') +
-      'When: ' + formatPickup_(obj['Pickup At']) + '\n' +
-      'Pickup: ' + obj['Pickup Address'] + '\n' +
-      'Destination: ' + obj['Destination'] + '\n\n' +
-      'Private ride status\n' +
-      'Ride ID: ' + access.rideId + '\n' +
-      'PIN: ' + access.pin + '\n' +
-      'Status link: ' + rideStatusAccessUrl_(access.rideId) + '\n\n' +
-      'Keep the Ride ID and PIN private. The PIN is not stored in readable form and cannot be recovered.\n\n' +
-      'A calendar invitation has been sent to this email address.\n'
-  });
-}
+function rideFareText_(obj) { const raw=obj&&obj['Quoted Fare'],fare=Number(raw); return raw!==''&&raw!==null&&raw!==undefined&&Number.isFinite(fare)?'$'+fare.toFixed(2):'Fare pending'; }
+function pulseEmailHtml_(title,lead,obj,options){options=options||{};const cfg=rideCfg_();const image=cfg.emailHeroImageUrl?'<img src="'+esc_(cfg.emailHeroImageUrl)+'" alt="Pulse Vermont ride" style="display:block;width:100%;max-height:250px;object-fit:cover;border:0">':'';const button=options.buttonUrl?'<p style="margin:26px 0 6px"><a href="'+esc_(options.buttonUrl)+'" style="display:inline-block;background:#45e394;color:#062718;text-decoration:none;font-weight:800;padding:14px 22px;border-radius:10px">'+esc_(options.buttonLabel||'Open')+'</a></p>':'';return '<div style="margin:0;background:#08111f;padding:24px 10px;font-family:Arial,sans-serif;color:#f7f9fb"><div style="max-width:620px;margin:0 auto;background:#101b2c;border:1px solid #29465c;border-radius:20px;overflow:hidden">'+image+'<div style="padding:26px"><div style="font-size:12px;letter-spacing:2px;color:#59d8ff;font-weight:800">PULSE VERMONT</div><h1 style="margin:8px 0;font-size:30px">'+esc_(title)+'</h1><p style="color:#bdd0de;font-size:16px">'+esc_(lead)+'</p><table role="presentation" style="width:100%;border-collapse:collapse;font-size:15px"><tr><td style="padding:9px 0;color:#8199aa">When</td><td style="padding:9px 0;text-align:right;font-weight:700">'+esc_(formatPickup_(obj['Pickup At']))+'</td></tr><tr><td style="padding:9px 0;color:#8199aa">From</td><td style="padding:9px 0;text-align:right;font-weight:700">'+esc_(obj['Pickup Address'])+'</td></tr><tr><td style="padding:9px 0;color:#8199aa">To</td><td style="padding:9px 0;text-align:right;font-weight:700">'+esc_(obj['Destination'])+'</td></tr><tr><td style="padding:14px 0;color:#8199aa;border-top:1px solid #29465c">Fare</td><td style="padding:14px 0;text-align:right;font-size:26px;font-weight:800;color:#6ee7b7;border-top:1px solid #29465c">'+esc_(rideFareText_(obj))+'</td></tr></table>'+button+(options.securityHtml||'')+'<p style="margin:24px 0 0;color:#688092;font-size:12px">Local rides · Pulse Vermont</p></div></div></div>'; }
+function notifyCustomerReceived_(row){MailApp.sendEmail({to:row['Customer Email'],subject:'Ride request received',body:'Hi '+row['Customer Name']+',\n\nRequest sent to your Pulse driver. It is not confirmed yet.\n\nWhen: '+formatPickup_(row['Pickup At'])+'\nFrom: '+row['Pickup Address']+'\nTo: '+row['Destination']+'\nFare: '+rideFareText_(row)+'\n',htmlBody:pulseEmailHtml_('Request received','Request sent to your Pulse driver. It is not confirmed yet.',row,{})});}
+function notifyCustomerConfirmed_(obj,access){const cfg=rideCfg_();if(!access||!access.rideId||!access.pin)throw new Error('Ride access details are required for confirmation email.');const url=rideStatusAccessUrl_(access.rideId),security='<div style="margin-top:22px;padding:14px;border-radius:10px;background:#0a1423;color:#9db0c1;font-size:12px;line-height:1.55">Ride ID: <b style="color:#fff">'+esc_(access.rideId)+'</b><br>PIN: <b style="color:#fff">'+esc_(access.pin)+'</b><br>Keep these private as fallback access details.</div>';MailApp.sendEmail({to:obj['Customer Email'],subject:'Ride confirmed — '+formatPickup_(obj['Pickup At']),body:'Your ride is confirmed.\nFare: '+rideFareText_(obj)+'\nStatus: '+url+'\nRide ID: '+access.rideId+'\nPIN: '+access.pin,htmlBody:pulseEmailHtml_('Ride confirmed',cfg.driverName+(cfg.vehicle?' · '+cfg.vehicle:'')+' will be your driver.',obj,{buttonUrl:url,buttonLabel:'Track my ride',securityHtml:security})});}
+function notifyCustomerCompleted_(obj){const again=requestUrl_();MailApp.sendEmail({to:obj['Customer Email'],subject:'Your Pulse ride receipt — '+rideFareText_(obj),body:'Ride complete. Thanks for riding with Pulse Vermont.\nFare: '+rideFareText_(obj)+'\nFrom: '+obj['Pickup Address']+'\nTo: '+obj['Destination']+'\nRequest another ride: '+again,htmlBody:pulseEmailHtml_('Thanks for riding','Your ride is complete. Here is your receipt.',obj,{buttonUrl:again,buttonLabel:'Request another ride'})});}
+function ensureCompletionReceiptSafe_(found){if(!found||!found.obj||found.obj['Receipt Email Sent At'])return false;try{notifyCustomerCompleted_(found.obj);const at=new Date();updateRideCells_(found.rowIndex,{'Receipt Email Sent At':at});found.obj['Receipt Email Sent At']=at;return true;}catch(error){console.log('Completion receipt warning: '+String((error&&error.message)||error));return false;}}
 
 function notifyCustomerDeclined_(obj) {
   MailApp.sendEmail({

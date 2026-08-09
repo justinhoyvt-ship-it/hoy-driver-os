@@ -366,7 +366,7 @@
           <div class="request-card done" style="display:block">
             <div class="badge">Request sent</div>
             <h2>Request received.</h2>
-            <p id="doneMsg">Your driver has it and will confirm shortly. Watch your inbox for the confirmation.</p>
+            <p id="doneMsg">Request sent to your Pulse driver. Watch your inbox for confirmation.</p>
             <div class="experience-status" id="riderStatus" role="status" aria-live="polite" data-state="submitted">Status: Requested — waiting for driver confirmation.</div>
             <div class="recap" id="recap"></div>
           </div>
@@ -666,7 +666,7 @@
       if(testMode){
         $('doneMsg').textContent='Test fixture accepted. No email, calendar event, or Sheet write was performed.';
       }else if(res.driverName){
-        $('doneMsg').textContent=res.driverName+' has it and will confirm shortly. Watch your inbox for the confirmation.';
+        $('doneMsg').textContent='Request sent to your Pulse driver. Watch your inbox for confirmation.';
       }
       $('riderStatus').textContent='Status: '+esc(res.status||'REQUESTED')+' — waiting for driver confirmation.';
       $('formView').style.display='none';

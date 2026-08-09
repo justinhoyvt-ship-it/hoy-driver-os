@@ -561,6 +561,7 @@ function listReservations_(knownRiderRows) {
       phone: '',
       notes: r.notes || '',
       whenISO: r.whenISO,
+      quotedFare: r.quotedFare,
       source: 'rider',
       status: r.status
     }));
