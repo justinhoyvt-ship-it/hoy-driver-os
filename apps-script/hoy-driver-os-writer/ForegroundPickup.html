@@ -4,6 +4,28 @@
   var PULSE069={watch:null,timer:null,last:null,busy:false,error:'',paused:false};
   var p069BaseCancelActive=cancelActive;
   var p069BaseDropOff=dropOff;
+  var PULSE081_FARE_KEY='pulse-direct-ride-fares-v1';
+  var PULSE081_FARE_TTL_MS=14*24*3600000;
+  var p081BaseRequestsFromServer=requestsFromServer;
+  var p081BaseSchedFromServer=schedFromServer;
+  var p081BaseScheduledTripState=scheduledTripState;
+  var p081BaseQueueTripLog=queueTripLog_;
+
+  function p081FareMap_(){
+    var map={};
+    try{map=JSON.parse(localStorage.getItem(PULSE081_FARE_KEY)||'{}')||{};}catch(e){map={};}
+    if(!map||typeof map!=='object'||Array.isArray(map))map={};
+    var cutoff=now()-PULSE081_FARE_TTL_MS,changed=false;
+    Object.keys(map).forEach(function(id){var entry=map[id]||{},fare=Number(entry.fare),at=Number(entry.at);if(!isFinite(fare)||fare<0||!isFinite(at)||at<cutoff){delete map[id];changed=true;}});
+    if(changed){try{localStorage.setItem(PULSE081_FARE_KEY,JSON.stringify(map));}catch(e){}}
+    return map;
+  }
+  function p081RememberRequests_(payload){
+    var list=Array.isArray(payload)?payload:((payload&&payload.items)||[]),map=p081FareMap_(),changed=false;
+    (list||[]).forEach(function(r){var id=String((r&&r.requestId)||'').trim(),fare=Number(r&&r.quotedFare);if(id&&isFinite(fare)&&fare>=0){map[id]={fare:fare,at:now()};changed=true;}});
+    if(changed){try{localStorage.setItem(PULSE081_FARE_KEY,JSON.stringify(map));}catch(e){}}
+  }
+  function p081FareFor_(requestId){var id=String(requestId||'').trim(),entry=p081FareMap_()[id]||{},fare=Number(entry.fare);return id&&isFinite(fare)&&fare>=0?fare:null;}
 
   function p069Rider_(){return S.active&&S.active.requestId?S.active:null;}
   function p069Status_(){var a=p069Rider_();return a?(a.riderStatus||'Confirmed'):'';}
@@ -92,6 +114,23 @@
     render();
   }
 
+  requestsFromServer=function(payload){p081RememberRequests_(payload);return p081BaseRequestsFromServer.apply(this,arguments);};
+  schedFromServer=function(list){
+    var result=p081BaseSchedFromServer.apply(this,arguments);
+    (S.scheduled||[]).forEach(function(s){if(s&&s.requestId&&s.quotedFare==null){var fare=p081FareFor_(s.requestId);if(fare!=null)s.quotedFare=fare;}});
+    renderSched();
+    return result;
+  };
+  scheduledTripState=function(s){
+    var ride=p081BaseScheduledTripState.apply(this,arguments),fare=s&&s.quotedFare!=null?Number(s.quotedFare):p081FareFor_(ride&&ride.requestId);
+    if(ride&&isFinite(fare)&&fare>=0)ride.quotedFare=fare;
+    return ride;
+  };
+  queueTripLog_=function(payload){
+    if(payload&&payload.requestId&&(payload.fare===''||payload.fare==null)){var fare=p081FareFor_(payload.requestId);if(fare!=null)payload.fare=fare;}
+    return p081BaseQueueTripLog.apply(this,arguments);
+  };
+
   startScheduled=function(id){
     var s=S.scheduled.filter(function(x){return x.id===id})[0];if(!s||scheduledStartBusy[id])return;
     if(s.requestId&&((S.active&&S.active.requestId===s.requestId)||(S.queued&&S.queued.requestId===s.requestId))){toast('Ride already started');return;}
@@ -140,6 +179,6 @@
   dropOff=function(){p069Stop_(false);return p069BaseDropOff.apply(this,arguments);};
   document.addEventListener('visibilitychange',function(){if(document.hidden)p069Stop_(true);else p069Resume_();});
   window.addEventListener('focus',p069Resume_);
-  setTimeout(function(){render();p069Resume_();},0);
+  setTimeout(function(){p081RememberRequests_(S.requests||[]);render();p069Resume_();},0);
 })();
 </script>
