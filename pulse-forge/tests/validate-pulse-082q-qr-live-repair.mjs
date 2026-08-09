@@ -1,7 +1,7 @@
 import fs from 'node:fs';
-const driver=fs.readFileSync('apps-script/hoy-driver-os-writer/Index.html','utf8');
-const form=fs.readFileSync('pulse-autobuild/request-app/RequestForm.html','utf8');
-const code=fs.readFileSync('pulse-autobuild/request-app/Code.gs','utf8');
+const driver=fs.readFileSync('../apps-script/hoy-driver-os-writer/Index.html','utf8');
+const form=fs.readFileSync('../pulse-autobuild/request-app/RequestForm.html','utf8');
+const code=fs.readFileSync('../pulse-autobuild/request-app/Code.gs','utf8');
 const need=(s,x)=>{if(!s.includes(x))throw new Error('missing '+x)};
 need(driver,'Book now or later today.');
 if(driver.includes('Have the rider scan this'))throw new Error('teaching QR copy returned');
