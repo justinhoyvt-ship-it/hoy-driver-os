@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "taskId": "PULSE-081",
   "title": "Direct ride beta integration gate",
-  "status": "STAGED",
+  "status": "STAGED_FOR_REVIEW",
   "automaticMerge": false,
   "productionDeployment": false,
   "productionMutation": false,
@@ -21,7 +21,7 @@
   },
   "acceptanceCriteria": [
     "One same-day rider can move through QR to fare quote to request to driver Inbox to accept to pickup to ride in progress to complete to Trip Log using existing components.",
-    "The fare shown to the rider is the fare attached to the request and displayed in the driver Inbox.",
+    "The fare shown to the rider is attached to the request, displayed in the driver Inbox, preserved into the active rider ride, and written to Trip Log on completion.",
     "The request app remains the sole Ride Requests writer.",
     "Existing NOW/LATER same-day behavior, future scheduling, held requests, rider status, and lifecycle controls are preserved.",
     "No duplicate request, pickup, drop-off, completion, or Trip Log event is introduced.",
