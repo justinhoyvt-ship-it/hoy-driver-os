@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "taskId": "PULSE-082",
+  "title": "Driver upcoming Pulse ride surface",
+  "status": "STAGED_FOR_REVIEW",
+  "automaticMerge": false,
+  "productionDeployment": false,
+  "productionMutation": false,
+  "engineActivation": false,
+  "scope": {
+    "reuseScheduledLane": true,
+    "reuseGinaProvenPersistence": true,
+    "showPulseSource": true,
+    "showQuotedFare": true,
+    "showRiderStatus": true,
+    "showPickupDestination": true,
+    "oneTapBeginPickup": true,
+    "noNewRideStore": true,
+    "noRequestWriterChange": true,
+    "noQrChange": true
+  },
+  "acceptanceCriteria": [
+    "The next confirmed Pulse rider ride is visually prominent in the existing Scheduled lane.",
+    "A Pulse Direct ride card shows rider, requested time, pickup, destination, rider status, and quoted fare when available.",
+    "Pickup navigation, destination navigation, and Begin pickup remain available from the card.",
+    "Manual scheduled rides remain visible and removable.",
+    "Existing QR, request writer, fare engine, Inbox, held-request behavior, lifecycle, and Trip Log are unchanged.",
+    "No new reservation or ride data store is introduced.",
+    "No production deployment or automatic merge occurs."
+  ]
+}

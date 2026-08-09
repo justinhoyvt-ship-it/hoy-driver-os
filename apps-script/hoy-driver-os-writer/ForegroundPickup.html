@@ -1,3 +1,30 @@
+<style id="pulse082-style">
+  .sched-card.p082-card{display:block;padding:12px;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.025));overflow:hidden}
+  .sched-card.p082-card.p082-featured{border-color:rgba(43,212,229,.48);background:linear-gradient(145deg,rgba(43,212,229,.12),rgba(76,147,255,.07) 55%,rgba(255,255,255,.025));box-shadow:0 10px 28px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.08)}
+  .p082-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+  .p082-badges{display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:wrap}
+  .p082-badge{font-family:var(--mono);font-size:.58rem;letter-spacing:.06em;padding:4px 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:rgba(255,255,255,.04)}
+  .p082-badge.pulse{color:var(--cyan);border-color:rgba(43,212,229,.4);background:rgba(43,212,229,.08)}
+  .p082-badge.status{color:var(--green);border-color:rgba(69,227,148,.3);background:rgba(69,227,148,.06)}
+  .p082-badge.next{color:#061325;background:linear-gradient(180deg,#7eeaf3,var(--cyan));border:0;font-weight:700}
+  .p082-time{font-family:var(--mono);font-size:.74rem;color:var(--sun);white-space:nowrap;text-align:right}
+  .p082-name{font-family:var(--display);font-size:1.05rem;font-weight:700;letter-spacing:-.01em;margin-bottom:9px}
+  .p082-route{display:grid;grid-template-columns:14px 1fr;column-gap:9px;row-gap:0;margin:5px 0 10px}
+  .p082-route-rail{grid-row:1 / span 2;position:relative;min-height:46px}
+  .p082-route-rail:before{content:"";position:absolute;left:6px;top:8px;bottom:8px;width:2px;background:linear-gradient(180deg,var(--cyan),var(--blue));opacity:.7}
+  .p082-dot{position:absolute;left:2px;width:10px;height:10px;border-radius:50%;background:var(--ink);border:2px solid var(--cyan);box-shadow:0 0 0 3px rgba(43,212,229,.08)}
+  .p082-dot.pick{top:2px}.p082-dot.drop{bottom:2px;border-color:var(--blue);box-shadow:0 0 0 3px rgba(76,147,255,.08)}
+  .p082-route-line{font-size:.78rem;line-height:1.35;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:1px 0 6px}
+  .p082-route-line small{display:block;font-family:var(--mono);font-size:.56rem;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;margin-bottom:1px}
+  .p082-meta{display:flex;align-items:center;justify-content:space-between;gap:9px;padding-top:9px;border-top:1px solid var(--line)}
+  .p082-fare{font-family:var(--display);font-size:1.04rem;font-weight:700;color:var(--green)}
+  .p082-fare small{display:block;font-family:var(--mono);font-size:.55rem;font-weight:500;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+  .p082-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap}
+  .p082-actions button{min-height:38px;padding:0 11px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.045);font-family:var(--display);font-size:.7rem;font-weight:700}
+  .p082-actions button.p082-start{background:linear-gradient(180deg,#8ff5c1,var(--green) 55%,#1f9c63);color:#04220f;border:0}
+  .p082-actions button:disabled{opacity:.42;cursor:default}
+  .p082-empty{font-size:.76rem;color:var(--muted);padding:2px 1px}
+</style>
 <script>
 (function(){
   var PULSE069_CFG={movementMiles:0.08,arrivingSoonMiles:0.60,arrivedMiles:0.08,stoppedMs:20000,stationarySpeedMetersPerSecond:0.8,stationaryMiles:0.015,maxAccuracyMeters:100};
@@ -10,6 +37,7 @@
   var p081BaseSchedFromServer=schedFromServer;
   var p081BaseScheduledTripState=scheduledTripState;
   var p081BaseQueueTripLog=queueTripLog_;
+  var p082BaseRenderSched=renderSched;
 
   function p081FareMap_(){
     var map={};
@@ -129,6 +157,52 @@
   queueTripLog_=function(payload){
     if(payload&&payload.requestId&&(payload.fare===''||payload.fare==null)){var fare=p081FareFor_(payload.requestId);if(fare!=null)payload.fare=fare;}
     return p081BaseQueueTripLog.apply(this,arguments);
+  };
+
+
+  function p082When_(s){
+    var diff=(Number(s.whenTS)||0)-now(),mins=Math.round(diff/60000);
+    if(!isFinite(diff))return '';
+    if(mins>90)return new Date(s.whenTS).toLocaleString([],{weekday:'short',hour:'numeric',minute:'2-digit'});
+    if(mins>=0)return 'in '+mins+'m';
+    return Math.abs(mins)+'m ago';
+  }
+  function p082Due_(s){var diff=(Number(s.whenTS)||0)-now();return isFinite(diff)&&diff<=30*60000&&diff>-60*60000;}
+  function p082Fare_(s){var raw=s&&s.quotedFare;if(raw===null||raw===''||raw===undefined)return null;var fare=Number(raw);return isFinite(fare)&&fare>=0?fare:null;}
+  function p082Button_(label,cls,disabled,handler){var b=document.createElement('button');b.type='button';b.textContent=label;b.className=cls||'';b.disabled=!!disabled;b.onclick=handler;return b;}
+
+  renderSched=function(){
+    var lane=$('schedList');if(!lane)return;lane.innerHTML='';
+    var rides=(S.scheduled||[]).slice().sort(function(a,b){return (a.whenTS||0)-(b.whenTS||0)});
+    if(!rides.length){var empty=document.createElement('div');empty.className='p082-empty';empty.textContent='No upcoming rides';lane.appendChild(empty);return;}
+    var nextPulse='';
+    rides.some(function(x){if(x&&x.source==='rider'){nextPulse=x.id;return true;}return false;});
+    rides.forEach(function(s){
+      var pulse=s.source==='rider',featured=pulse&&s.id===nextPulse,due=p082Due_(s),fare=p082Fare_(s);
+      var card=document.createElement('div');card.className='sched-card p082-card'+(featured?' p082-featured':'')+(due?' due':'');
+      var top=document.createElement('div');top.className='p082-top';
+      var badges=document.createElement('div');badges.className='p082-badges';
+      if(featured){var next=document.createElement('span');next.className='p082-badge next';next.textContent='NEXT PULSE RIDE';badges.appendChild(next);}
+      var source=document.createElement('span');source.className='p082-badge'+(pulse?' pulse':'');source.textContent=pulse?'PULSE DIRECT':'SCHEDULED';badges.appendChild(source);
+      if(pulse){var status=document.createElement('span');status.className='p082-badge status';status.textContent=s.riderStatus||'Confirmed';badges.appendChild(status);}
+      top.appendChild(badges);
+      var time=document.createElement('div');time.className='p082-time';time.textContent=(due?'DUE · ':'')+p082When_(s);top.appendChild(time);card.appendChild(top);
+
+      var name=document.createElement('div');name.className='p082-name';name.textContent=s.name||'Ride';card.appendChild(name);
+      var route=document.createElement('div');route.className='p082-route';
+      var rail=document.createElement('div');rail.className='p082-route-rail';rail.innerHTML='<i class="p082-dot pick"></i><i class="p082-dot drop"></i>';route.appendChild(rail);
+      var pick=document.createElement('div');pick.className='p082-route-line';pick.innerHTML='<small>Pickup</small>'+esc(s.pickup||'Pickup not set');route.appendChild(pick);
+      var drop=document.createElement('div');drop.className='p082-route-line';drop.innerHTML='<small>Destination</small>'+esc(s.dest||'Destination not set');route.appendChild(drop);card.appendChild(route);
+
+      var meta=document.createElement('div');meta.className='p082-meta';
+      var fareBox=document.createElement('div');fareBox.className='p082-fare';fareBox.innerHTML=fare!=null?('<small>Pulse fare</small>$'+money(fare)):('<small>Ride</small>'+esc(pulse?'Direct':'Scheduled'));meta.appendChild(fareBox);
+      var acts=document.createElement('div');acts.className='p082-actions';
+      if(s.pickup)acts.appendChild(p082Button_('Pickup','',false,function(){navTo(s.pickup)}));
+      if(s.dest)acts.appendChild(p082Button_('Drop','',false,function(){navTo(s.dest)}));
+      acts.appendChild(p082Button_('Begin pickup','p082-start',!!scheduledStartBusy[s.id]||!!S.active||!!S.queued,function(){startScheduled(s.id)}));
+      if(!pulse)acts.appendChild(p082Button_('×','',false,function(){srv('removeReservation',s.id).then(function(list){schedFromServer(list)}).catch(function(){});}));
+      meta.appendChild(acts);card.appendChild(meta);lane.appendChild(card);
+    });
   };
 
   startScheduled=function(id){
