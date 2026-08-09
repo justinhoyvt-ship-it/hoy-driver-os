@@ -1,0 +1,31 @@
+name: PULSE-082Q Tighten NOW Timing
+on:
+  push:
+    branches: [pulse/pulse-082q-qr-live-repair]
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: pulse/pulse-082q-qr-live-repair
+      - name: Fix NOW lead-time edge case
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('pulse-autobuild/request-app/RequestForm.html')
+          s=p.read_text()
+          old="var d=new Date(Date.now()+15*60000);"
+          if s.count(old)!=1: raise SystemExit('expected one NOW lead-time expression')
+          p.write_text(s.replace(old,"var d=new Date(Date.now()+16*60000);"))
+          PY
+      - name: Remove temporary workflow and commit
+        run: |
+          rm .github/workflows/pulse-082q-fix-now.yml
+          git config user.name pulse-forge
+          git config user.email pulse-forge@users.noreply.github.com
+          git add pulse-autobuild/request-app/RequestForm.html .github/workflows/pulse-082q-fix-now.yml
+          git commit -m "PULSE-082Q: avoid NOW lead-time rounding failure"
+          git push
