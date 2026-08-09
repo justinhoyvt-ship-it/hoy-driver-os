@@ -26,7 +26,8 @@ const RIDE = Object.freeze({
     'Customer Name','Customer Phone','Customer Email',
     'Pickup Address','Destination','Pickup At','Passengers','Notes','Consent',
     'Confirmed At','Cancelled At','Completed At','Calendar Event ID','Driver Notes','Dedup Key',
-    'Ride ID','PIN Salt','PIN Verifier','Access Issued At','Access Email Sent At'
+    'Ride ID','PIN Salt','PIN Verifier','Access Issued At','Access Email Sent At',
+    'Quoted Fare','Quote ID','Quote Expires At','Pricing Version'
   ])
 });
 
@@ -587,6 +588,7 @@ function submitRideRequest(payload) {
   if (payload.consent !== true) throw new Error('Consent is required before sending a request.');
 
   const customer = normalizeRidePayload_(payload);
+  const fareQuote = pulseValidateSubmittedFareQuote_(payload, customer);
   const lock = LockService.getScriptLock();
   lock.waitLock(10000);
   try {
@@ -598,7 +600,8 @@ function submitRideRequest(payload) {
         duplicate: true,
         requestId: duplicate.obj['Request ID'],
         status: duplicate.obj.Status,
-        driverName: cfg.driverName
+        driverName: cfg.driverName,
+        quotedFare: Number(duplicate.obj['Quoted Fare'] || fareQuote.fare)
       };
     }
 
@@ -624,12 +627,16 @@ function submitRideRequest(payload) {
       'Completed At': '',
       'Calendar Event ID': '',
       'Driver Notes': '',
-      'Dedup Key': customer.dedupKey
+      'Dedup Key': customer.dedupKey,
+      'Quoted Fare': fareQuote.fare,
+      'Quote ID': fareQuote.quoteId,
+      'Quote Expires At': new Date(fareQuote.expiresAt),
+      'Pricing Version': fareQuote.pricingVersion
     };
     sh.appendRow(RIDE.HEADERS.map(function(header) { return row[header] === undefined ? '' : row[header]; }));
     notifyDriverOfRequest_(row);
     notifyCustomerReceived_(row);
-    return { ok: true, requestId: requestId, status: 'REQUESTED', driverName: cfg.driverName };
+    return { ok: true, requestId: requestId, status: 'REQUESTED', driverName: cfg.driverName, quotedFare: fareQuote.fare, quoteId: fareQuote.quoteId };
   } finally {
     lock.releaseLock();
   }

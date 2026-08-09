@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "taskId": "PULSE-058",
+  "title": "Carry the rider-visible Pulse fare through request confirmation into Hoy Driver Inbox",
+  "status": "STAGED_FOR_REVIEW",
+  "automaticMerge": false,
+  "productionDeployment": false,
+  "productionMutation": false,
+  "engineActivation": false,
+  "scope": {
+    "reusePulse059FareEngine": true,
+    "preserveQrSameDayLane": true,
+    "preserveFutureSchedulingLane": true,
+    "signedFareHandoff": true,
+    "driverInboxDisplaysQuotedFare": true,
+    "standaloneRequestAppSoleWriter": true,
+    "recalculateAtSubmission": false
+  },
+  "acceptanceCriteria": [
+    "The exact fare shown to the rider is carried into the authoritative Ride Requests row.",
+    "The quote is cryptographically bound to quote ID, route, pickup time, fare, pricing version, and expiry before submission.",
+    "Expired, modified, route-changed, or pickup-time-changed quote payloads fail closed.",
+    "Hoy Driver reads the stored quoted fare and displays it in the existing Inbox card.",
+    "The request app remains the only Ride Requests writer.",
+    "Existing QR same-day behavior, future scheduling, PULSE-079 held requests, lifecycle, and fare calculation are not rebuilt.",
+    "No production deployment or automatic merge occurs."
+  ]
+}

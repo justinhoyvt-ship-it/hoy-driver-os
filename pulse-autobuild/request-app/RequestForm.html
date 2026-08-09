@@ -682,6 +682,16 @@
         return;
       }
       submittedQuote=Object.assign({},activeQuote);
+      var requestPayload=Object.assign({},data,{
+        quoteId:submittedQuote.quoteId||'',
+        quotedFare:submittedQuote.fare,
+        quoteOrigin:submittedQuote.origin||data.pickup,
+        quoteDestination:submittedQuote.destination||data.destination,
+        quotePickupAt:submittedQuote.pickupAt||'',
+        quoteExpiresAt:submittedQuote.expiresAt||'',
+        quotePricingVersion:submittedQuote.pricingVersion||'',
+        quoteToken:submittedQuote.quoteToken||''
+      });
       submissionState='submitting';
       button.disabled=true;
       button.textContent=testMode?'Testing…':'Confirming…';
@@ -700,7 +710,7 @@
           setExperienceState_('retry','The request was not sent. Review the message and retry.','confirm');
           showError((err&&err.message)?err.message:'Could not send the request. Please try again.');
         })
-        .submitRideRequest(data);
+        .submitRideRequest(requestPayload);
     }
 
     function showError(msg){
