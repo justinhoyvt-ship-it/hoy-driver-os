@@ -1,0 +1,11 @@
+name: PULSE-084 Smoke
+on:
+  push:
+    branches:
+      - pulse/pulse-084-fare-receipt-continuity
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo PULSE-084-smoke
