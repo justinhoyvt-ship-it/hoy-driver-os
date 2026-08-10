@@ -51,6 +51,11 @@
     ],
     "reasonFareQuoteDeferred": "The captured live RiderExperience.gs already contains the PULSE-059 fare engine. Adding canonical FareQuote.gs before moving that code would duplicate PULSE_FARE_VERSION_, pulseGetFareQuote, and related functions."
   },
+  "preserveUnchanged": [
+    "RequestForm.html",
+    "RiderExperience.gs",
+    "appsscript.json"
+  ],
   "phaseBCleanupAfterQrPasses": {
     "add": ["FareQuote.gs"],
     "replace": ["RiderExperience.gs with canonical rider-experience configuration"],
