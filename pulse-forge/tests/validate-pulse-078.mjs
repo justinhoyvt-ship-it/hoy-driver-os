@@ -8,7 +8,10 @@ const root = path.basename(cwd) === 'pulse-forge'
   ? cwd
   : path.resolve(cwd, 'pulse-forge');
 const sourcePath = path.join(root, 'controller/PULSE078SourceReconciliation.gs');
+const taskPath = path.resolve(root, '../pulse-agent/tasks/PULSE-078.json');
 const problems = [];
+const LIVE_REQUEST_PROJECT = '1IMkq0QRzfOdhtMkefk65eN9ceOdxtNG2YgzGBCd15IAUK0u8bnisi0b0';
+const STALE_REQUEST_PROJECT = '1pxF-tqlu-NrINv0QD-sQZEXMGUoc408YhHOuKccoU_URCtCyOmTiaVSm';
 
 let source = '';
 if (!fs.existsSync(sourcePath)) {
@@ -22,6 +25,13 @@ if (!fs.existsSync(sourcePath)) {
   }
 }
 
+let task = null;
+try {
+  task = JSON.parse(fs.readFileSync(taskPath, 'utf8'));
+} catch (error) {
+  problems.push(`Unable to read PULSE-078 task map: ${error.message}`);
+}
+
 for (const marker of [
   'function forgePulse078RunSourceReconciliation()',
   'function forgePulse078CompareFiles_(liveFiles, repoFiles)',
@@ -29,10 +39,21 @@ for (const marker of [
   "authority: 'REPO'",
   "authority: 'LIVE'",
   "rideRequestsWriter: true",
+  `scriptId: '${LIVE_REQUEST_PROJECT}'`,
   'appsScriptHeadWrites: 0',
   'productionTouched: false'
 ]) {
   if (!source.includes(marker)) problems.push(`Missing PULSE-078 marker: ${marker}`);
+}
+
+if (source.includes(STALE_REQUEST_PROJECT)) {
+  problems.push('Stale rider request Apps Script project ID remains in reconciliation controller');
+}
+if (!task || task.targets?.requestApp !== LIVE_REQUEST_PROJECT) {
+  problems.push('PULSE-078 task map does not target the current live rider request project');
+}
+if (JSON.stringify(task || {}).includes(STALE_REQUEST_PROJECT)) {
+  problems.push('Stale rider request Apps Script project ID remains in PULSE-078 task map');
 }
 
 for (const forbidden of [
@@ -151,6 +172,7 @@ try {
 const report = {
   ok: problems.length === 0,
   checkedAt: new Date().toISOString(),
+  requestProject: LIVE_REQUEST_PROJECT,
   problems
 };
 console.log(JSON.stringify(report, null, 2));

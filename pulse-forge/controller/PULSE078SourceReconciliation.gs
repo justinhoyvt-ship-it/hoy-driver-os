@@ -37,7 +37,7 @@ function forgePulse078Targets_() {
     },
     {
       alias: 'PULSE_REQUEST_APP',
-      scriptId: '1pxF-tqlu-NrINv0QD-sQZEXMGUoc408YhHOuKccoU_URCtCyOmTiaVSm',
+      scriptId: '1IMkq0QRzfOdhtMkefk65eN9ceOdxtNG2YgzGBCd15IAUK0u8bnisi0b0',
       repoRoots: ['pulse-autobuild/request-app/'],
       repoExact: [],
       canonicalRoot: 'pulse-autobuild/request-app',

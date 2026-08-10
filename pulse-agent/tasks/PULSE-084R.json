@@ -1,0 +1,19 @@
+{
+  "taskId": "PULSE-084R",
+  "title": "Correct the canonical live rider/request Apps Script project mapping",
+  "status": "STAGED_FOR_REVIEW",
+  "dependsOn": ["PULSE-084"],
+  "liveRequestProjectId": "1IMkq0QRzfOdhtMkefk65eN9ceOdxtNG2YgzGBCd15IAUK0u8bnisi0b0",
+  "staleProjectId": "1pxF-tqlu-NrINv0QD-sQZEXMGUoc408YhHOuKccoU_URCtCyOmTiaVSm",
+  "canonicalSource": "pulse-autobuild/request-app",
+  "acceptance": {
+    "reconciliationControllerUsesLiveProject": true,
+    "reconciliationTaskUsesLiveProject": true,
+    "staleProjectRejectedByCI": true,
+    "masterRegistryCorrected": true,
+    "rideRequestsWriterBoundaryPreserved": true,
+    "productionDeploymentAutomatic": false,
+    "automaticMerge": false,
+    "productionDataMutation": false
+  }
+}
