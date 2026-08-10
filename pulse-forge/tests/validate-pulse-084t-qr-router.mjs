@@ -7,25 +7,84 @@ const root=path.resolve(here,'../..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const driver=read('apps-script/hoy-driver-os-writer/Code.gs');
 const patch=read('pulse-autobuild/request-app/production-router-patch.gs.txt');
+const qr=read('pulse-autobuild/request-app/QrLiveRequest.html');
+const qrServer=read('pulse-autobuild/request-app/QrLiveServer.gs');
+const future=read('pulse-autobuild/request-app/RequestForm.html');
+const fare=read('pulse-autobuild/request-app/FareQuote.gs');
 const manifest=JSON.parse(read('pulse-autobuild/request-app/production-sync-manifest.json'));
 const task=JSON.parse(read('pulse-agent/tasks/PULSE-084T.json'));
 const failures=[];
 const check=(ok,msg)=>{if(!ok)failures.push(msg);};
 
-check(task.routes?.qr==='QRLiveRequest.html','QR route contract changed');
+check(task.routes?.qr==='QrLiveRequest.html','QR route contract changed');
 check(task.routes?.future==='RequestForm.html','future route contract changed');
-check(patch.includes("const view = String(params.view || '').toLowerCase();"),'router patch must read view');
-check(patch.includes("const source = String(params.source || '').toLowerCase();"),'router patch must read source');
-check(patch.includes("if (view === 'qr' || source === 'qr_live')"),'QR selector route missing');
-check(patch.includes("createHtmlOutputFromFile('QRLiveRequest')"),'QR must render QRLiveRequest.html');
-check(patch.includes("createHtmlOutputFromFile('RequestForm')"),'future/default must render RequestForm.html');
-check(patch.indexOf("createHtmlOutputFromFile('QRLiveRequest')") < patch.indexOf("createHtmlOutputFromFile('RequestForm')"),'QR route must be checked before default future form');
+check(task.baseline?.qrSameDayOnly===true,'QR same-day baseline missing');
+check(task.baseline?.qrNowLater===true,'QR NOW/LATER baseline missing');
+check(task.delta?.newFareCalculator===false,'QR recovery must not create a second fare calculator');
+
+for(const marker of [
+  'function requestPageFile_(params)',
+  "view === 'qr' || view === 'qr-live' || source === 'qr_live'",
+  "return 'QrLiveRequest'",
+  "return 'RequestForm'",
+  "createHtmlOutputFromFile(pageFile)",
+  "action === 'driver-decision'",
+  'driverDecisionResponse_(params)'
+]) check(patch.includes(marker),`routing patch marker missing: ${marker}`);
+
 check(driver.includes("'&view=qr&source=qr_live'"),'Hoy Driver QR URL selectors changed');
-check(manifest.patchOnly?.includes('Code.gs'),'Code.gs must be patch-only during QR repair');
-check(manifest.preserveLiveOnly?.includes('QRLiveRequest.html'),'QRLiveRequest.html must be preserved');
-check(manifest.preserveUnchanged?.includes('RequestForm.html'),'RequestForm.html must remain unchanged during QR repair');
+check(driver.includes("'&view=form'"),'Hoy Driver future-form URL selector changed');
+
+for(const marker of [
+  '<title>Pulse Vermont — Quick ride request</title>',
+  '>Now</button>',
+  '>Later today</button>',
+  'id="quotePanel"',
+  'id="quoteBtn"',
+  '.pulseGetFareQuote({',
+  'quoteIsCurrent_()',
+  'quotedFare:quote&&quote.fare',
+  'quoteToken:quote&&quote.quoteToken',
+  '.submitQrLiveRide(data)',
+  'Request sent to your Pulse driver. Watch your email for confirmation.'
+]) check(qr.includes(marker),`QrLiveRequest marker missing: ${marker}`);
+
+for(const marker of [
+  "SOURCE: 'QR_LIVE'",
+  "throw new Error('QR rides are available for today only.')",
+  "timing !== 'NOW' && timing !== 'LATER'",
+  'function submitQrLiveRide(payload)',
+  'pulseValidateSubmittedFareQuote_(payload, qrLiveFareCustomer_(payload, customer))',
+  "'Quoted Fare': fareQuote.fare",
+  "'Quote ID': fareQuote.quoteId",
+  "'Quote Expires At': new Date(fareQuote.expiresAt)",
+  "'Pricing Version': fareQuote.pricingVersion",
+  "if (customer.timing === 'LATER') notifyDriverOfRequest_(row)",
+  'notifyCustomerReceived_(row)',
+  'function driverDecisionResponse_(params)',
+  'function expireQrLiveRequests()'
+]) check(qrServer.includes(marker),`QR server marker missing: ${marker}`);
+
+for(const marker of [
+  'function pulseGetFareQuote(input)',
+  'function pulseValidateSubmittedFareQuote_(payload, customer)',
+  'writesPerformed: false'
+]) check(fare.includes(marker),`existing fare engine marker missing: ${marker}`);
+check(!qrServer.includes('PULSE_FARE_BASE')&&!qr.includes('PULSE_FARE_BASE'),'QR lane must reuse FareQuote.gs rather than duplicate pricing');
+
+check(future.includes('<title>Pulse Vermont — Request a ride</title>'),'RequestForm future surface missing');
+check(future.includes('id="quotePanel"'),'RequestForm must retain its existing fare panel');
+check(future.includes('pulseGetFareQuote'),'RequestForm must retain its existing fare engine call');
+
+check(manifest.architecture?.futureBookingHtml==='RequestForm.html','manifest future form mapping changed');
+check(manifest.architecture?.qrSameDayHtml==='QrLiveRequest.html','manifest QR form mapping changed');
+check(manifest.architecture?.qrDateScope==='TODAY_ONLY','manifest same-day contract missing');
+check(manifest.preserveUnchanged?.includes('RequestForm.html'),'RequestForm must remain untouched during QR recovery');
+check(manifest.addOrReplace?.includes('QrLiveRequest.html'),'canonical QR HTML must be deployed');
+check(manifest.addOrReplace?.includes('QrLiveServer.gs'),'QR server must be restored');
+check(manifest.addOrReplace?.includes('FareQuote.gs'),'fare engine must be present');
 check(manifest.safety?.replaceRequestFormDuringQrRepair===false,'QR repair must not replace RequestForm.html');
 check(manifest.safety?.replaceWholeCodeDuringQrRepair===false,'QR repair must not replace whole Code.gs');
 
-if(failures.length){console.error('PULSE-084T QR router FAIL');failures.forEach(x=>console.error('- '+x));process.exit(1);} 
-console.log('PULSE-084T QR router PASS');
+if(failures.length){console.error('PULSE-084T QR recovery FAIL');failures.forEach(x=>console.error('- '+x));process.exit(1);}
+console.log('PULSE-084T QR recovery PASS');
