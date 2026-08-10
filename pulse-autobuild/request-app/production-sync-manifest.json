@@ -1,8 +1,30 @@
 {
-  "taskId": "PULSE-084T",
+  "taskId": "PULSE-084U",
   "targetProjectName": "Friend Request app-Main",
   "targetScriptId": "1IMkq0QRzfOdhtMkefk65eN9ceOdxtNG2YgzGBCd15IAUK0u8bnisi0b0",
   "sourceRoot": "pulse-autobuild/request-app",
+  "capturedLiveState": {
+    "capturedAt": "2026-08-10T16:40:00-04:00",
+    "captureMethod": "authenticated Safari webarchive",
+    "files": {
+      "appsscript.json": "2801829018a46e58275687c3c6d58114ce8b2795f82f260a61563af666d60be0",
+      "Code.gs": "67dc3134de29af6f4bc8db7c0b448ccc7f1343605f2468b2a934deafbc7fc945",
+      "QrLiveRequest.html": "818491195e324b90f9e89f77d7b9283f3d8b88a28f85c89fce778a7642c7b960",
+      "RequestForm.html": "79e2d750ebd4c991f49a1f396bcea2330f2870be6a1f99dc20355649886f456d",
+      "RiderExperience.gs": "2f814820a169f124a3e3ccfd6877550652aaea09cadec8bd9d5a19fcea8a5fbf"
+    },
+    "liveFareEngineFile": "RiderExperience.gs",
+    "liveFareEngineFunctions": [
+      "pulseGetFareQuote",
+      "pulseValidateSubmittedFareQuote_"
+    ],
+    "missingFromLive": [
+      "QrLiveServer.gs",
+      "requestPageFile_",
+      "submitQrLiveRide",
+      "driverDecisionResponse_"
+    ]
+  },
   "architecture": {
     "futureBookingHtml": "RequestForm.html",
     "qrSameDayHtml": "QrLiveRequest.html",
@@ -10,18 +32,35 @@
     "qrDateScope": "TODAY_ONLY",
     "sharedWriter": "Ride Requests"
   },
-  "patchOnly": [
-    "Code.gs: requestPageFile_, doGet(e), doPost(e)"
-  ],
-  "addOrReplace": [
-    "QrLiveServer.gs",
-    "QrLiveRequest.html",
-    "FareQuote.gs"
-  ],
+  "phaseARecovery": {
+    "goal": "Restore the known-good QR NOW/LATER TODAY lane and add fare with the fewest production edits.",
+    "patchOnly": [
+      "Code.gs: requestPageFile_, doGet(e), doPost(e)"
+    ],
+    "addOrReplace": [
+      "QrLiveServer.gs",
+      "QrLiveRequest.html"
+    ],
+    "preserveUnchanged": [
+      "RequestForm.html",
+      "RiderExperience.gs",
+      "appsscript.json"
+    ],
+    "doNotAddYet": [
+      "FareQuote.gs"
+    ],
+    "reasonFareQuoteDeferred": "The captured live RiderExperience.gs already contains the PULSE-059 fare engine. Adding canonical FareQuote.gs before moving that code would duplicate PULSE_FARE_VERSION_, pulseGetFareQuote, and related functions."
+  },
   "preserveUnchanged": [
     "RequestForm.html",
-    "RiderExperience.gs"
+    "RiderExperience.gs",
+    "appsscript.json"
   ],
+  "phaseBCleanupAfterQrPasses": {
+    "add": ["FareQuote.gs"],
+    "replace": ["RiderExperience.gs with canonical rider-experience configuration"],
+    "goal": "Restore canonical file naming only after the live QR+fare lane is proven."
+  },
   "routerPatch": "production-router-patch.gs.txt",
   "requiredHeaders": [
     "Quoted Fare",
@@ -42,16 +81,12 @@
     "driverDecisionResponse_",
     "expireQrLiveRequests"
   ],
-  "requiredQrFare": [
-    "pulseGetFareQuote",
-    "pulseValidateSubmittedFareQuote_",
-    "Quoted Fare",
-    "Quote ID"
-  ],
-  "deploymentRule": "Restore the QR server file and fare-enabled QrLiveRequest.html, patch only the three routing functions in Code.gs, ensure FareQuote.gs is present, leave RequestForm.html unchanged, then update the existing production deployment. Do not create a new production URL.",
+  "deploymentRule": "PHASE A ONLY: from the captured live state, add QrLiveServer.gs, replace QrLiveRequest.html with the fare-enabled canonical version, and patch only requestPageFile_/doGet/doPost in Code.gs. Do not touch RequestForm.html or RiderExperience.gs and do not add FareQuote.gs yet. Update the existing production deployment, then prove scan QR -> QrLiveRequest -> NOW/LATER TODAY -> fare -> request before Phase B cleanup.",
   "safety": {
     "replaceRequestFormDuringQrRepair": false,
     "replaceWholeCodeDuringQrRepair": false,
+    "addFareQuoteDuringPhaseA": false,
+    "touchRiderExperienceDuringPhaseA": false,
     "automaticProductionWrite": false,
     "automaticDeployment": false
   }
