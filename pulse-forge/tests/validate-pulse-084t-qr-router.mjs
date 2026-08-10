@@ -22,15 +22,15 @@ check(task.baseline?.qrSameDayOnly===true,'QR same-day baseline missing');
 check(task.baseline?.qrNowLater===true,'QR NOW/LATER baseline missing');
 check(task.delta?.newFareCalculator===false,'QR recovery must not create a second fare calculator');
 
-for(const marker of [
-  'function requestPageFile_(params)',
-  "view === 'qr' || view === 'qr-live' || source === 'qr_live'",
-  "return 'QrLiveRequest'",
-  "return 'RequestForm'",
-  "createHtmlOutputFromFile(pageFile)",
-  "action === 'driver-decision'",
-  'driverDecisionResponse_(params)'
-]) check(patch.includes(marker),`routing patch marker missing: ${marker}`);
+const routeChecks=[
+  [/function\s+requestPageFile_\s*\(\s*params\s*\)/,'requestPageFile_ helper missing'],
+  [/view\s*===\s*['"]qr['"][\s\S]*source\s*===\s*['"]qr_live['"]/,'QR selector route missing'],
+  [/return\s+['"]QrLiveRequest['"]/,'QR route target missing'],
+  [/return\s+['"]RequestForm['"]/,'future/default route target missing'],
+  [/createHtmlOutputFromFile\s*\(\s*pageFile\s*\)/,'selected page is not rendered'],
+  [/action\s*===\s*['"]driver-decision['"][\s\S]*driverDecisionResponse_\s*\(\s*params\s*\)/,'driver decision POST route missing']
+];
+for(const [pattern,msg] of routeChecks) check(pattern.test(patch),msg);
 
 check(driver.includes("'&view=qr&source=qr_live'"),'Hoy Driver QR URL selectors changed');
 check(driver.includes("'&view=form'"),'Hoy Driver future-form URL selector changed');
@@ -54,6 +54,8 @@ for(const marker of [
   "throw new Error('QR rides are available for today only.')",
   "timing !== 'NOW' && timing !== 'LATER'",
   'function submitQrLiveRide(payload)',
+  'if (payload.testMode === true)',
+  'noWrite: true',
   'pulseValidateSubmittedFareQuote_(payload, qrLiveFareCustomer_(payload, customer))',
   "'Quoted Fare': fareQuote.fare",
   "'Quote ID': fareQuote.quoteId",
@@ -64,6 +66,7 @@ for(const marker of [
   'function driverDecisionResponse_(params)',
   'function expireQrLiveRequests()'
 ]) check(qrServer.includes(marker),`QR server marker missing: ${marker}`);
+check(!qrServer.includes("payload.testMode === true &&"),'QR test mode must never fall through to a write path');
 
 for(const marker of [
   'function pulseGetFareQuote(input)',
