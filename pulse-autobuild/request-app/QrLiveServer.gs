@@ -57,9 +57,12 @@ function normalizeQrLivePayload_(payload) {
   const timing = qrLiveTiming_(payload.timing);
   const today = qrLiveToday_();
   const submittedDate = String(payload.date || today).trim();
-  const pickupLatNumber = Number(payload.pickupLat);
-  const pickupLngNumber = Number(payload.pickupLng);
+  const pickupLatRaw = String(payload.pickupLat == null ? '' : payload.pickupLat).trim();
+  const pickupLngRaw = String(payload.pickupLng == null ? '' : payload.pickupLng).trim();
+  const pickupLatNumber = Number(pickupLatRaw);
+  const pickupLngNumber = Number(pickupLngRaw);
   const hasPickupCoordinates =
+    !!pickupLatRaw && !!pickupLngRaw &&
     Number.isFinite(pickupLatNumber) && pickupLatNumber >= -90 && pickupLatNumber <= 90 &&
     Number.isFinite(pickupLngNumber) && pickupLngNumber >= -180 && pickupLngNumber <= 180;
 
@@ -123,7 +126,7 @@ function qrLiveFareCustomer_(payload, customer) {
 /** Called only by QrLiveRequest.html. */
 function submitQrLiveRide(payload) {
   payload = payload || {};
-  if (payload.testMode === true && !payload.quoteToken) {
+  if (payload.testMode === true) {
     return {
       ok: true,
       noWrite: true,
@@ -131,7 +134,8 @@ function submitQrLiveRide(payload) {
       status: 'REQUESTED',
       source: PULSE_QR_LIVE.SOURCE,
       timing: qrLiveTiming_(payload.timing || 'NOW'),
-      driverName: rideCfg_().driverName
+      driverName: rideCfg_().driverName,
+      quotedFare: Number.isFinite(Number(payload.quotedFare)) ? Number(payload.quotedFare) : null
     };
   }
 
@@ -328,6 +332,8 @@ function testPulse084tQrLiveNoWrite() {
     time:Utilities.formatDate(later, RIDE.TIMEZONE, 'HH:mm'), timing:'LATER',
     passengers:1, notes:'', consent:true
   });
+  const noWrite = submitQrLiveRide({testMode:true,timing:'NOW',quotedFare:30});
+  if (!noWrite || noWrite.noWrite !== true) throw new Error('QR test mode must never write.');
   return {
     ok:true,
     source:PULSE_QR_LIVE.SOURCE,
