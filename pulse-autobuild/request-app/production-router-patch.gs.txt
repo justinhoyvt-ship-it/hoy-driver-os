@@ -1,9 +1,26 @@
+/*
+ * PULSE-084T production routing patch.
+ * In Friend Request app-Main:
+ *   1) add requestPageFile_ if absent,
+ *   2) replace only doGet(e),
+ *   3) replace only doPost(e).
+ * Do not replace RequestForm.html as part of QR recovery.
+ */
+function requestPageFile_(params) {
+  params = params || {};
+  const view = String(params.view || params.page || '').trim().toLowerCase();
+  const source = String(params.source || '').trim().toLowerCase();
+
+  if (view === 'qr' || view === 'qr-live' || source === 'qr_live') {
+    return 'QrLiveRequest';
+  }
+  return 'RequestForm';
+}
+
 function doGet(e) {
   e = e || {};
   const params = e.parameter || {};
   const action = String(params.action || '').toLowerCase();
-  const view = String(params.view || '').toLowerCase();
-  const source = String(params.source || '').toLowerCase();
 
   if (action === 'driver-actions') return driverActionLinksResponse_(params);
   if (action === 'driver-status-state') return driverStatusStateResponse_(params);
@@ -12,15 +29,20 @@ function doGet(e) {
     return rideActionPage_(action, params);
   }
 
-  if (view === 'qr' || source === 'qr_live') {
-    return HtmlService.createHtmlOutputFromFile('QRLiveRequest')
-      .setTitle('Pulse Vermont — Ride today')
-      .addMetaTag('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover')
-      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-  }
-
-  return HtmlService.createHtmlOutputFromFile('RequestForm')
-    .setTitle('Pulse Vermont — Request a ride')
+  const pageFile = requestPageFile_(params);
+  return HtmlService.createHtmlOutputFromFile(pageFile)
+    .setTitle(pageFile === 'QrLiveRequest' ? 'Pulse Vermont — Quick ride request' : 'Pulse Vermont — Request a ride')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+function doPost(e) {
+  e = e || {};
+  const params = Object.assign({}, e.parameter || {}, parseJsonPost_(e));
+  const action = String(params.action || '').toLowerCase();
+  if (action === 'driver-decision') return driverDecisionResponse_(params);
+  if (action === 'driver-status') return driverStatusUpdateResponse_(params);
+  if (action === 'rider-status') return riderStatusLookupResponse_(params);
+  if (action === 'status-access') return riderStatusAccessSubmitPage_(params);
+  return jsonResponse_({ ok: false, message: 'Unsupported request action.' });
 }
