@@ -3,22 +3,26 @@
   "targetProjectName": "Friend Request app-Main",
   "targetScriptId": "1IMkq0QRzfOdhtMkefk65eN9ceOdxtNG2YgzGBCd15IAUK0u8bnisi0b0",
   "sourceRoot": "pulse-autobuild/request-app",
-  "replace": [],
+  "architecture": {
+    "futureBookingHtml": "RequestForm.html",
+    "qrSameDayHtml": "QrLiveRequest.html",
+    "qrTiming": ["NOW", "LATER"],
+    "qrDateScope": "TODAY_ONLY",
+    "sharedWriter": "Ride Requests"
+  },
   "patchOnly": [
-    "Code.gs"
+    "Code.gs: requestPageFile_, doGet(e), doPost(e)"
   ],
   "addOrReplace": [
-    "FareQuote.gs",
-    "RiderExperience.gs"
-  ],
-  "preserveLiveOnly": [
-    "QRLiveRequest.html"
+    "QrLiveServer.gs",
+    "QrLiveRequest.html",
+    "FareQuote.gs"
   ],
   "preserveUnchanged": [
-    "RequestForm.html"
+    "RequestForm.html",
+    "RiderExperience.gs"
   ],
   "routerPatch": "production-router-patch.gs.txt",
-  "manifest": "appsscript.json",
   "requiredHeaders": [
     "Quoted Fare",
     "Quote ID",
@@ -27,13 +31,25 @@
     "Receipt Email Sent At"
   ],
   "requiredRoutes": {
-    "view=qr": "QRLiveRequest.html",
-    "source=qr_live": "QRLiveRequest.html",
+    "view=qr": "QrLiveRequest.html",
+    "source=qr_live": "QrLiveRequest.html",
+    "view=form": "RequestForm.html",
     "default": "RequestForm.html"
   },
-  "deploymentRule": "Patch only the doGet router in the current production source, preserve QRLiveRequest.html and RequestForm.html, then update the existing production deployment. Do not create a new production URL.",
+  "requiredQrFunctions": [
+    "submitQrLiveRide",
+    "normalizeQrLivePayload_",
+    "driverDecisionResponse_",
+    "expireQrLiveRequests"
+  ],
+  "requiredQrFare": [
+    "pulseGetFareQuote",
+    "pulseValidateSubmittedFareQuote_",
+    "Quoted Fare",
+    "Quote ID"
+  ],
+  "deploymentRule": "Restore the QR server file and fare-enabled QrLiveRequest.html, patch only the three routing functions in Code.gs, ensure FareQuote.gs is present, leave RequestForm.html unchanged, then update the existing production deployment. Do not create a new production URL.",
   "safety": {
-    "deleteQRLiveRequest": false,
     "replaceRequestFormDuringQrRepair": false,
     "replaceWholeCodeDuringQrRepair": false,
     "automaticProductionWrite": false,
