@@ -68,26 +68,37 @@ for(const marker of [
 ]) check(qrServer.includes(marker),`QR server marker missing: ${marker}`);
 check(!qrServer.includes("payload.testMode === true &&"),'QR test mode must never fall through to a write path');
 
+// Canonical fare engine still exists in repo, but exact captured live state already
+// contains these functions in RiderExperience.gs. Phase A must therefore NOT add
+// FareQuote.gs until that live file is split back to canonical naming.
 for(const marker of [
   'function pulseGetFareQuote(input)',
   'function pulseValidateSubmittedFareQuote_(payload, customer)',
   'writesPerformed: false'
-]) check(fare.includes(marker),`existing fare engine marker missing: ${marker}`);
-check(!qrServer.includes('PULSE_FARE_BASE')&&!qr.includes('PULSE_FARE_BASE'),'QR lane must reuse FareQuote.gs rather than duplicate pricing');
+]) check(fare.includes(marker),`canonical fare engine marker missing: ${marker}`);
+check(!qrServer.includes('PULSE_FARE_BASE')&&!qr.includes('PULSE_FARE_BASE'),'QR lane must reuse the existing fare engine rather than duplicate pricing');
 
 check(future.includes('<title>Pulse Vermont — Request a ride</title>'),'RequestForm future surface missing');
 check(future.includes('id="quotePanel"'),'RequestForm must retain its existing fare panel');
 check(future.includes('pulseGetFareQuote'),'RequestForm must retain its existing fare engine call');
 
+check(manifest.taskId==='PULSE-084U','captured-live recovery manifest task ID missing');
+check(manifest.targetScriptId==='1IMkq0QRzfOdhtMkefk65eN9ceOdxtNG2YgzGBCd15IAUK0u8bnisi0b0','wrong live rider project');
+check(manifest.capturedLiveState?.captureMethod==='authenticated Safari webarchive','live capture method missing');
+check(manifest.capturedLiveState?.liveFareEngineFile==='RiderExperience.gs','captured live fare-engine file not recorded');
+check(manifest.capturedLiveState?.missingFromLive?.includes('submitQrLiveRide'),'captured missing QR writer not recorded');
 check(manifest.architecture?.futureBookingHtml==='RequestForm.html','manifest future form mapping changed');
 check(manifest.architecture?.qrSameDayHtml==='QrLiveRequest.html','manifest QR form mapping changed');
 check(manifest.architecture?.qrDateScope==='TODAY_ONLY','manifest same-day contract missing');
-check(manifest.preserveUnchanged?.includes('RequestForm.html'),'RequestForm must remain untouched during QR recovery');
-check(manifest.addOrReplace?.includes('QrLiveRequest.html'),'canonical QR HTML must be deployed');
-check(manifest.addOrReplace?.includes('QrLiveServer.gs'),'QR server must be restored');
-check(manifest.addOrReplace?.includes('FareQuote.gs'),'fare engine must be present');
+check(manifest.phaseARecovery?.preserveUnchanged?.includes('RequestForm.html'),'RequestForm must remain untouched during Phase A');
+check(manifest.phaseARecovery?.preserveUnchanged?.includes('RiderExperience.gs'),'captured live fare-engine file must remain untouched during Phase A');
+check(manifest.phaseARecovery?.addOrReplace?.includes('QrLiveRequest.html'),'fare-enabled QR HTML must be deployed in Phase A');
+check(manifest.phaseARecovery?.addOrReplace?.includes('QrLiveServer.gs'),'QR server must be restored in Phase A');
+check(manifest.phaseARecovery?.doNotAddYet?.includes('FareQuote.gs'),'Phase A must explicitly defer FareQuote.gs to prevent duplicate functions');
 check(manifest.safety?.replaceRequestFormDuringQrRepair===false,'QR repair must not replace RequestForm.html');
 check(manifest.safety?.replaceWholeCodeDuringQrRepair===false,'QR repair must not replace whole Code.gs');
+check(manifest.safety?.addFareQuoteDuringPhaseA===false,'Phase A must not add FareQuote.gs');
+check(manifest.safety?.touchRiderExperienceDuringPhaseA===false,'Phase A must not touch captured RiderExperience.gs');
 
-if(failures.length){console.error('PULSE-084T QR recovery FAIL');failures.forEach(x=>console.error('- '+x));process.exit(1);}
-console.log('PULSE-084T QR recovery PASS');
+if(failures.length){console.error('PULSE-084U captured-live QR recovery FAIL');failures.forEach(x=>console.error('- '+x));process.exit(1);}
+console.log('PULSE-084U captured-live QR recovery PASS');
