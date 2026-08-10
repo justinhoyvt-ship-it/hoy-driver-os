@@ -1,0 +1,48 @@
+{
+  "taskId": "PULSE-084U",
+  "title": "Recover QR fare lane from exact live editor capture",
+  "status": "STAGED_FOR_REVIEW",
+  "dependsOn": ["PULSE-084T"],
+  "targetScriptId": "1IMkq0QRzfOdhtMkefk65eN9ceOdxtNG2YgzGBCd15IAUK0u8bnisi0b0",
+  "capture": {
+    "method": "authenticated Safari webarchive",
+    "capturedAt": "2026-08-10T16:40:00-04:00",
+    "files": [
+      "appsscript.json",
+      "Code.gs",
+      "QrLiveRequest.html",
+      "RequestForm.html",
+      "RiderExperience.gs"
+    ]
+  },
+  "observedLiveState": {
+    "codeHasFareHeaders": true,
+    "codeAlwaysServesRequestForm": true,
+    "codeHasSubmitQrLiveRide": false,
+    "qrHtmlCallsSubmitQrLiveRide": true,
+    "qrHtmlHasFareUi": false,
+    "requestFormHasFareUi": true,
+    "riderExperienceFileActuallyContainsFareEngine": true,
+    "separateFareQuoteFilePresent": false,
+    "separateQrLiveServerFilePresent": false
+  },
+  "phaseA": {
+    "add": ["QrLiveServer.gs"],
+    "replace": ["QrLiveRequest.html"],
+    "patch": ["Code.gs: requestPageFile_, doGet(e), doPost(e)"],
+    "leaveAlone": ["RequestForm.html", "RiderExperience.gs", "appsscript.json"],
+    "doNotAdd": ["FareQuote.gs"]
+  },
+  "acceptance": {
+    "qrOpensQrLiveRequest": true,
+    "qrSupportsNowOrLaterToday": true,
+    "qrShowsSignedFareBeforeRequest": true,
+    "qrRequestStoresQuotedFare": true,
+    "futureRequestFormUnchanged": true,
+    "noDuplicateFareFunctions": true,
+    "wholeCodeNotReplaced": true,
+    "automaticProductionWrite": false,
+    "automaticDeployment": false,
+    "automaticMerge": false
+  }
+}
