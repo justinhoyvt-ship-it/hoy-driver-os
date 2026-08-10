@@ -1,0 +1,21 @@
+{
+  "taskId": "PULSE-084T",
+  "title": "Restore protected QRLiveRequest router",
+  "status": "STAGED_FOR_REVIEW",
+  "dependsOn": ["PULSE-084", "PULSE-084R", "PULSE-084S"],
+  "targetScriptId": "1IMkq0QRzfOdhtMkefk65eN9ceOdxtNG2YgzGBCd15IAUK0u8bnisi0b0",
+  "routes": {
+    "qr": "QRLiveRequest.html",
+    "future": "RequestForm.html"
+  },
+  "qrSelectors": ["view=qr", "source=qr_live"],
+  "acceptance": {
+    "qrUsesDedicatedHtml": true,
+    "futureFormRemainsSeparate": true,
+    "statusAndDecisionRoutesPreserved": true,
+    "requestFormNotUsedAsQrSubstitute": true,
+    "automaticProductionWrite": false,
+    "automaticDeployment": false,
+    "automaticMerge": false
+  }
+}
