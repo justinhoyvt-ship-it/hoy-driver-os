@@ -1,0 +1,8 @@
+{
+  "taskId": "PULSE-084T",
+  "status": "STAGED_FOR_REVIEW",
+  "branch": "pulse/pulse-084t-restore-qr-router",
+  "productionDeployment": false,
+  "automaticMerge": false,
+  "productionMutation": false
+}

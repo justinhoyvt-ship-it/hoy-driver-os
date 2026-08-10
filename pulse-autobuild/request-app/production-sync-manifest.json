@@ -1,20 +1,28 @@
 {
-  "taskId": "PULSE-084S",
+  "taskId": "PULSE-084T",
   "targetProjectName": "Friend Request app-Main",
   "targetScriptId": "1IMkq0QRzfOdhtMkefk65eN9ceOdxtNG2YgzGBCd15IAUK0u8bnisi0b0",
   "sourceRoot": "pulse-autobuild/request-app",
-  "replace": [
-    "Code.gs",
-    "RequestForm.html"
+  "architecture": {
+    "futureBookingHtml": "RequestForm.html",
+    "qrSameDayHtml": "QrLiveRequest.html",
+    "qrTiming": ["NOW", "LATER"],
+    "qrDateScope": "TODAY_ONLY",
+    "sharedWriter": "Ride Requests"
+  },
+  "patchOnly": [
+    "Code.gs: requestPageFile_, doGet(e), doPost(e)"
   ],
   "addOrReplace": [
-    "FareQuote.gs",
+    "QrLiveServer.gs",
+    "QrLiveRequest.html",
+    "FareQuote.gs"
+  ],
+  "preserveUnchanged": [
+    "RequestForm.html",
     "RiderExperience.gs"
   ],
-  "preserveLiveOnly": [
-    "QRLiveRequest.html"
-  ],
-  "manifest": "appsscript.json",
+  "routerPatch": "production-router-patch.gs.txt",
   "requiredHeaders": [
     "Quoted Fare",
     "Quote ID",
@@ -22,13 +30,28 @@
     "Pricing Version",
     "Receipt Email Sent At"
   ],
-  "requiredUiMarkers": [
-    "Request sent to your Pulse driver",
-    "Watch your inbox for confirmation"
+  "requiredRoutes": {
+    "view=qr": "QrLiveRequest.html",
+    "source=qr_live": "QrLiveRequest.html",
+    "view=form": "RequestForm.html",
+    "default": "RequestForm.html"
+  },
+  "requiredQrFunctions": [
+    "submitQrLiveRide",
+    "normalizeQrLivePayload_",
+    "driverDecisionResponse_",
+    "expireQrLiveRequests"
   ],
-  "deploymentRule": "Update the existing production deployment only after source sync. Do not create a new production URL.",
+  "requiredQrFare": [
+    "pulseGetFareQuote",
+    "pulseValidateSubmittedFareQuote_",
+    "Quoted Fare",
+    "Quote ID"
+  ],
+  "deploymentRule": "Restore the QR server file and fare-enabled QrLiveRequest.html, patch only the three routing functions in Code.gs, ensure FareQuote.gs is present, leave RequestForm.html unchanged, then update the existing production deployment. Do not create a new production URL.",
   "safety": {
-    "deleteQRLiveRequest": false,
+    "replaceRequestFormDuringQrRepair": false,
+    "replaceWholeCodeDuringQrRepair": false,
     "automaticProductionWrite": false,
     "automaticDeployment": false
   }
