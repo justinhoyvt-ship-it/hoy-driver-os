@@ -1,17 +1,34 @@
 {
   "taskId": "PULSE-084T",
-  "title": "Restore protected QRLiveRequest router",
+  "title": "Restore the working QR same-day lane and add its fare handoff",
   "status": "STAGED_FOR_REVIEW",
-  "dependsOn": ["PULSE-084", "PULSE-084R", "PULSE-084S"],
+  "dependsOn": ["PULSE-057", "PULSE-058", "PULSE-084", "PULSE-084R", "PULSE-084S"],
   "targetScriptId": "1IMkq0QRzfOdhtMkefk65eN9ceOdxtNG2YgzGBCd15IAUK0u8bnisi0b0",
   "routes": {
-    "qr": "QRLiveRequest.html",
+    "qr": "QrLiveRequest.html",
     "future": "RequestForm.html"
   },
   "qrSelectors": ["view=qr", "source=qr_live"],
+  "baseline": {
+    "qrSameDayOnly": true,
+    "qrNowLater": true,
+    "futureFormSeparate": true,
+    "bothFormsSameAppsScriptProject": true,
+    "sharedRideRequestsWriter": true
+  },
+  "delta": {
+    "restoreQrServerFunctions": true,
+    "captureQrHtmlInRepo": true,
+    "addExistingFareEngineToQrHtml": true,
+    "storeSignedFareOnQrRequest": true,
+    "changeRequestFormHtml": false,
+    "newFareCalculator": false
+  },
   "acceptance": {
     "qrUsesDedicatedHtml": true,
     "futureFormRemainsSeparate": true,
+    "qrRequiresCurrentSignedFare": true,
+    "fareStoredInRideRequests": true,
     "statusAndDecisionRoutesPreserved": true,
     "requestFormNotUsedAsQrSubstitute": true,
     "automaticProductionWrite": false,
