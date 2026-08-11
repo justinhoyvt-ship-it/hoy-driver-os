@@ -20,7 +20,7 @@ check(task.status==='STAGED_FOR_REVIEW','PULSE-081 must be staged for review');
 check(task.productionDeployment===false&&task.productionMutation===false&&task.automaticMerge===false,'release safety flags changed');
 check(task.scope?.farePhoneValidationBlocksBuild===false,'fare phone validation became a build blocker');
 check(fare.includes('pulseGetFareQuote(input)')&&fare.includes('quote.quoteToken = pulseFareQuoteToken_(quote);'),'signed fare quote path missing');
-check(form.includes('.submitRideRequest(requestPayload);'),'fare-to-request handoff missing');
+check(/\.submitRideRequest\s*\(\s*requestPayload\s*\)/.test(form),'fare-to-request handoff missing');
 check(request.includes("'Quoted Fare': fareQuote.fare"),'authoritative Ride Requests fare missing');
 check(index.includes("Pulse fare $'+money(r.quotedFare)"),'driver Inbox fare display missing');
 check(foreground.includes("PULSE081_FARE_KEY='pulse-direct-ride-fares-v1'"),'direct-ride fare cache missing');
