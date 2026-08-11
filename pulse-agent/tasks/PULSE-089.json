@@ -1,25 +1,44 @@
 {
   "taskId": "PULSE-089",
-  "title": "Payment state + Venmo / future authorize-capture",
+  "title": "Payment state + PayPal/Venmo business checkout",
   "status": "STAGED",
   "dependsOn": ["PULSE-085C", "PULSE-087"],
   "scope": {
-    "nearTerm": [
-      "Add ride payment state: NOT_DUE, PENDING, PAID, UNPAID, WAIVED",
-      "After driver acceptance, confirmation email may show Pay with Venmo using the quoted fare and Ride ID",
-      "Completion receipt shows Paid or Payment due",
-      "If a completed ride remains unpaid, flag rider email/phone with balance due",
-      "Block or warn on the next request until prior balance is resolved",
-      "Declined requests never create a payment obligation"
+    "paymentState": ["NOT_DUE", "AUTHORIZED", "PENDING", "PAID", "UNPAID", "VOIDED", "WAIVED"],
+    "onlinePrepay": [
+      "Use PayPal Checkout with intent AUTHORIZE after fare/request review",
+      "Persist PayPal order ID and authorization ID against the Pulse Ride ID",
+      "Driver decline voids authorization and creates no payment obligation",
+      "Driver acceptance may leave funds authorized until ride completion",
+      "Ride completion captures the authorized amount server-side",
+      "If capture fails, mark UNPAID and send payment-due receipt"
     ],
     "venmo": {
       "profileUrl": "https://venmo.com/u/justinhoyvt",
-      "role": "near-term direct payment option",
-      "notAuthorityFor": ["authorization hold", "automatic capture", "automatic release on decline"]
+      "businessAccount": true,
+      "role": "supported business payment option and fallback direct-pay lane"
     },
-    "future": [
-      "Evaluate PayPal authorize/capture for preauthorization after acceptance and capture at ride completion",
-      "Keep payment provider behind Pulse payment-state abstraction so ride lifecycle does not change"
+    "inPerson": [
+      "Use Venmo/PayPal Tap to Pay on driver's phone as post-ride fallback",
+      "Record payment method as TAP_TO_PAY and mark PAID after successful in-person payment",
+      "Keep quoted ride fare separate from any configurable post-ride convenience fee"
+    ],
+    "postRideFee": {
+      "property": "POST_RIDE_FEE_PCT",
+      "requestedPercent": 5,
+      "productionDefaultPercent": 0,
+      "rule": "Do not enable the requested 5% post-ride fee until card-network, PayPal/Venmo terms, and Vermont surcharge compliance are verified. Build the field/configuration path now without activating it."
+    },
+    "unpaidLogic": [
+      "Completion receipt shows Paid or Payment due",
+      "If completed ride remains unpaid, flag rider email/phone with balance due",
+      "Block or warn on the next request until prior balance is resolved",
+      "Allow driver/admin to mark WAIVED when appropriate"
+    ],
+    "security": [
+      "Keep PayPal client secret server-side only",
+      "Use PayPal request IDs/idempotency for authorize/capture calls",
+      "Never trust browser-only payment success; verify server-side before marking PAID"
     ]
   },
   "production": {"automaticDeploy": false, "automaticMerge": false}
