@@ -1,0 +1,30 @@
+{
+  "taskId": "PULSE-085C",
+  "title": "Smart address entry + automatic fare",
+  "status": "STAGED",
+  "dependsOn": ["PULSE-085A"],
+  "scope": {
+    "qrAndFutureForms": [
+      "Auto-resolve pickup and destination instead of relying on raw free text",
+      "Bias address suggestions to Vermont/local rider context",
+      "Keep Use my location",
+      "Automatically calculate route and fare when both endpoints are valid",
+      "Recalculate on route or pickup-time change",
+      "Keep a manual retry only for route/fare failures",
+      "Show fare explanation: distance, duration, and short pricing summary"
+    ],
+    "openSourceCandidates": [
+      "Photon for search-as-you-type geocoding/location bias",
+      "MapLibre GL JS for rider/driver route visuals",
+      "OSRM as an optional future routing layer or route-preview source"
+    ]
+  },
+  "acceptance": [
+    "Normal rider flow has no required Get fare tap",
+    "Address entry resolves to usable locations before quote",
+    "Fare updates automatically after route/time changes",
+    "Rider sees distance + duration + concise fare explanation",
+    "Existing signed fare verification remains authoritative"
+  ],
+  "production": {"automaticDeploy": false, "automaticMerge": false}
+}
