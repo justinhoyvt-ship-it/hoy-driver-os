@@ -1,25 +1,28 @@
 {
   "taskId": "PULSE-085B",
   "title": "Driver lifecycle simplification + first console visual pass",
-  "status": "STAGED",
+  "status": "BUILDING",
   "dependsOn": ["PULSE-085A"],
   "scope": {
     "driverControls": [
       "Remove manual Leaving / On the way / Arriving soon / Arrived rider-update choreography from primary driver controls",
       "Primary rider ride flow becomes Accept -> Start pickup -> Pickup -> Start ride -> Drop off / Complete",
-      "Generate rider-facing status events automatically from driver actions where deterministic",
-      "Keep navigation available without requiring a status tap"
+      "Generate rider-facing status events automatically from deterministic driver actions and foreground GPS",
+      "Do not automatically launch an external map when a Pulse ride starts",
+      "Keep navigation available inside the Pulse driver experience"
     ],
     "consoleVisual": [
       "Upgrade request and Scheduled cards to a cleaner ride-app hierarchy",
       "Scheduled card: time, pickup -> destination, fare, single primary action",
       "Request card: route, time, fare, Accept / Decline",
+      "Active ride: destination, fare, current phase and one dominant next action",
       "Reduce technical labels and internal-state language",
       "Preserve current live map and shift controls"
     ]
   },
   "acceptance": [
-    "Driver does not manually tap Arriving soon or Arrived as separate required steps",
+    "Driver does not manually tap Leaving, On the way, Arriving soon or Arrived as separate required steps",
+    "Starting a Pulse pickup does not force-open another maps/browser window",
     "Fare is visible before accepting a rider request",
     "Confirmed Scheduled rides show fare and one clear next action",
     "Rider still receives a coherent status progression",
