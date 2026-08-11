@@ -1,0 +1,1 @@
+Implementation note: the canonical repository source contains the new `Pulse085BClient.html` and `Pulse085B.gs`. Production activation requires the one-line `doGet()` injection documented in `production-patch.md`; no whole-file `Code.gs` replacement is permitted.
