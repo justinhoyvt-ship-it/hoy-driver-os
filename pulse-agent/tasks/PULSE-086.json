@@ -1,0 +1,25 @@
+{
+  "taskId": "PULSE-086",
+  "title": "Pulse Console visual upgrade",
+  "status": "STAGED",
+  "dependsOn": ["PULSE-085B"],
+  "scope": {
+    "visual": [
+      "Full driver-console visual pass after lifecycle controls are simplified",
+      "Stronger ride hierarchy, cleaner spacing, fewer glass panels and internal labels",
+      "Use route/fare/status as the dominant information",
+      "Retain Pulse night visual identity and current map functionality",
+      "Make active ride and incoming request states visually distinct at a glance"
+    ],
+    "map": [
+      "Evaluate MapLibre GL JS as an upgrade path from the current Leaflet presentation",
+      "Support route line, pickup/destination markers and active-trip focus when routing data is available"
+    ]
+  },
+  "acceptance": [
+    "Console looks like a purpose-built driver app rather than an admin dashboard",
+    "Incoming request, Scheduled and active ride are immediately distinguishable",
+    "No functional regression in QR, Inbox, map, shift, or rider lifecycle"
+  ],
+  "production": {"automaticDeploy": false, "automaticMerge": false}
+}
