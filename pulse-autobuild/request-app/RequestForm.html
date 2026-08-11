@@ -53,23 +53,14 @@
     .eyebrow{font-family:var(--mono);font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
     .muted{color:var(--muted)}
 
-    /* Light-cycle bar — identical to the main Pulse Vermont site */
     .theme-bar{background:var(--mountain-front);color:#F8F4EE;border-bottom:1px solid rgba(255,255,255,.12)}
     .theme-inner{min-height:38px;display:flex;align-items:center;justify-content:space-between;gap:16px}
     .theme-label{font-family:var(--mono);font-size:.65rem;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,.66)}
     .theme-buttons{display:flex;align-items:center;gap:4px;overflow:auto}
-    .theme-buttons button{
-      border:0;background:transparent;color:rgba(255,255,255,.62);
-      font-family:var(--mono);font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;
-      padding:10px 7px;cursor:pointer
-    }
+    .theme-buttons button{border:0;background:transparent;color:rgba(255,255,255,.62);font-family:var(--mono);font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;padding:10px 7px;cursor:pointer}
     .theme-buttons button:hover,.theme-buttons button[aria-pressed="true"]{color:#fff}
     .theme-buttons button[aria-pressed="true"]{text-decoration:underline;text-decoration-color:var(--signal);text-underline-offset:5px}
-    @media(max-width:650px){
-      .theme-label{display:none}
-      .theme-inner{justify-content:center}
-      .theme-buttons button{font-size:.59rem;padding-inline:5px}
-    }
+    @media(max-width:650px){.theme-label{display:none}.theme-inner{justify-content:center}.theme-buttons button{font-size:.59rem;padding-inline:5px}}
 
     nav{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
     .nav{height:76px;display:flex;align-items:center;justify-content:space-between;gap:24px}
@@ -78,739 +69,150 @@
     .logo path{fill:none;stroke:url(#pulseGradient);stroke-width:2.7;stroke-linecap:square;stroke-linejoin:miter}
     .nav-tag{font-family:var(--mono);font-size:.69rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 
-    .hero{
-      position:relative;overflow:hidden;color:#fff;
-      background:linear-gradient(180deg,var(--sky-top) 0%,var(--sky-mid) 54%,var(--sky-low) 100%);
-      transition:background .7s ease;
-    }
+    .hero{position:relative;overflow:hidden;color:#fff;background:linear-gradient(180deg,var(--sky-top) 0%,var(--sky-mid) 54%,var(--sky-low) 100%);transition:background .7s ease}
     .hero-sun{position:absolute;right:9%;top:14%;width:104px;height:104px;border-radius:50%;background:var(--sun);box-shadow:0 0 70px color-mix(in srgb,var(--sun) 55%,transparent)}
     html[data-theme="night"] .hero-sun{width:70px;height:70px;box-shadow:0 0 35px rgba(226,237,255,.28)}
     .hero-stars{display:none;position:absolute;inset:0;background-image:radial-gradient(#fff 1px,transparent 1px);background-size:61px 61px;opacity:.35}
     html[data-theme="night"] .hero-stars{display:block}
     .hero-inner{position:relative;z-index:4;padding:70px 0 250px;display:grid;grid-template-columns:1fr .96fr;gap:60px;align-items:start}
-    .hero-copy{max-width:560px;padding-top:24px}
-    .hero h1{font-size:clamp(2.9rem,6.2vw,5.4rem);text-transform:uppercase;text-shadow:0 8px 40px rgba(0,0,0,.25);margin-top:14px}
-    .hero h1 span{display:block;color:var(--sun)}
-    .hero-lede{margin-top:22px;max-width:46ch;font-size:clamp(1.02rem,1.6vw,1.2rem);color:rgba(255,255,255,.9)}
-    .hero-lede b{color:#fff;font-weight:600}
-    .hero-note{margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,.22);font-family:var(--mono);font-size:.72rem;letter-spacing:.05em;color:rgba(255,255,255,.72);max-width:42ch}
-    .landscape{position:absolute;left:0;right:0;bottom:-2px;height:330px;width:100%;z-index:2}
-    @media(max-width:900px){
-      .hero-inner{grid-template-columns:1fr;padding-bottom:290px;gap:32px}
-      .hero-copy{max-width:620px;padding-top:8px}
-      .hero-sun{right:4%;top:9%}
-    }
+    .hero-copy{max-width:560px;padding-top:24px}.hero h1{font-size:clamp(2.9rem,6.2vw,5.4rem);text-transform:uppercase;text-shadow:0 8px 40px rgba(0,0,0,.25);margin-top:14px}.hero h1 span{display:block;color:var(--sun)}
+    .hero-lede{margin-top:22px;max-width:46ch;font-size:clamp(1.02rem,1.6vw,1.2rem);color:rgba(255,255,255,.9)}.hero-lede b{color:#fff;font-weight:600}.hero-note{margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,.22);font-family:var(--mono);font-size:.72rem;letter-spacing:.05em;color:rgba(255,255,255,.72);max-width:42ch}.landscape{position:absolute;left:0;right:0;bottom:-2px;height:330px;width:100%;z-index:2}
+    @media(max-width:900px){.hero-inner{grid-template-columns:1fr;padding-bottom:290px;gap:32px}.hero-copy{max-width:620px;padding-top:8px}.hero-sun{right:4%;top:9%}}
 
-    /* Request card — mirrors the interest-form styling from the main site */
-    .request-card{
-      background:color-mix(in srgb,var(--surface) 94%,transparent);color:var(--ink);
-      padding:30px;border:1px solid color-mix(in srgb,var(--line) 65%,transparent);
-      box-shadow:0 24px 70px rgba(0,0,0,.22)
-    }
+    .request-card{background:color-mix(in srgb,var(--surface) 94%,transparent);color:var(--ink);padding:30px;border:1px solid color-mix(in srgb,var(--line) 65%,transparent);box-shadow:0 24px 70px rgba(0,0,0,.22)}
     .card-kicker{font-family:var(--mono);font-size:.64rem;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);padding-bottom:16px;margin-bottom:20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px}
-    .field{margin-bottom:18px}
-    .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    label{display:block;margin-bottom:8px;font-family:var(--mono);font-size:.65rem;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
-    label .req{color:var(--signal)}
-    input,select,textarea{width:100%;padding:0 13px;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:0}
-    input,select{height:49px}
-    textarea{min-height:74px;padding:12px 13px;resize:vertical;line-height:1.5}
-    input::placeholder,textarea::placeholder{color:color-mix(in srgb,var(--muted) 80%,transparent)}
-    input:focus,select:focus,textarea:focus{outline:0;border-color:var(--signal)}
-    .submit{
-      width:100%;min-height:52px;margin-top:6px;border:0;background:var(--ink);color:var(--paper);
-      font-family:var(--mono);font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background .2s ease,color .2s ease
-    }
-    .submit:hover{background:var(--signal);color:#061114}
-    .submit:disabled{opacity:.6;cursor:wait}
-    .form-note{margin-top:12px;color:var(--muted);font-size:.74rem}
-    .consent{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start;margin:4px 0 18px}
-    .consent input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--signal)}
-    .consent label{margin:0;text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.78rem;line-height:1.45;color:var(--muted)}
-    .test-badge{display:none;position:fixed;z-index:100;top:46px;left:50%;transform:translateX(-50%);padding:7px 11px;background:var(--sun);color:#16100a;font-family:var(--mono);font-size:.64rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
-    .test-badge.show{display:block}
-    .err{display:none;margin-bottom:18px;padding:11px 13px;border:1px solid var(--sky-low);color:var(--sky-low);font-family:var(--mono);font-size:.72rem;line-height:1.5}
-    .err.show{display:block}
+    .field{margin-bottom:18px}.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    label{display:block;margin-bottom:8px;font-family:var(--mono);font-size:.65rem;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}label .req{color:var(--signal)}
+    input,select,textarea{width:100%;padding:0 13px;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:0}input,select{height:49px}textarea{min-height:74px;padding:12px 13px;resize:vertical;line-height:1.5}input::placeholder,textarea::placeholder{color:color-mix(in srgb,var(--muted) 80%,transparent)}input:focus,select:focus,textarea:focus{outline:0;border-color:var(--signal)}
+    .submit{width:100%;min-height:52px;margin-top:6px;border:0;background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background .2s ease,color .2s ease}.submit:hover{background:var(--signal);color:#061114}.submit:disabled{opacity:.6;cursor:wait}
+    .form-note{margin-top:12px;color:var(--muted);font-size:.74rem}.consent{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start;margin:4px 0 18px}.consent input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--signal)}.consent label{margin:0;text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.78rem;line-height:1.45;color:var(--muted)}
+    .test-badge{display:none;position:fixed;z-index:100;top:46px;left:50%;transform:translateX(-50%);padding:7px 11px;background:var(--sun);color:#16100a;font-family:var(--mono);font-size:.64rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase}.test-badge.show{display:block}.err{display:none;margin-bottom:18px;padding:11px 13px;border:1px solid var(--sky-low);color:var(--sky-low);font-family:var(--mono);font-size:.72rem;line-height:1.5}.err.show{display:block}
 
-    .quote-panel{margin:4px 0 18px;padding:16px;border:1px solid var(--line);background:var(--surface-2)}
-    .quote-actions{display:grid;grid-template-columns:1fr;gap:10px}
-    .quote-btn{min-height:48px;border:1px solid var(--ink);background:transparent;color:var(--ink);font-family:var(--mono);font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
-    .quote-btn:hover{background:var(--ink);color:var(--paper)}
-    .quote-btn:disabled{opacity:.55;cursor:wait}
-    .quote-result{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
-    .quote-result.show{display:block}
-    .quote-fare{font-family:var(--display);font-size:2rem;font-weight:700}
-    .quote-meta{margin-top:4px;color:var(--muted);font-size:.75rem}
+    .smart-hint{display:block;margin-top:6px;color:var(--muted);font-family:var(--mono);font-size:.62rem;line-height:1.35}.smart-hint.busy{color:var(--signal)}
+    .quote-panel{margin:4px 0 18px;padding:16px;border:1px solid var(--line);background:var(--surface-2)}.quote-actions{display:grid;grid-template-columns:1fr;gap:10px}.quote-btn{display:none;min-height:48px;border:1px solid var(--ink);background:transparent;color:var(--ink);font-family:var(--mono);font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}.quote-btn.retry{display:block}.quote-btn:hover{background:var(--ink);color:var(--paper)}.quote-btn:disabled{opacity:.55;cursor:wait}.quote-result{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}.quote-result.show{display:block}.quote-fare{font-family:var(--display);font-size:2rem;font-weight:700}.quote-meta{margin-top:4px;color:var(--muted);font-size:.75rem}.fare-why{margin-top:7px;color:var(--muted);font-size:.72rem;line-height:1.45}
 
+    .experience-only{display:none}html[data-rider-experience="on"] .experience-only{display:block}html[data-rider-experience="on"] .legacy-only{display:none!important}.experience-progress{margin:0 0 18px;padding:0;list-style:none;display:grid;grid-template-columns:repeat(6,1fr);gap:5px}.experience-progress li{min-width:0;padding:8px 4px;border:1px solid var(--line);font-family:var(--mono);font-size:.55rem;line-height:1.2;text-align:center;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:var(--surface)}.experience-progress li[aria-current="step"]{border-color:var(--signal);color:var(--ink);background:color-mix(in srgb,var(--signal) 14%,var(--surface))}.experience-progress li[data-complete="true"]{border-color:var(--green);color:var(--green)}
+    .experience-status{margin:0 0 18px;padding:12px 13px;border-left:4px solid var(--signal);background:var(--surface-2);font-family:var(--mono);font-size:.7rem;line-height:1.5}.experience-status[data-state="unavailable"],.experience-status[data-state="validation"],.experience-status[data-state="retry"]{border-left-color:var(--sky-low)}.experience-status[data-state="quoted"],.experience-status[data-state="submitted"]{border-left-color:var(--green)}.experience-stage{margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}.experience-stage[hidden]{display:none!important}.stage-title{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:16px}.stage-title h2{font-size:1.2rem}.stage-title span{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+    .review-list{display:grid;gap:10px;margin:0 0 18px;padding:0;list-style:none}.review-list li{display:grid;grid-template-columns:88px 1fr;gap:12px;padding-bottom:9px;border-bottom:1px solid var(--line)}.review-list small{font-family:var(--mono);font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.review-list strong{font-size:.9rem;overflow-wrap:anywhere}.secondary{width:100%;min-height:48px;margin-top:9px;border:1px solid var(--ink);background:transparent;color:var(--ink);font-family:var(--mono);font-size:.69rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}.secondary:hover{background:var(--ink);color:var(--paper)}.field-invalid input,.field-invalid textarea{border-color:var(--sky-low)}.field-help{display:none;margin-top:6px;color:var(--sky-low);font-family:var(--mono);font-size:.65rem}.field-invalid .field-help{display:block}
+    html[data-rider-experience="on"] .request-card{padding-bottom:26px}html[data-rider-experience="on"] #routeFields{scroll-margin-top:96px}html[data-rider-experience="on"] #contactFields[hidden],html[data-rider-experience="on"] #requestDetails[hidden]{display:none!important}
+    @media(max-width:650px){html[data-rider-experience="on"] .wrap{width:min(100% - 24px,var(--max))}html[data-rider-experience="on"] .hero-inner{padding-top:34px;gap:24px}html[data-rider-experience="on"] .request-card{padding:22px 18px}html[data-rider-experience="on"] .row2{grid-template-columns:1fr}html[data-rider-experience="on"] .experience-progress{grid-template-columns:repeat(3,1fr)}html[data-rider-experience="on"] .experience-progress li{font-size:.52rem}html[data-rider-experience="on"] input,html[data-rider-experience="on"] select{height:54px}html[data-rider-experience="on"] .submit,html[data-rider-experience="on"] .quote-btn,html[data-rider-experience="on"] .secondary{min-height:56px}}
 
-    /* PULSE-061 rider experience — inactive unless explicitly enabled */
-    .experience-only{display:none}
-    html[data-rider-experience="on"] .experience-only{display:block}
-    html[data-rider-experience="on"] .legacy-only{display:none!important}
-    .experience-progress{margin:0 0 18px;padding:0;list-style:none;display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
-    .experience-progress li{min-width:0;padding:8px 4px;border:1px solid var(--line);font-family:var(--mono);font-size:.55rem;line-height:1.2;text-align:center;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:var(--surface)}
-    .experience-progress li[aria-current="step"]{border-color:var(--signal);color:var(--ink);background:color-mix(in srgb,var(--signal) 14%,var(--surface))}
-    .experience-progress li[data-complete="true"]{border-color:var(--green);color:var(--green)}
-    .experience-status{margin:0 0 18px;padding:12px 13px;border-left:4px solid var(--signal);background:var(--surface-2);font-family:var(--mono);font-size:.7rem;line-height:1.5}
-    .experience-status[data-state="unavailable"],.experience-status[data-state="validation"],.experience-status[data-state="retry"]{border-left-color:var(--sky-low)}
-    .experience-status[data-state="quoted"],.experience-status[data-state="submitted"]{border-left-color:var(--green)}
-    .experience-stage{margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
-    .experience-stage[hidden]{display:none!important}
-    .stage-title{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:16px}
-    .stage-title h2{font-size:1.2rem}
-    .stage-title span{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-    .review-list{display:grid;gap:10px;margin:0 0 18px;padding:0;list-style:none}
-    .review-list li{display:grid;grid-template-columns:88px 1fr;gap:12px;padding-bottom:9px;border-bottom:1px solid var(--line)}
-    .review-list small{font-family:var(--mono);font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-    .review-list strong{font-size:.9rem;overflow-wrap:anywhere}
-    .secondary{width:100%;min-height:48px;margin-top:9px;border:1px solid var(--ink);background:transparent;color:var(--ink);font-family:var(--mono);font-size:.69rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
-    .secondary:hover{background:var(--ink);color:var(--paper)}
-    .field-invalid input,.field-invalid textarea{border-color:var(--sky-low)}
-    .field-help{display:none;margin-top:6px;color:var(--sky-low);font-family:var(--mono);font-size:.65rem}
-    .field-invalid .field-help{display:block}
-    html[data-rider-experience="on"] .request-card{padding-bottom:26px}
-    html[data-rider-experience="on"] #routeFields{scroll-margin-top:96px}
-    html[data-rider-experience="on"] #contactFields[hidden],html[data-rider-experience="on"] #requestDetails[hidden]{display:none!important}
-    @media(max-width:650px){
-      html[data-rider-experience="on"] .wrap{width:min(100% - 24px,var(--max))}
-      html[data-rider-experience="on"] .hero-inner{padding-top:34px;gap:24px}
-      html[data-rider-experience="on"] .request-card{padding:22px 18px}
-      html[data-rider-experience="on"] .row2{grid-template-columns:1fr}
-      html[data-rider-experience="on"] .experience-progress{grid-template-columns:repeat(3,1fr)}
-      html[data-rider-experience="on"] .experience-progress li{font-size:.52rem}
-      html[data-rider-experience="on"] input,html[data-rider-experience="on"] select{height:54px}
-      html[data-rider-experience="on"] .submit,html[data-rider-experience="on"] .quote-btn,html[data-rider-experience="on"] .secondary{min-height:56px}
-    }
-
-    /* Success state */
-    .done{display:none}
-    .done.show{display:block}
-    .done .badge{font-family:var(--mono);font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--green);border:1px solid var(--green);display:inline-block;padding:7px 11px;margin-bottom:20px}
-    .done h2{font-size:1.9rem;margin-bottom:12px}
-    .done p{color:var(--muted)}
-    .recap{margin-top:22px;border-top:1px solid var(--line);padding-top:18px;display:grid;gap:12px}
-    .recap div{display:grid;grid-template-columns:92px 1fr;gap:14px;align-items:baseline}
-    .recap small{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-    .recap strong{font-family:var(--display);font-weight:600;font-size:1rem}
-
-    footer{padding:32px 0;background:var(--mountain-front);color:rgba(255,255,255,.72)}
-    .footer{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;font-family:var(--mono);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase}
-    .footer-links{display:flex;gap:20px}
-    .footer a:hover{color:var(--signal)}
-
-    @media(prefers-reduced-motion:reduce){
-      html{scroll-behavior:auto}
-      *,*::before,*::after{transition:none!important;animation:none!important}
-    }
+    .done{display:none}.done.show{display:block}.done .badge{font-family:var(--mono);font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--green);border:1px solid var(--green);display:inline-block;padding:7px 11px;margin-bottom:20px}.done h2{font-size:1.9rem;margin-bottom:12px}.done p{color:var(--muted)}.recap{margin-top:22px;border-top:1px solid var(--line);padding-top:18px;display:grid;gap:12px}.recap div{display:grid;grid-template-columns:92px 1fr;gap:14px;align-items:baseline}.recap small{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}.recap strong{font-family:var(--display);font-weight:600;font-size:1rem}
+    footer{padding:32px 0;background:var(--mountain-front);color:rgba(255,255,255,.72)}.footer{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;font-family:var(--mono);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase}.footer-links{display:flex;gap:20px}.footer a:hover{color:var(--signal)}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
   </style>
 </head>
 <body>
   <div class="test-badge" id="testBadge">TEST MODE · NO WRITES</div>
-  <div class="theme-bar">
-    <div class="wrap theme-inner">
-      <span class="theme-label">Vermont light cycle</span>
-      <div class="theme-buttons" aria-label="Choose visual theme">
-        <button type="button" data-theme-choice="live">Live</button>
-        <button type="button" data-theme-choice="sunrise" aria-pressed="true">Sunrise</button>
-        <button type="button" data-theme-choice="day">Day</button>
-        <button type="button" data-theme-choice="sunset">Sunset</button>
-        <button type="button" data-theme-choice="night">Night</button>
-      </div>
-    </div>
-  </div>
+  <div class="theme-bar"><div class="wrap theme-inner"><span class="theme-label">Vermont light cycle</span><div class="theme-buttons" aria-label="Choose visual theme"><button type="button" data-theme-choice="live">Live</button><button type="button" data-theme-choice="sunrise" aria-pressed="true">Sunrise</button><button type="button" data-theme-choice="day">Day</button><button type="button" data-theme-choice="sunset">Sunset</button><button type="button" data-theme-choice="night">Night</button></div></div></div>
 
-  <nav>
-    <div class="wrap nav">
-      <a class="brand" href="#top" aria-label="Pulse Vermont">
-        <svg class="logo" viewBox="0 0 100 40" aria-hidden="true">
-          <defs>
-            <linearGradient id="pulseGradient" x1="0" x2="1">
-              <stop offset="0" stop-color="#2BD4E5"/>
-              <stop offset=".55" stop-color="#F7B23B"/>
-              <stop offset="1" stop-color="#D6522F"/>
-            </linearGradient>
-          </defs>
-          <path d="M0,20 L15,20 L25,5 L35,35 L45,10 L55,20 L100,20"/>
-        </svg>
-        <span>PULSE VERMONT</span>
-      </a>
-      <span class="nav-tag">Ride request</span>
-    </div>
-  </nav>
+  <nav><div class="wrap nav"><a class="brand" href="#top" aria-label="Pulse Vermont"><svg class="logo" viewBox="0 0 100 40" aria-hidden="true"><defs><linearGradient id="pulseGradient" x1="0" x2="1"><stop offset="0" stop-color="#2BD4E5"/><stop offset=".55" stop-color="#F7B23B"/><stop offset="1" stop-color="#D6522F"/></linearGradient></defs><path d="M0,20 L15,20 L25,5 L35,35 L45,10 L55,20 L100,20"/></svg><span>PULSE VERMONT</span></a><span class="nav-tag">Ride request</span></div></nav>
 
-  <main id="top">
-    <header class="hero">
-      <div class="hero-stars" aria-hidden="true"></div>
-      <div class="hero-sun" aria-hidden="true"></div>
+  <main id="top"><header class="hero"><div class="hero-stars" aria-hidden="true"></div><div class="hero-sun" aria-hidden="true"></div>
+    <div class="wrap hero-inner">
+      <div class="hero-copy"><p class="eyebrow">Pulse Vermont · request a ride</p><h1>Where <span>to?</span></h1><p class="hero-lede">Send the details and <b id="driverName">your Pulse Driver</b> confirms by email. Airport runs, appointments, or a lift across town.</p><p class="hero-note">A direct local ride request — not a live dispatch. You will get an email the moment it is confirmed.</p></div>
 
-      <div class="wrap hero-inner">
-        <div class="hero-copy">
-          <p class="eyebrow">Pulse Vermont · request a ride</p>
-          <h1>Where <span>to?</span></h1>
-          <p class="hero-lede">Send the details and <b id="driverName">your driver</b> confirms by email. Airport runs, appointments, or a lift across town.</p>
-          <p class="hero-note">A direct request to one local driver — not a live dispatch. You will get an email the moment it is confirmed.</p>
+      <div id="formView"><div class="request-card" id="requestCard">
+        <div class="card-kicker"><span>New request</span><span>Pulse Vermont</span></div>
+        <ol class="experience-progress experience-only" id="experienceProgress" aria-label="Ride request steps"><li data-step="pickup" aria-current="step">1 From</li><li data-step="destination">2 To</li><li data-step="time">3 Time</li><li data-step="fare">4 Fare</li><li data-step="request">5 Request</li><li data-step="confirm">6 Confirm</li></ol>
+        <div class="experience-status experience-only" id="experienceStatus" role="status" aria-live="polite" data-state="editing">Start with pickup, destination, and pickup time.</div><div class="err" id="err" role="alert" aria-live="assertive"></div>
+
+        <div id="contactFields"><div class="field" id="nameField"><label for="name">Your name <span class="req">*</span></label><input id="name" autocomplete="name" placeholder="First and last" aria-describedby="nameHelp"><span class="field-help" id="nameHelp">Enter your name.</span></div>
+          <div class="row2"><div class="field" id="phoneField"><label for="phone">Phone <span class="req">*</span></label><input id="phone" type="tel" autocomplete="tel" placeholder="(802) 555-0123" aria-describedby="phoneHelp"><span class="field-help" id="phoneHelp">Enter a phone number.</span></div><div class="field"><label for="passengers">Passengers</label><input id="passengers" type="number" min="1" max="7" value="1"></div></div>
+          <div class="field" id="emailField"><label for="email">Email <span class="req">*</span></label><input id="email" type="email" autocomplete="email" placeholder="you@example.com" aria-describedby="emailHelp"><span class="field-help" id="emailHelp">Enter a valid email address.</span></div>
         </div>
 
-        <div id="formView">
-          <div class="request-card" id="requestCard">
-            <div class="card-kicker"><span>New request</span><span>Pulse Vermont</span></div>
-            <ol class="experience-progress experience-only" id="experienceProgress" aria-label="Ride request steps">
-              <li data-step="pickup" aria-current="step">1 From</li>
-              <li data-step="destination">2 To</li>
-              <li data-step="time">3 Time</li>
-              <li data-step="fare">4 Fare</li>
-              <li data-step="request">5 Request</li>
-              <li data-step="confirm">6 Confirm</li>
-            </ol>
-            <div class="experience-status experience-only" id="experienceStatus" role="status" aria-live="polite" data-state="editing">Start with pickup, destination, and pickup time.</div>
-            <div class="err" id="err" role="alert" aria-live="assertive"></div>
-
-            <div id="contactFields">
-              <div class="field" id="nameField">
-                <label for="name">Your name <span class="req">*</span></label>
-                <input id="name" autocomplete="name" placeholder="First and last" aria-describedby="nameHelp">
-                <span class="field-help" id="nameHelp">Enter your name.</span>
-              </div>
-
-              <div class="row2">
-                <div class="field" id="phoneField">
-                  <label for="phone">Phone <span class="req">*</span></label>
-                  <input id="phone" type="tel" autocomplete="tel" placeholder="(802) 555-0123" aria-describedby="phoneHelp">
-                  <span class="field-help" id="phoneHelp">Enter a phone number.</span>
-                </div>
-                <div class="field">
-                  <label for="passengers">Passengers</label>
-                  <input id="passengers" type="number" min="1" max="7" value="1">
-                </div>
-              </div>
-
-              <div class="field" id="emailField">
-                <label for="email">Email <span class="req">*</span></label>
-                <input id="email" type="email" autocomplete="email" placeholder="you@example.com" aria-describedby="emailHelp">
-                <span class="field-help" id="emailHelp">Enter a valid email address.</span>
-              </div>
-            </div>
-
-            <div id="routeFields">
-              <div class="field" id="pickupField">
-                <label for="pickup"><span class="experience-only">1 · From where</span><span class="legacy-only">Pickup address</span> <span class="req">*</span></label>
-                <input id="pickup" autocomplete="street-address" placeholder="Where should I get you?" aria-describedby="pickupHelp">
-                <span class="field-help" id="pickupHelp">Enter a pickup location.</span>
-              </div>
-
-              <div class="field" id="destinationField">
-                <label for="destination"><span class="experience-only">2 · Where to</span><span class="legacy-only">Destination</span> <span class="req">*</span></label>
-                <input id="destination" placeholder="Airport, address, or place name" aria-describedby="destinationHelp">
-                <span class="field-help" id="destinationHelp">Enter a destination.</span>
-              </div>
-
-              <div class="row2" id="pickupTimeFields">
-                <div class="field" id="dateField">
-                  <label for="date"><span class="experience-only">3 · Pickup date</span><span class="legacy-only">Date</span> <span class="req">*</span></label>
-                  <input id="date" type="date" aria-describedby="dateHelp">
-                  <span class="field-help" id="dateHelp">Choose a pickup date.</span>
-                </div>
-                <div class="field" id="timeField">
-                  <label for="time"><span class="experience-only">3 · Pickup time</span><span class="legacy-only">Pickup time</span> <span class="req">*</span></label>
-                  <input id="time" type="time" aria-describedby="timeHelp">
-                  <span class="field-help" id="timeHelp">Choose a pickup time.</span>
-                </div>
-              </div>
-
-              <div class="quote-panel" id="quotePanel">
-                <div class="card-kicker"><span>4 · Pulse fare</span><span>No request yet</span></div>
-                <div class="quote-actions">
-                  <button class="quote-btn" id="quoteBtn" type="button" disabled aria-describedby="quoteState">Checking private link…</button>
-                </div>
-                <div class="quote-result" id="quoteResult" aria-live="polite">
-                  <div class="quote-fare" id="quoteFare"></div>
-                  <div class="quote-meta" id="quoteMeta"></div>
-                </div>
-                <p class="form-note" id="quoteState">Calculating a fare does not send a request.</p>
-              </div>
-            </div>
-
-            <div id="requestStage" class="experience-stage experience-only" hidden>
-              <div class="stage-title"><h2>5 · Request</h2><span>No write yet</span></div>
-              <div id="requestFieldsSlot"></div>
-            </div>
-
-            <div id="requestDetails">
-              <div class="field">
-                <label for="notes">Anything I should know?</label>
-                <textarea id="notes" placeholder="Flight number, luggage, a stop on the way…"></textarea>
-              </div>
-
-              <div class="consent" id="consentField">
-                <input id="consent" type="checkbox" aria-describedby="consentHelp">
-                <label for="consent">I consent to sharing these contact, pickup, and scheduling details with the driver for this private ride request.</label>
-                <span class="field-help" id="consentHelp">Consent is required before confirmation.</span>
-              </div>
-            </div>
-
-            <button class="submit legacy-only" id="submitBtn" type="button" disabled>Checking private link…</button>
-            <button class="submit experience-only" id="requestReviewBtn" type="button" disabled hidden>Request</button>
-            <p class="form-note" id="requestNote">This sends no payment. The ride is not reserved until the driver confirms it.</p>
-
-            <div id="confirmStage" class="experience-stage experience-only" hidden>
-              <div class="stage-title"><h2>6 · Confirm Ride</h2><span>Final check</span></div>
-              <ul class="review-list" id="reviewList"></ul>
-              <button class="submit" id="confirmRideBtn" type="button">Confirm Ride</button>
-              <button class="secondary" id="editRequestBtn" type="button">Edit request</button>
-              <p class="form-note">Confirm Ride calls the existing standalone request writer once.</p>
-            </div>
-          </div>
+        <div id="routeFields">
+          <div class="field" id="pickupField"><label for="pickup"><span class="experience-only">1 · From where</span><span class="legacy-only">Pickup address</span> <span class="req">*</span></label><input id="pickup" list="pickupSuggestions" autocomplete="street-address" placeholder="Where should I get you?" aria-describedby="pickupHelp pickupSmartHint"><datalist id="pickupSuggestions"></datalist><span class="smart-hint" id="pickupSmartHint">Start typing an address or place.</span><span class="field-help" id="pickupHelp">Enter a pickup location.</span></div>
+          <div class="field" id="destinationField"><label for="destination"><span class="experience-only">2 · Where to</span><span class="legacy-only">Destination</span> <span class="req">*</span></label><input id="destination" list="destinationSuggestions" placeholder="Airport, address, or place name" aria-describedby="destinationHelp destinationSmartHint"><datalist id="destinationSuggestions"></datalist><span class="smart-hint" id="destinationSmartHint">Start typing an address or place.</span><span class="field-help" id="destinationHelp">Enter a destination.</span></div>
+          <div class="row2" id="pickupTimeFields"><div class="field" id="dateField"><label for="date"><span class="experience-only">3 · Pickup date</span><span class="legacy-only">Date</span> <span class="req">*</span></label><input id="date" type="date" aria-describedby="dateHelp"><span class="field-help" id="dateHelp">Choose a pickup date.</span></div><div class="field" id="timeField"><label for="time"><span class="experience-only">3 · Pickup time</span><span class="legacy-only">Pickup time</span> <span class="req">*</span></label><input id="time" type="time" aria-describedby="timeHelp"><span class="field-help" id="timeHelp">Choose a pickup time.</span></div></div>
+          <div class="quote-panel" id="quotePanel"><div class="card-kicker"><span>4 · Pulse fare</span><span>Automatic</span></div><div class="quote-actions"><button class="quote-btn" id="quoteBtn" type="button" disabled aria-describedby="quoteState">Retry fare</button></div><div class="quote-result" id="quoteResult" aria-live="polite"><div class="quote-fare" id="quoteFare"></div><div class="quote-meta" id="quoteMeta"></div><div class="fare-why" id="quoteWhy">Includes base fare, route distance, drive time, and booking fee.</div></div><p class="form-note" id="quoteState">Enter From, To, date, and time. Fare calculates automatically.</p></div>
         </div>
 
-        <div id="doneView" style="display:none">
-          <div class="request-card done" style="display:block">
-            <div class="badge">Request sent</div>
-            <h2>Request received.</h2>
-            <p id="doneMsg">Request sent to your Pulse driver. Watch your inbox for confirmation.</p>
-            <div class="experience-status" id="riderStatus" role="status" aria-live="polite" data-state="submitted">Status: Requested — waiting for driver confirmation.</div>
-            <div class="recap" id="recap"></div>
-          </div>
-        </div>
-      </div>
+        <div id="requestStage" class="experience-stage experience-only" hidden><div class="stage-title"><h2>5 · Request</h2><span>No write yet</span></div><div id="requestFieldsSlot"></div></div>
+        <div id="requestDetails"><div class="field"><label for="notes">Anything I should know?</label><textarea id="notes" placeholder="Flight number, luggage, a stop on the way…"></textarea></div><div class="consent" id="consentField"><input id="consent" type="checkbox" aria-describedby="consentHelp"><label for="consent">I consent to sharing these contact, pickup, and scheduling details with the driver for this private ride request.</label><span class="field-help" id="consentHelp">Consent is required before confirmation.</span></div></div>
+        <button class="submit legacy-only" id="submitBtn" type="button" disabled>Checking link…</button><button class="submit experience-only" id="requestReviewBtn" type="button" disabled hidden>Request</button><p class="form-note" id="requestNote">This sends no payment. The ride is not reserved until the driver confirms it.</p>
+        <div id="confirmStage" class="experience-stage experience-only" hidden><div class="stage-title"><h2>6 · Confirm Ride</h2><span>Final check</span></div><ul class="review-list" id="reviewList"></ul><button class="submit" id="confirmRideBtn" type="button">Confirm Ride</button><button class="secondary" id="editRequestBtn" type="button">Edit request</button><p class="form-note">Review the details, then confirm the request.</p></div>
+      </div></div>
 
-      <svg class="landscape" viewBox="0 0 1440 330" preserveAspectRatio="none" aria-hidden="true">
-        <path d="M0 330V178C144 95 245 194 382 106C494 34 610 148 731 94C855 38 954 150 1084 87C1202 30 1319 90 1440 57V330Z" fill="var(--mountain-back)" opacity=".82"/>
-        <path d="M0 330V223C154 157 274 240 428 167C574 98 693 211 850 154C1007 96 1119 213 1265 160C1338 133 1388 136 1440 123V330Z" fill="var(--mountain-mid)"/>
-        <path d="M0 330V275C173 226 314 288 475 240C634 193 768 283 931 233C1102 181 1262 263 1440 211V330Z" fill="var(--mountain-front)"/>
-        <path d="M0 330V307C190 282 344 319 520 294C724 265 884 319 1087 288C1241 265 1356 285 1440 274V330Z" fill="var(--lake)"/>
-      </svg>
-    </header>
-  </main>
-
-  <footer>
-    <div class="wrap footer">
-      <span>Pulse Vermont · local project in testing</span>
-      <div class="footer-links">
-        <a href="mailto:justinhoyvt@gmail.com">Contact</a>
-      </div>
+      <div id="doneView" style="display:none"><div class="request-card done" style="display:block"><div class="badge">Request sent</div><h2>Request received.</h2><p id="doneMsg">Request sent to your Pulse driver. Watch your inbox for confirmation.</p><div class="experience-status" id="riderStatus" role="status" aria-live="polite" data-state="submitted">Status: Requested — waiting for driver confirmation.</div><div class="recap" id="recap"></div></div></div>
     </div>
-  </footer>
+    <svg class="landscape" viewBox="0 0 1440 330" preserveAspectRatio="none" aria-hidden="true"><path d="M0 330V178C144 95 245 194 382 106C494 34 610 148 731 94C855 38 954 150 1084 87C1202 30 1319 90 1440 57V330Z" fill="var(--mountain-back)" opacity=".82"/><path d="M0 330V223C154 157 274 240 428 167C574 98 693 211 850 154C1007 96 1119 213 1265 160C1338 133 1388 136 1440 123V330Z" fill="var(--mountain-mid)"/><path d="M0 330V275C173 226 314 288 475 240C634 193 768 283 931 233C1102 181 1262 263 1440 211V330Z" fill="var(--mountain-front)"/><path d="M0 330V307C190 282 344 319 520 294C724 265 884 319 1087 288C1241 265 1356 285 1440 274V330Z" fill="var(--lake)"/></svg>
+  </header></main>
+
+  <footer><div class="wrap footer"><span>Pulse Vermont · local project in testing</span><div class="footer-links"><a href="mailto:justinhoyvt@gmail.com">Contact</a></div></div></footer>
 
   <script>
-    var $ = function(id){ return document.getElementById(id); };
-    var requestToken='';
-    var testMode=false;
-    var requestOpen=false;
-    var activeQuote=null;
-    var riderExperience=false;
-    var submissionState='idle';
-    var stagedRequestData=null;
-    var submittedQuote=null;
+    var $=function(id){return document.getElementById(id)};
+    var requestToken='',testMode=false,requestOpen=false,activeQuote=null,riderExperience=false,submissionState='idle',stagedRequestData=null,submittedQuote=null;
+    var fareTimer=null,suggestionTimers={pickup:null,destination:null},suggestionSeq={pickup:0,destination:0};
 
+    function quotePickupAt_(){return String($('date').value||'')+'T'+String($('time').value||'')}
+    function quoteIsCurrent_(){return !!(activeQuote&&activeQuote.expiresAt&&Date.parse(activeQuote.expiresAt)>Date.now())}
+    function setQuoteState_(message){$('quoteState').textContent=message}
     function resetQuote_(){
       if(submissionState==='submitting'||submissionState==='submitted')return;
-      activeQuote=null;
-      var result=$('quoteResult');
-      if(result)result.classList.remove('show');
-      if(riderExperience){
-        hideRequestStage_();
-        setExperienceState_('editing','Route changed. Calculate a new Pulse fare.','pickup');
-      }
-      var submit=$('submitBtn');
-      if(submit&&requestOpen){
-        submit.disabled=true;
-        submit.textContent='Get fare first';
-      }
+      activeQuote=null;$('quoteResult').classList.remove('show');$('quoteBtn').classList.remove('retry');
+      setQuoteState_('Enter From, To, date, and time. Fare calculates automatically.');
+      if(riderExperience){hideRequestStage_();setExperienceState_('editing','Route changed. Fare will recalculate automatically.','pickup')}
+      if(requestOpen){$('submitBtn').disabled=true;$('submitBtn').textContent='Waiting for fare'}
+    }
+    function routeReady_(){return requestOpen&&$('pickup').value.trim().length>=3&&$('destination').value.trim().length>=3&&!!$('date').value&&!!$('time').value}
+    function scheduleFare_(delay){
+      clearTimeout(fareTimer);
+      if(!routeReady_())return;
+      setQuoteState_('Route ready — calculating fare…');$('submitBtn').disabled=true;$('submitBtn').textContent='Calculating fare…';
+      fareTimer=setTimeout(function(){requestFareQuote_(false)},typeof delay==='number'?delay:650);
     }
 
-    function quotePickupAt_(){
-      return String($('date').value||'')+'T'+String($('time').value||'');
+    function requestFareQuote_(manual){
+      clearError();clearFieldErrors_();
+      var pickup=$('pickup').value.trim(),destination=$('destination').value.trim(),pickupAt=quotePickupAt_();
+      var routeMissing=[];if(!pickup)routeMissing.push('pickup');if(!destination)routeMissing.push('destination');if(!$('date').value)routeMissing.push('date');if(!$('time').value)routeMissing.push('time');
+      if(routeMissing.length){if(manual){markMissingFields_(routeMissing);showError('Add pickup, destination, date, and time before requesting a fare.');focusFirstField_(routeMissing)}return}
+      var fingerprint=[pickup.toLowerCase(),destination.toLowerCase(),pickupAt].join('|');
+      $('quoteBtn').disabled=true;$('quoteBtn').classList.remove('retry');setQuoteState_('Calculating route and fare…');setExperienceState_('calculating','Calculating your Pulse fare. No request is being sent.','fare');
+      google.script.run.withSuccessHandler(function(res){
+        var current=[$('pickup').value.trim().toLowerCase(),$('destination').value.trim().toLowerCase(),quotePickupAt_()].join('|');if(current!==fingerprint)return scheduleFare_(200);
+        activeQuote=res||null;$('quoteFare').textContent='$'+Number(res.fare||0).toFixed(2);$('quoteMeta').textContent=Number(res.distanceMiles||0).toFixed(1)+' miles · '+Number(res.durationMinutes||0)+' minutes';$('quoteWhy').textContent='Includes base fare, '+Number(res.distanceMiles||0).toFixed(1)+' route miles, '+Number(res.durationMinutes||0)+' drive minutes, and booking fee.';$('quoteResult').classList.add('show');$('quoteBtn').disabled=false;setQuoteState_('Fare ready · valid for 15 minutes.');
+        if(riderExperience){showRequestStage_();setExperienceState_('quoted','Fare ready. Add contact details, then choose Request.','request')}else{$('submitBtn').disabled=false;$('submitBtn').textContent=testMode?'Test ride request':'Request this ride'}
+      }).withFailureHandler(function(err){activeQuote=null;$('quoteResult').classList.remove('show');$('quoteBtn').disabled=false;$('quoteBtn').classList.add('retry');$('quoteBtn').textContent='Retry fare';setQuoteState_('Fare unavailable. Check the route and retry.');setExperienceState_('unavailable','Fare unavailable. Check the route and retry.','fare');if(manual)showError((err&&err.message)?err.message:'Could not calculate a fare. Check the route and retry.')})
+      .pulseGetFareQuote({pickup:pickup,destination:destination,pickupAt:pickupAt,requestToken:requestToken,testMode:testMode});
     }
 
-    function quoteIsCurrent_(){
-      if(!activeQuote||!activeQuote.expiresAt)return false;
-      return Date.parse(activeQuote.expiresAt)>Date.now();
+    function smartInput_(id){
+      var input=$(id),list=$(id+'Suggestions'),hint=$(id+'SmartHint');
+      input.addEventListener('input',function(){resetQuote_();clearTimeout(suggestionTimers[id]);var value=input.value.trim();if(value.length<3){list.innerHTML='';hint.textContent='Start typing an address or place.';hint.classList.remove('busy');return}hint.textContent='Finding nearby matches…';hint.classList.add('busy');suggestionTimers[id]=setTimeout(function(){var seq=++suggestionSeq[id];google.script.run.withSuccessHandler(function(result){if(seq!==suggestionSeq[id])return;var items=result&&result.suggestions||[];list.innerHTML='';items.forEach(function(item){var option=document.createElement('option');option.value=item.label;list.appendChild(option)});hint.textContent=items.length?'Choose a match or keep typing.':'No match yet — keep typing.';hint.classList.remove('busy')}).withFailureHandler(function(){if(seq!==suggestionSeq[id])return;hint.textContent='Keep typing; route check will verify it.';hint.classList.remove('busy')}).pulseSmartAddressSuggestions({query:value,requestToken:requestToken,testMode:testMode})},280);scheduleFare_()});
+      input.addEventListener('change',function(){scheduleFare_(250)});input.addEventListener('blur',function(){scheduleFare_(350)});
     }
 
-    function requestFareQuote_(){
-      clearError();
-      clearFieldErrors_();
-      var pickup=$('pickup').value.trim();
-      var destination=$('destination').value.trim();
-      var pickupAt=quotePickupAt_();
-      var routeMissing=[];
-      if(!pickup)routeMissing.push('pickup');
-      if(!destination)routeMissing.push('destination');
-      if(!$('date').value)routeMissing.push('date');
-      if(!$('time').value)routeMissing.push('time');
-      if(routeMissing.length){
-        markMissingFields_(routeMissing);
-        setExperienceState_('validation','Add pickup, destination, date, and time before calculating a fare.','pickup');
-        showError('Add pickup, destination, date, and time before requesting a fare.');
-        focusFirstField_(routeMissing);
-        return;
-      }
-      var btn=$('quoteBtn');
-      btn.disabled=true;
-      btn.textContent='Calculating…';
-      setExperienceState_('calculating','Calculating your Pulse fare. No request is being sent.','fare');
-      google.script.run
-        .withSuccessHandler(function(res){
-          activeQuote=res||null;
-          $('quoteFare').textContent='$'+Number(res.fare||0).toFixed(2);
-          $('quoteMeta').textContent=
-            Number(res.distanceMiles||0).toFixed(1)+' miles · '+
-            Number(res.durationMinutes||0)+' minutes · valid for 15 minutes';
-          $('quoteResult').classList.add('show');
-          btn.disabled=false;
-          btn.textContent='Recalculate fare';
-          if(riderExperience){
-            showRequestStage_();
-            setExperienceState_('quoted','Fare ready. Add contact details, then choose Request.','request');
-          }else{
-            $('submitBtn').disabled=false;
-            $('submitBtn').textContent=testMode?'Test ride request':'Request this ride';
-          }
-        })
-        .withFailureHandler(function(err){
-          activeQuote=null;
-          btn.disabled=false;
-          btn.textContent='Retry Pulse fare';
-          setExperienceState_('unavailable','Fare unavailable. Check the route and retry; the form remains usable.','fare');
-          showError((err&&err.message)?err.message:'Could not calculate a fare. Check the route and retry.');
-        })
-        .pulseGetFareQuote({
-          pickup:pickup,
-          destination:destination,
-          pickupAt:pickupAt,
-          requestToken:requestToken,
-          testMode:testMode
-        });
-    }
+    (function(){var root=document.documentElement,buttons=[].slice.call(document.querySelectorAll('[data-theme-choice]')),cycleTimer=null;function liveTheme(){var hour=new Date().getHours();if(hour<7)return 'sunrise';if(hour<17)return 'day';if(hour<21)return 'sunset';return 'night'}function setTheme(theme,pressed){root.setAttribute('data-theme',theme);buttons.forEach(function(button){button.setAttribute('aria-pressed',String(button.getAttribute('data-theme-choice')===pressed))});var meta=document.querySelector('meta[name="theme-color"]'),colors={sunrise:'#241335',day:'#77B7D8',sunset:'#30214D',night:'#070B1D'};if(meta)meta.setAttribute('content',colors[theme]||colors.sunrise)}function startLive(){clearInterval(cycleTimer);setTheme(liveTheme(),'live');cycleTimer=setInterval(function(){setTheme(liveTheme(),'live')},60000)}buttons.forEach(function(button){button.addEventListener('click',function(){var choice=button.getAttribute('data-theme-choice');clearInterval(cycleTimer);if(choice==='live')startLive();else setTheme(choice,choice)})})})();
 
-    (function(){
-      var root=document.documentElement;
-      var buttons=[].slice.call(document.querySelectorAll('[data-theme-choice]'));
-      var cycleTimer=null;
-      function liveTheme(){
-        var hour=new Date().getHours();
-        if(hour<7)return 'sunrise';
-        if(hour<17)return 'day';
-        if(hour<21)return 'sunset';
-        return 'night';
-      }
-      function setTheme(theme,pressed){
-        root.setAttribute('data-theme',theme);
-        buttons.forEach(function(button){
-          button.setAttribute('aria-pressed',String(button.getAttribute('data-theme-choice')===pressed));
-        });
-        var meta=document.querySelector('meta[name="theme-color"]');
-        var colors={sunrise:'#241335',day:'#77B7D8',sunset:'#30214D',night:'#070B1D'};
-        if(meta)meta.setAttribute('content',colors[theme]||colors.sunrise);
-      }
-      function startLive(){
-        clearInterval(cycleTimer);
-        setTheme(liveTheme(),'live');
-        cycleTimer=setInterval(function(){setTheme(liveTheme(),'live');},60000);
-      }
-      buttons.forEach(function(button){
-        button.addEventListener('click',function(){
-          var choice=button.getAttribute('data-theme-choice');
-          clearInterval(cycleTimer);
-          if(choice==='live')startLive();else setTheme(choice,choice);
-        });
-      });
-    })();
+    function setExperienceState_(state,message,step){if(!riderExperience)return;var status=$('experienceStatus');if(status){status.setAttribute('data-state',state);status.textContent=message}var steps=[].slice.call(document.querySelectorAll('#experienceProgress li')),order=['pickup','destination','time','fare','request','confirm'],current=Math.max(0,order.indexOf(step));steps.forEach(function(item,index){item.removeAttribute('aria-current');item.setAttribute('data-complete',String(index<current));if(index===current)item.setAttribute('aria-current','step')})}
+    function activateRiderExperience_(){riderExperience=true;document.documentElement.setAttribute('data-rider-experience','on');var card=$('requestCard'),route=$('routeFields'),contact=$('contactFields');if(card&&route&&contact)card.insertBefore(route,contact);$('contactFields').hidden=true;$('requestDetails').hidden=true;$('requestStage').hidden=true;$('confirmStage').hidden=true;$('requestReviewBtn').disabled=true;$('requestReviewBtn').hidden=true;if(quoteIsCurrent_())showRequestStage_();setExperienceState_('editing','Start with pickup, destination, and pickup time. Fare calculates automatically.','pickup')}
+    function showRequestStage_(){if(!riderExperience)return;$('requestStage').hidden=false;$('contactFields').hidden=false;$('requestDetails').hidden=false;var slot=$('requestFieldsSlot');if(slot){slot.appendChild($('contactFields'));slot.appendChild($('requestDetails'))}$('requestReviewBtn').disabled=false;$('requestReviewBtn').hidden=false;$('requestReviewBtn').textContent='Request';$('requestStage').appendChild($('requestReviewBtn'));var note=$('requestNote');if(note)$('requestStage').appendChild(note)}
+    function hideRequestStage_(){if(!riderExperience)return;$('requestStage').hidden=true;$('confirmStage').hidden=true;$('contactFields').hidden=true;$('requestDetails').hidden=true;$('requestReviewBtn').hidden=true;stagedRequestData=null;submittedQuote=null;submissionState='idle'}
+    function clearFieldErrors_(){[].slice.call(document.querySelectorAll('.field-invalid')).forEach(function(el){el.classList.remove('field-invalid')});[].slice.call(document.querySelectorAll('[aria-invalid="true"]')).forEach(function(el){el.removeAttribute('aria-invalid')})}
+    function markMissingFields_(ids){ids.forEach(function(id){var field=$(id+'Field'),input=$(id);if(field)field.classList.add('field-invalid');if(input)input.setAttribute('aria-invalid','true')})}
+    function focusFirstField_(ids){var first=ids.length?$(ids[0]):null;if(first&&typeof first.focus==='function')first.focus()}
+    function validateRequestData_(data){clearFieldErrors_();var required=['name','phone','email','pickup','destination','date','time'],missing=required.filter(function(k){return !data[k]});if(missing.length){markMissingFields_(missing);focusFirstField_(missing);return 'Please fill in every field marked with a star.'}if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email)){markMissingFields_(['email']);focusFirstField_(['email']);return 'That email address does not look right.'}if(!data.consent){$('consentField').classList.add('field-invalid');$('consent').setAttribute('aria-invalid','true');$('consent').focus();return 'Please check the consent box before continuing.'}return ''}
+    function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+    function collect(){return{name:$('name').value.trim(),phone:$('phone').value.trim(),email:$('email').value.trim(),pickup:$('pickup').value.trim(),destination:$('destination').value.trim(),date:$('date').value.trim(),time:$('time').value.trim(),passengers:$('passengers').value.trim(),notes:$('notes').value.trim(),consent:$('consent').checked,requestToken:requestToken,testMode:testMode}}
+    function pretty(dateStr,timeStr){try{var p=dateStr.split('-'),t=timeStr.split(':'),d=new Date(+p[0],+p[1]-1,+p[2],+t[0],+t[1]);return d.toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'})+' at '+d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}catch(e){return dateStr+' at '+timeStr}}
+    function buildReview_(data){$('reviewList').innerHTML='<li><small>Pickup</small><strong>'+esc(pretty(data.date,data.time))+'</strong></li><li><small>From</small><strong>'+esc(data.pickup)+'</strong></li><li><small>To</small><strong>'+esc(data.destination)+'</strong></li><li><small>Pulse fare</small><strong>$'+Number(activeQuote.fare||0).toFixed(2)+'</strong></li><li><small>Rider</small><strong>'+esc(data.name)+'</strong></li><li><small>Contact</small><strong>'+esc(data.phone)+' · '+esc(data.email)+'</strong></li>'}
+    function openConfirmation_(){clearError();if(!quoteIsCurrent_()){resetQuote_();scheduleFare_(50);showError('Your fare is recalculating.');return}var data=collect(),validation=validateRequestData_(data);if(validation){setExperienceState_('validation',validation,'request');showError(validation);return}stagedRequestData=data;buildReview_(data);$('requestStage').hidden=true;$('confirmStage').hidden=false;$('confirmRideBtn').disabled=false;$('confirmRideBtn').textContent='Confirm Ride';setExperienceState_('review','Review the details, then confirm the ride.','confirm');$('confirmRideBtn').focus()}
+    function editRequest_(){if(submissionState==='submitting')return;$('confirmStage').hidden=true;$('requestStage').hidden=false;setExperienceState_('quoted','Update details, then choose Request again.','request');$('name').focus()}
+    function renderSuccess_(res,data){res=res||{};var quote=submittedQuote||activeQuote||{};$('recap').innerHTML='<div><small>Pickup</small><strong>'+esc(pretty(data.date,data.time))+'</strong></div><div><small>From</small><strong>'+esc(data.pickup)+'</strong></div><div><small>To</small><strong>'+esc(data.destination)+'</strong></div><div><small>Pulse fare</small><strong>$'+Number(quote.fare||0).toFixed(2)+'</strong></div><div><small>Status</small><strong>'+esc(res.status||'REQUESTED')+'</strong></div>';if(testMode)$('doneMsg').textContent='Test fixture accepted. No email, calendar event, or Sheet write was performed.';else $('doneMsg').textContent='Request sent to your Pulse driver. Watch your inbox for confirmation.';$('riderStatus').textContent='Status: '+esc(res.status||'REQUESTED')+' — waiting for driver confirmation.';$('formView').style.display='none';$('doneView').style.display='block';window.scrollTo({top:0,behavior:'smooth'})}
+    function submitExistingWriter_(data,button){if(submissionState==='submitting'||submissionState==='submitted')return;if(!quoteIsCurrent_()){resetQuote_();scheduleFare_(50);showError('Your Pulse fare expired. It is recalculating now.');return}submittedQuote=Object.assign({},activeQuote);var requestPayload=Object.assign({},data,{quoteId:submittedQuote.quoteId||'',quotedFare:submittedQuote.fare,quoteOrigin:submittedQuote.origin||data.pickup,quoteDestination:submittedQuote.destination||data.destination,quotePickupAt:submittedQuote.pickupAt||'',quoteExpiresAt:submittedQuote.expiresAt||'',quotePricingVersion:submittedQuote.pricingVersion||'',quoteToken:submittedQuote.quoteToken||''});submissionState='submitting';button.disabled=true;button.textContent=testMode?'Testing…':'Confirming…';setExperienceState_('submitting','Confirming your ride request. Please wait.','confirm');google.script.run.withSuccessHandler(function(res){submissionState='submitted';setExperienceState_('submitted','Request sent.','confirm');renderSuccess_(res,data)}).withFailureHandler(function(err){submissionState='idle';submittedQuote=null;button.disabled=false;button.textContent=riderExperience?'Retry Confirm Ride':(quoteIsCurrent_()?(testMode?'Test ride request':'Request this ride'):'Waiting for fare');setExperienceState_('retry','The request was not sent. Review the message and retry.','confirm');showError((err&&err.message)?err.message:'Could not send the request. Please try again.')}).submitRideRequest(requestPayload)}
+    function showError(msg){var e=$('err');e.textContent=msg;e.classList.add('show');window.scrollTo({top:0,behavior:'smooth'})}function clearError(){$('err').classList.remove('show')}
 
-    function setExperienceState_(state,message,step){
-      if(!riderExperience)return;
-      var status=$('experienceStatus');
-      if(status){status.setAttribute('data-state',state);status.textContent=message;}
-      var steps=[].slice.call(document.querySelectorAll('#experienceProgress li'));
-      var order=['pickup','destination','time','fare','request','confirm'];
-      var current=Math.max(0,order.indexOf(step));
-      steps.forEach(function(item,index){
-        item.removeAttribute('aria-current');
-        item.setAttribute('data-complete',String(index<current));
-        if(index===current)item.setAttribute('aria-current','step');
-      });
-    }
+    function initializeRoute_(){google.script.url.getLocation(function(route){var params=(route&&route.parameter)||{};requestToken=String(params.request||'');testMode=String(params.mode||'').toLowerCase()==='test';if(testMode)$('testBadge').classList.add('show');google.script.run.withSuccessHandler(function(config){config=config||{};requestOpen=!!config.requestOpen;var btn=$('submitBtn');if(requestOpen){$('quoteBtn').disabled=false;btn.disabled=true;btn.textContent='Waiting for fare';if(testMode)$('err').classList.remove('show');google.script.run.withSuccessHandler(function(experience){experience=experience||{};if(experience.enabled)activateRiderExperience_()}).withFailureHandler(function(){riderExperience=false;document.documentElement.setAttribute('data-rider-experience','off')}).pulseGetRiderExperienceConfig({requestToken:requestToken,testMode:testMode,previewExperience:testMode&&String(params.experience||'')==='1'});scheduleFare_()}else{btn.disabled=true;btn.textContent='Private link required';showError('This private ride-request link is not valid. Ask the driver for a current link.')}}).withFailureHandler(function(err){$('submitBtn').disabled=true;$('submitBtn').textContent='Request unavailable';showError((err&&err.message)?err.message:'Could not verify this request link.')}).getPublicConfig({requestToken:requestToken,testMode:testMode})})}
 
-    function activateRiderExperience_(){
-      riderExperience=true;
-      document.documentElement.setAttribute('data-rider-experience','on');
-      var card=$('requestCard');
-      var route=$('routeFields');
-      var contact=$('contactFields');
-      if(card&&route&&contact)card.insertBefore(route,contact);
-      $('contactFields').hidden=true;
-      $('requestDetails').hidden=true;
-      $('requestStage').hidden=true;
-      $('confirmStage').hidden=true;
-      $('requestReviewBtn').disabled=true;
-      $('requestReviewBtn').hidden=true;
-      if(quoteIsCurrent_())showRequestStage_();
-      setExperienceState_('editing','Start with pickup, destination, and pickup time.','pickup');
-    }
-
-    function showRequestStage_(){
-      if(!riderExperience)return;
-      $('requestStage').hidden=false;
-      $('contactFields').hidden=false;
-      $('requestDetails').hidden=false;
-      var slot=$('requestFieldsSlot');
-      if(slot){
-        slot.appendChild($('contactFields'));
-        slot.appendChild($('requestDetails'));
-      }
-      $('requestReviewBtn').disabled=false;
-      $('requestReviewBtn').hidden=false;
-      $('requestReviewBtn').textContent='Request';
-      $('requestStage').appendChild($('requestReviewBtn'));
-      var note=$('requestNote');
-      if(note)$('requestStage').appendChild(note);
-    }
-
-    function hideRequestStage_(){
-      if(!riderExperience)return;
-      $('requestStage').hidden=true;
-      $('confirmStage').hidden=true;
-      $('contactFields').hidden=true;
-      $('requestDetails').hidden=true;
-      $('requestReviewBtn').hidden=true;
-      stagedRequestData=null;
-      submittedQuote=null;
-      submissionState='idle';
-    }
-
-    function clearFieldErrors_(){
-      [].slice.call(document.querySelectorAll('.field-invalid')).forEach(function(el){el.classList.remove('field-invalid');});
-      [].slice.call(document.querySelectorAll('[aria-invalid="true"]')).forEach(function(el){el.removeAttribute('aria-invalid');});
-    }
-
-    function markMissingFields_(ids){
-      ids.forEach(function(id){
-        var field=$(id+'Field');
-        var input=$(id);
-        if(field)field.classList.add('field-invalid');
-        if(input)input.setAttribute('aria-invalid','true');
-      });
-    }
-
-    function focusFirstField_(ids){
-      var first=ids.length?$(ids[0]):null;
-      if(first&&typeof first.focus==='function')first.focus();
-    }
-
-    function validateRequestData_(data){
-      clearFieldErrors_();
-      var required=['name','phone','email','pickup','destination','date','time'];
-      var missing=required.filter(function(k){return !data[k];});
-      if(missing.length){
-        markMissingFields_(missing);
-        focusFirstField_(missing);
-        return 'Please fill in every field marked with a star.';
-      }
-      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email)){
-        markMissingFields_(['email']);focusFirstField_(['email']);return 'That email address does not look right.';
-      }
-      if(!data.consent){
-        $('consentField').classList.add('field-invalid');$('consent').setAttribute('aria-invalid','true');$('consent').focus();
-        return 'Please check the consent box before continuing.';
-      }
-      return '';
-    }
-
-    function buildReview_(data){
-      $('reviewList').innerHTML=
-        '<li><small>Pickup</small><strong>'+esc(pretty(data.date,data.time))+'</strong></li>'+ 
-        '<li><small>From</small><strong>'+esc(data.pickup)+'</strong></li>'+ 
-        '<li><small>To</small><strong>'+esc(data.destination)+'</strong></li>'+ 
-        '<li><small>Pulse fare</small><strong>$'+Number(activeQuote.fare||0).toFixed(2)+'</strong></li>'+ 
-        '<li><small>Rider</small><strong>'+esc(data.name)+'</strong></li>'+ 
-        '<li><small>Contact</small><strong>'+esc(data.phone)+' · '+esc(data.email)+'</strong></li>';
-    }
-
-    function openConfirmation_(){
-      clearError();
-      if(!quoteIsCurrent_()){
-        resetQuote_();showError('Get a current Pulse fare before continuing.');return;
-      }
-      var data=collect();
-      var validation=validateRequestData_(data);
-      if(validation){
-        setExperienceState_('validation',validation,'request');showError(validation);return;
-      }
-      stagedRequestData=data;
-      buildReview_(data);
-      $('requestStage').hidden=true;
-      $('confirmStage').hidden=false;
-      $('confirmRideBtn').disabled=false;
-      $('confirmRideBtn').textContent='Confirm Ride';
-      setExperienceState_('review','Review the details, then confirm the ride.','confirm');
-      $('confirmRideBtn').focus();
-    }
-
-    function editRequest_(){
-      if(submissionState==='submitting')return;
-      $('confirmStage').hidden=true;
-      $('requestStage').hidden=false;
-      setExperienceState_('quoted','Update details, then choose Request again.','request');
-      $('name').focus();
-    }
-
-    function renderSuccess_(res,data){
-      res=res||{};
-      var quote=submittedQuote||activeQuote||{};
-      $('recap').innerHTML=
-        '<div><small>Pickup</small><strong>'+esc(pretty(data.date,data.time))+'</strong></div>'+ 
-        '<div><small>From</small><strong>'+esc(data.pickup)+'</strong></div>'+ 
-        '<div><small>To</small><strong>'+esc(data.destination)+'</strong></div>'+ 
-        '<div><small>Pulse fare</small><strong>$'+Number(quote.fare||0).toFixed(2)+'</strong></div>'+ 
-        '<div><small>Status</small><strong>'+esc(res.status||'REQUESTED')+'</strong></div>';
-      if(testMode){
-        $('doneMsg').textContent='Test fixture accepted. No email, calendar event, or Sheet write was performed.';
-      }else if(res.driverName){
-        $('doneMsg').textContent='Request sent to your Pulse driver. Watch your inbox for confirmation.';
-      }
-      $('riderStatus').textContent='Status: '+esc(res.status||'REQUESTED')+' — waiting for driver confirmation.';
-      $('formView').style.display='none';
-      $('doneView').style.display='block';
-      window.scrollTo({top:0,behavior:'smooth'});
-    }
-
-    function submitExistingWriter_(data,button){
-      if(submissionState==='submitting'||submissionState==='submitted')return;
-      if(!quoteIsCurrent_()){
-        resetQuote_();
-        showError('Your Pulse fare expired. Recalculate the fare before confirming the ride.');
-        return;
-      }
-      submittedQuote=Object.assign({},activeQuote);
-      var requestPayload=Object.assign({},data,{
-        quoteId:submittedQuote.quoteId||'',
-        quotedFare:submittedQuote.fare,
-        quoteOrigin:submittedQuote.origin||data.pickup,
-        quoteDestination:submittedQuote.destination||data.destination,
-        quotePickupAt:submittedQuote.pickupAt||'',
-        quoteExpiresAt:submittedQuote.expiresAt||'',
-        quotePricingVersion:submittedQuote.pricingVersion||'',
-        quoteToken:submittedQuote.quoteToken||''
-      });
-      submissionState='submitting';
-      button.disabled=true;
-      button.textContent=testMode?'Testing…':'Confirming…';
-      setExperienceState_('submitting','Confirming your ride request. Please wait.','confirm');
-      google.script.run
-        .withSuccessHandler(function(res){
-          submissionState='submitted';
-          setExperienceState_('submitted','Request sent once through the existing writer.','confirm');
-          renderSuccess_(res,data);
-        })
-        .withFailureHandler(function(err){
-          submissionState='idle';
-          submittedQuote=null;
-          button.disabled=false;
-          button.textContent=riderExperience?'Retry Confirm Ride':(quoteIsCurrent_()?(testMode?'Test ride request':'Request this ride'):'Get fare first');
-          setExperienceState_('retry','The request was not sent. Review the message and retry.','confirm');
-          showError((err&&err.message)?err.message:'Could not send the request. Please try again.');
-        })
-        .submitRideRequest(requestPayload);
-    }
-
-    function showError(msg){
-      var e=$('err');e.textContent=msg;e.classList.add('show');
-      window.scrollTo({top:0,behavior:'smooth'});
-    }
-    function clearError(){ $('err').classList.remove('show'); }
-    function esc(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
-
-    function collect(){
-      return {
-        name:$('name').value.trim(),phone:$('phone').value.trim(),email:$('email').value.trim(),
-        pickup:$('pickup').value.trim(),destination:$('destination').value.trim(),
-        date:$('date').value.trim(),time:$('time').value.trim(),
-        passengers:$('passengers').value.trim(),notes:$('notes').value.trim(),
-        consent:$('consent').checked,requestToken:requestToken,testMode:testMode
-      };
-    }
-
-    function pretty(dateStr,timeStr){
-      try{
-        var p=dateStr.split('-'),t=timeStr.split(':');
-        var d=new Date(+p[0],+p[1]-1,+p[2],+t[0],+t[1]);
-        return d.toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'})+' at '+d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
-      }catch(e){return dateStr+' at '+timeStr;}
-    }
-
-    function initializeRoute_(){
-      google.script.url.getLocation(function(route){
-        var params=(route&&route.parameter)||{};
-        requestToken=String(params.request||'');
-        testMode=String(params.mode||'').toLowerCase()==='test';
-        if(testMode)$('testBadge').classList.add('show');
-        google.script.run
-          .withSuccessHandler(function(config){
-            config=config||{};
-            if(config.driverName)$('driverName').textContent=config.driverName;
-            requestOpen=!!config.requestOpen;
-            var btn=$('submitBtn');
-            if(requestOpen){
-              $('quoteBtn').disabled=false;
-              $('quoteBtn').textContent='Get Pulse fare';
-              btn.disabled=true;
-              btn.textContent='Get fare first';
-              if(testMode)$('err').classList.remove('show');
-              google.script.run
-                .withSuccessHandler(function(experience){
-                  experience=experience||{};
-                  if(experience.enabled)activateRiderExperience_();
-                })
-                .withFailureHandler(function(){
-                  riderExperience=false;
-                  document.documentElement.setAttribute('data-rider-experience','off');
-                })
-                .pulseGetRiderExperienceConfig({
-                  requestToken:requestToken,
-                  testMode:testMode,
-                  previewExperience:testMode&&String(params.experience||'')==='1'
-                });
-            }else{
-              btn.disabled=true;
-              btn.textContent='Private link required';
-              showError('This private ride-request link is not valid. Ask the driver for a current link.');
-            }
-          })
-          .withFailureHandler(function(err){
-            $('submitBtn').disabled=true;
-            $('submitBtn').textContent='Request unavailable';
-            showError((err&&err.message)?err.message:'Could not verify this request link.');
-          })
-          .getPublicConfig({requestToken:requestToken,testMode:testMode});
-      });
-    }
-
-    $('quoteBtn').addEventListener('click',requestFareQuote_);
-    ['pickup','destination','date','time'].forEach(function(id){
-      $(id).addEventListener('input',resetQuote_);
-    });
-
-    $('requestReviewBtn').addEventListener('click',openConfirmation_);
-    $('editRequestBtn').addEventListener('click',editRequest_);
-    $('confirmRideBtn').addEventListener('click',function(){
-      if(!stagedRequestData){openConfirmation_();return;}
-      submitExistingWriter_(stagedRequestData,$('confirmRideBtn'));
-    });
-
-    $('submitBtn').addEventListener('click',function(){
-      clearError();
-      if(!quoteIsCurrent_()){
-        resetQuote_();
-        showError('Get a current Pulse fare before requesting the ride.');
-        return;
-      }
-      if(!requestOpen){showError('This private request link is not valid.');return;}
-      var data=collect();
-      var validation=validateRequestData_(data);
-      if(validation){showError(validation);return;}
-      submitExistingWriter_(data,$('submitBtn'));
-    });
-
+    smartInput_('pickup');smartInput_('destination');
+    ['date','time'].forEach(function(id){$(id).addEventListener('input',function(){resetQuote_();scheduleFare_()})});
+    $('quoteBtn').addEventListener('click',function(){requestFareQuote_(true)});
+    $('requestReviewBtn').addEventListener('click',openConfirmation_);$('editRequestBtn').addEventListener('click',editRequest_);$('confirmRideBtn').addEventListener('click',function(){if(!stagedRequestData){openConfirmation_();return}submitExistingWriter_(stagedRequestData,$('confirmRideBtn'))});
+    $('submitBtn').addEventListener('click',function(){clearError();if(!quoteIsCurrent_()){resetQuote_();scheduleFare_(50);showError('Your fare is recalculating.');return}if(!requestOpen){showError('This private request link is not valid.');return}var data=collect(),validation=validateRequestData_(data);if(validation){showError(validation);return}submitExistingWriter_(data,$('submitBtn'))});
     initializeRoute_();
   </script>
 </body>
