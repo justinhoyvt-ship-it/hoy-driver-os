@@ -1,32 +1,46 @@
 {
   "taskId": "PULSE-086",
-  "title": "Pulse Console visual upgrade",
-  "status": "STAGED",
-  "dependsOn": ["PULSE-085B"],
+  "title": "Pulse Console visual + interaction upgrade",
+  "status": "STAGED_FOR_REVIEW",
+  "dependsOn": ["PULSE-085B", "PULSE-085C"],
+  "runtime": {
+    "clientOverlay": "Pulse086Client.html",
+    "automaticDeploy": false,
+    "automaticMerge": false
+  },
   "scope": {
     "visual": [
       "Full driver-console visual pass after lifecycle controls are simplified",
       "Stronger ride hierarchy, cleaner spacing, fewer glass panels and internal labels",
-      "Use route/fare/status as the dominant information",
-      "Retain Pulse night visual identity and current map functionality",
-      "Make active ride and incoming request states visually distinct at a glance",
-      "Remove TEST T-001 and other test/debug chrome from the normal live driving surface",
-      "Never lead the console with an expired opportunity/event card",
-      "Separate Uber trip-mirroring controls from private Pulse ride controls so the two lifecycles do not visually compete",
-      "Preserve Uber mirror data capture but make it a clearly labeled secondary lane when no mirrored Uber trip is active"
+      "Use route/fare/status/next action as the dominant information",
+      "Retain Pulse night visual identity and current Leaflet map functionality",
+      "Make incoming request, Scheduled, pickup, active trip, and completion states visually distinct",
+      "Remove TEST/debug chrome from the normal live driving surface",
+      "Remove opportunity/event card from the primary driving surface; event intelligence remains a secondary information lane",
+      "Make Uber trip-mirroring controls visually secondary whenever a Pulse rider request/ride is active"
     ],
-    "map": [
-      "Evaluate MapLibre GL JS as an upgrade path from the current Leaflet presentation",
-      "Support route line, pickup/destination markers and active-trip focus when routing data is available"
+    "interaction": [
+      "Guard request and ride lifecycle buttons against rapid repeat taps while a transition is in flight",
+      "Remove ambiguous DUE labels that have no numeric/time context",
+      "Normalize Accept ride / Route to pickup labels into a single clear next action",
+      "Preserve in-console routing from PULSE-085B",
+      "Do not change request writer, fare writer, rider lifecycle writer, or Uber mirror data capture"
+    ],
+    "followOn": [
+      "End Shift direct-finish cleanup after live server end-shift function is captured/verified",
+      "Background refresh/polling hardening after current production refresh function is captured/verified",
+      "MapLibre remains optional future map visual upgrade rather than a blocker"
     ]
   },
   "acceptance": [
     "Console looks like a purpose-built driver app rather than an admin dashboard",
     "Incoming request, Scheduled, active Pulse ride, and Uber mirror mode are immediately distinguishable",
-    "Expired opportunity cards are filtered out of the live console",
-    "Test/debug target information is hidden from normal driving view",
-    "Uber mirror controls no longer dominate the primary Pulse ride surface when idle",
-    "No functional regression in QR, Inbox, map, shift, Uber mirroring, or rider lifecycle"
+    "Opportunity/test/debug cards do not occupy the primary live-driving surface",
+    "Fare remains prominent on incoming requests and Scheduled rides",
+    "One dominant next action is presented for rider lifecycle states",
+    "Rapid repeat taps are temporarily blocked client-side",
+    "Uber mirror controls no longer dominate while a Pulse rider request/ride is active",
+    "No regression in QR, fare, Inbox, Scheduled, map, shift, Uber mirroring, or rider lifecycle"
   ],
   "production": {"automaticDeploy": false, "automaticMerge": false}
 }
