@@ -1,0 +1,2 @@
+Accept -> Start pickup -> automatic rider progress -> Start ride -> Complete ride
+Routing stays in Pulse map. External window launch removed by Pulse085BClient override.
