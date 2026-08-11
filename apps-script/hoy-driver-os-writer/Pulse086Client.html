@@ -1,0 +1,120 @@
+<style id="pulse086-style">
+  /* PULSE-086 — live driver console visual / interaction cleanup */
+  #app{gap:12px;padding-left:12px;padding-right:12px;padding-bottom:150px}
+  .opp,.test{display:none!important}
+  .head{margin-bottom:2px}
+  .brand{font-size:1.04rem}
+  .tag.live{padding:5px 9px}
+
+  .online-bar{border-radius:16px;padding:13px 14px;background:linear-gradient(180deg,rgba(69,227,148,.08),rgba(69,227,148,.03))}
+  .shift-btn.end{min-height:46px;padding-inline:18px}
+
+  .sched{padding:15px;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.025))}
+  .sched-head{margin-bottom:11px}.sched-head span{font-size:1.02rem}.sched-add{min-height:42px;padding:0 13px;font-size:.72rem}
+  .sched-card,.sched-card.p082-card{padding:15px 14px;border-radius:15px;gap:12px;background:rgba(255,255,255,.035)}
+  .sched-card.due{border-color:rgba(247,178,59,.48);background:linear-gradient(180deg,rgba(247,178,59,.105),rgba(247,178,59,.035))}
+  .sc-main b,.p084-route{font-size:.98rem;line-height:1.3}.sc-main small,.p084-time{font-size:.75rem}.p084-fare{font-size:1.28rem;color:var(--green);font-weight:800}
+  .p084-action button,.sched-card button{min-height:48px;border-radius:12px}
+
+  .inbox-card{padding:16px;border-radius:17px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.026))}
+  .inbox-card b{font-size:1.08rem;margin-bottom:5px}.inbox-time{font-size:.74rem}.inbox-route{font-size:.92rem;line-height:1.42}
+  .inbox-fare{font-size:1.48rem;font-weight:800;color:var(--green);margin-top:10px}
+  .inbox-actions{gap:10px}.inbox-actions button{min-height:52px;border-radius:13px;font-size:.92rem}
+
+  .map-wrap{border-radius:18px;overflow:hidden;min-height:210px}
+  #map{min-height:210px}
+  .p085b-route-chip{left:10px;right:10px;bottom:10px;border-radius:12px;padding:10px 12px}
+
+  .status{border-radius:18px;padding:17px;background:linear-gradient(180deg,rgba(247,178,59,.07),rgba(255,255,255,.025))}
+  .status h2,.status .big{font-size:1.5rem;line-height:1.14}
+  .status .sub,.status small{font-size:.8rem}
+
+  .rider-flow{padding:15px;border-radius:18px;background:linear-gradient(180deg,rgba(69,227,148,.09),rgba(69,227,148,.035))}
+  .rider-flow-head{font-size:.95rem}.rider-flow-head small{font-size:.76rem}
+  .rider-flow-actions,.rider-flow-actions.two{grid-template-columns:1fr;gap:9px}
+  .rider-flow-actions button{min-height:54px;border-radius:13px;font-size:.9rem}
+  .rider-flow-actions button.primary{font-size:.96rem}
+
+  .p086-busy{position:relative;pointer-events:none;opacity:.66}
+  .p086-busy::after{content:'Working…';position:absolute;inset:0;display:grid;place-items:center;border-radius:inherit;background:rgba(5,8,19,.72);color:var(--cyan);font-family:var(--mono);font-size:.68rem;letter-spacing:.04em}
+  .p086-secondary{opacity:.72}
+  .p086-hidden{display:none!important}
+
+  @media(max-width:430px){
+    #app{padding-left:10px;padding-right:10px}
+    .sched,.inbox-card,.rider-flow,.status{border-radius:16px}
+    .inbox-route{font-size:.88rem}.inbox-fare{font-size:1.4rem}
+  }
+</style>
+<script>
+(function(){
+  'use strict';
+  var P086={observer:null,busyUntil:0};
+
+  function q(sel,root){return (root||document).querySelector(sel)}
+  function qa(sel,root){return [].slice.call((root||document).querySelectorAll(sel))}
+
+  function hideDebug_(){
+    qa('.test').forEach(function(el){el.classList.add('p086-hidden')});
+    qa('.opp').forEach(function(el){el.classList.add('p086-hidden')});
+  }
+
+  function cleanCopy_(){
+    qa('.sc-when,.p084-time,.inbox-time').forEach(function(el){
+      var text=String(el.textContent||'').replace(/\bDUE\b\s*$/i,'').trim();
+      if(text!==String(el.textContent||'').trim())el.textContent=text;
+    });
+    qa('button').forEach(function(btn){
+      var text=String(btn.textContent||'').trim();
+      if(/^accept ride\s*start ride$/i.test(text))btn.textContent='Accept ride';
+      if(/^navigate pickup$/i.test(text))btn.textContent='Route to pickup';
+    });
+  }
+
+  function deEmphasizeUber_(){
+    qa('.go').forEach(function(btn){
+      if(document.querySelector('.rider-flow.show')||document.querySelector('.inbox-card'))btn.classList.add('p086-secondary');
+      else btn.classList.remove('p086-secondary');
+    });
+  }
+
+  function guardButtons_(){
+    qa('.rider-flow-actions button,.inbox-actions button,.p084-action button,.sched-card button').forEach(function(btn){
+      if(btn.dataset.p086Guard==='1')return;
+      btn.dataset.p086Guard='1';
+      btn.addEventListener('click',function(){
+        if(btn.disabled||btn.classList.contains('p086-busy'))return;
+        var text=String(btn.textContent||'').toLowerCase();
+        if(!/(accept|decline|start|complete|route|pickup|destination|arriv)/.test(text))return;
+        btn.classList.add('p086-busy');
+        btn.disabled=true;
+        window.setTimeout(function(){
+          btn.classList.remove('p086-busy');
+          btn.disabled=false;
+        },1800);
+      },true);
+    });
+  }
+
+  function improveHierarchy_(){
+    qa('.inbox-card').forEach(function(card){
+      var fare=q('.inbox-fare',card),actions=q('.inbox-actions',card);
+      if(fare&&actions&&fare.nextElementSibling!==actions){card.insertBefore(fare,actions)}
+    });
+  }
+
+  function refreshEnhancements_(){
+    hideDebug_();cleanCopy_();deEmphasizeUber_();guardButtons_();improveHierarchy_();
+  }
+
+  function start_(){
+    refreshEnhancements_();
+    P086.observer=new MutationObserver(function(){window.requestAnimationFrame(refreshEnhancements_)});
+    P086.observer.observe(document.body,{subtree:true,childList:true,characterData:true});
+    window.addEventListener('focus',function(){window.setTimeout(refreshEnhancements_,50)});
+    window.setInterval(refreshEnhancements_,5000);
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start_);else start_();
+})();
+</script>
