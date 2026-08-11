@@ -1,0 +1,153 @@
+<style id="pulse085b-style">
+  /* First console visual pass: ride information first, implementation state second. */
+  .inbox-card{padding:16px;border-radius:17px;background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.025));}
+  .inbox-card b{font-size:1.06rem}.inbox-route{font-size:.9rem;line-height:1.45;color:var(--text)}
+  .inbox-fare{font-size:1.35rem;font-weight:800;margin-top:9px}.inbox-time{font-size:.72rem}
+  .inbox-actions button{min-height:49px;border-radius:12px;font-size:.88rem}
+  .sched-card.p082-card{padding:17px 15px;border-radius:17px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.025));}
+  .p084-time{font-size:.8rem}.p084-fare{font-size:1.18rem}.p084-route{font-size:.96rem}
+  .p084-action button{min-height:50px;border-radius:13px}
+
+  .rider-flow{padding:14px;border-radius:17px;border-color:rgba(69,227,148,.34);background:linear-gradient(180deg,rgba(69,227,148,.085),rgba(69,227,148,.035));}
+  .rider-flow-head{font-size:.88rem}.rider-flow-head small{font-size:.72rem;color:var(--green)}
+  .rider-flow-actions{grid-template-columns:1fr;gap:9px}
+  .rider-flow-actions.two{grid-template-columns:1fr 1fr}
+  .rider-flow-actions button{min-height:50px;border-radius:12px;font-size:.84rem}
+  .map-wrap{position:relative}
+  .p085b-route-chip{display:none;position:absolute;z-index:700;left:12px;right:12px;bottom:12px;padding:9px 11px;border:1px solid rgba(43,212,229,.35);border-radius:11px;background:rgba(5,8,19,.88);backdrop-filter:blur(10px);font-family:var(--mono);font-size:.68rem;color:var(--cyan);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+  .p085b-route-chip.show{display:block}
+  @media(max-width:430px){.rider-flow-actions.two{grid-template-columns:1fr}}
+</style>
+<script>
+(function(){
+  'use strict';
+  var P085B={line:null,marker:null,busy:false};
+
+  function p085bMapOrigin_(){
+    try{
+      if(meMarker&&meMarker.getLatLng){var m=meMarker.getLatLng();return [Number(m.lat),Number(m.lng)];}
+      if(map&&map.getCenter){var c=map.getCenter();return [Number(c.lat),Number(c.lng)];}
+    }catch(e){}
+    return [null,null];
+  }
+
+  function p085bRouteChip_(){
+    var wrap=document.querySelector('.map-wrap');
+    if(!wrap)return null;
+    var chip=wrap.querySelector('.p085b-route-chip');
+    if(!chip){chip=document.createElement('div');chip.className='p085b-route-chip';wrap.appendChild(chip);}
+    return chip;
+  }
+
+  function p085bClearRoute_(){
+    try{if(map&&P085B.line){map.removeLayer(P085B.line);P085B.line=null;}}catch(e){}
+    try{if(map&&P085B.marker){map.removeLayer(P085B.marker);P085B.marker=null;}}catch(e){}
+  }
+
+  function p085bShowRoute_(address,label){
+    address=String(address||'').trim();
+    if(!address){toast('Address unavailable');return Promise.resolve(null);}
+    if(P085B.busy)return Promise.resolve(null);
+    P085B.busy=true;
+    var chip=p085bRouteChip_();
+    if(chip){chip.textContent='Finding '+String(label||'route').toLowerCase()+'…';chip.classList.add('show');}
+    var origin=p085bMapOrigin_();
+    return srv('pulse085bRoutePreview',origin[0],origin[1],address).then(function(result){
+      P085B.busy=false;
+      if(!result||result.ok!==true)throw new Error('Route unavailable');
+      p085bClearRoute_();
+      var pts=Array.isArray(result.routePoints)?result.routePoints:[];
+      var dest=Array.isArray(result.destinationPoint)?result.destinationPoint:null;
+      try{
+        if(map&&pts.length>1){
+          P085B.line=L.polyline(pts,{color:'#43d9ea',weight:5,opacity:.9}).addTo(map);
+          map.fitBounds(P085B.line.getBounds(),{padding:[28,28],maxZoom:15});
+        }else if(map&&dest&&isFinite(dest[0])&&isFinite(dest[1])){
+          map.setView(dest,15);
+        }
+        if(map&&dest&&isFinite(dest[0])&&isFinite(dest[1]))P085B.marker=L.circleMarker(dest,{radius:7,color:'#f7b23b',weight:3,fillColor:'#f7b23b',fillOpacity:1}).addTo(map);
+      }catch(e){}
+      var summary=[result.durationText,result.distanceText].filter(Boolean).join(' · ');
+      if(chip){chip.textContent=(label||'Route')+(summary?' · '+summary:'');chip.classList.add('show');}
+      if(summary)toast(summary);
+      return result;
+    }).catch(function(error){
+      P085B.busy=false;
+      if(chip){chip.textContent='Route unavailable · tap again to retry';chip.classList.add('show');}
+      toast(error&&error.message?error.message:'Route unavailable');
+      return null;
+    });
+  }
+
+  // PULSE-085B: navigation remains inside the Pulse console. No window.open.
+  navTo=function(address){return p085bShowRoute_(address,'Route');};
+
+  function p085bDeparture_(){var x=p085bMapOrigin_();return isFinite(x[0])&&isFinite(x[1])?x:null;}
+
+  startScheduled=function(id){
+    var s=S.scheduled.filter(function(x){return x.id===id})[0];if(!s||scheduledStartBusy[id])return;
+    if(s.requestId&&((S.active&&S.active.requestId===s.requestId)||(S.queued&&S.queued.requestId===s.requestId))){toast('Ride already started');return;}
+    if(S.active||S.queued){toast('Finish current ride first');return;}
+    if(!S.shift)goOnline();
+    scheduledStartBusy[id]=true;renderSched();
+    var departure=p085bDeparture_();
+    function release(){delete scheduledStartBusy[id];renderSched();}
+    function begin(result){
+      var ride=scheduledTripState(s);
+      if(s.source==='rider'){
+        ride.riderStatus=(result&&result.status)||'Leaving';
+        ride.pickupTarget=(result&&result.pickupTarget)||null;
+        ride.pickupTargetError=(result&&result.pickupTargetError)||'';
+        ride.pickupOrigin=departure;
+        ride.pickupMovedMiles=0;
+        ride.pickupStoppedSince=0;
+      }
+      S.active=ride;persistState();schedFromServer((result&&result.reservations)||[]);release();
+      toast('Pickup started');render();
+      p085bShowRoute_(s.pickup||ride.pickup,'Pickup');
+      try{window.dispatchEvent(new Event('focus'));}catch(e){}
+    }
+    srv('beginForegroundPickup',s.requestId||'',id,s.pickup||'').then(begin).catch(function(e){release();toast(e&&e.message?e.message:'Could not begin pickup');render();});
+  };
+
+  function p085bDriverStatus_(status){
+    if(status==='Leaving'||status==='On the way')return 'Heading to pickup';
+    if(status==='Arriving soon')return 'Near pickup';
+    if(status==='Arrived')return 'At pickup';
+    if(status==='Ride in progress')return 'Ride in progress';
+    if(status==='Complete')return 'Complete';
+    return status||'Ride confirmed';
+  }
+
+  renderRiderFlow=function(){
+    var box=$('riderFlow'),actions=$('riderFlowActions');if(!box||!actions)return;
+    actions.innerHTML='';actions.classList.remove('two');
+    var a=S.active;if(!isRiderRide_(a)){box.classList.remove('show');return;}
+    box.classList.add('show');
+    var st=riderStatus_(a),display=p085bDriverStatus_(st);
+    $('riderFlowStatus').textContent=display;
+
+    if(st==='Leaving'||st==='On the way'||st==='Arriving soon'){
+      actions.appendChild(riderActionButton_('Route to pickup',true,function(){p085bShowRoute_(a.pickup,'Pickup');}));
+      return;
+    }
+    if(st==='Arrived'){
+      actions.appendChild(riderActionButton_('Start ride',true,function(){
+        advanceRiderStatus_('Ride in progress',function(){a.state='ON_TRIP';a.pickedUpAt=now();startTrace();toast('Ride started');p085bShowRoute_(a.dest,'Destination');});
+      }));
+      return;
+    }
+    if(st==='Ride in progress'){
+      actions.classList.add('two');
+      actions.appendChild(riderActionButton_('Route to destination',false,function(){p085bShowRoute_(a.dest,'Destination');}));
+      actions.appendChild(riderActionButton_('Complete ride',true,function(){advanceRiderStatus_('Complete',function(){dropOff();p085bClearRoute_();});}));
+      return;
+    }
+    if(st==='Complete'){
+      var done=riderActionButton_('Ride complete',false,function(){});done.disabled=true;actions.appendChild(done);
+    }
+  };
+
+  setTimeout(function(){render();},0);
+})();
+</script>

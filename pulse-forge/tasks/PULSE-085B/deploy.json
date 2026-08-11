@@ -1,0 +1,9 @@
+{
+  "taskId": "PULSE-085B",
+  "target": "Hoy Driver OS Apps Script",
+  "addFiles": ["Pulse085B.gs", "Pulse085BClient.html"],
+  "patch": "Code.gs doGet only: inject Pulse085BClient after ForegroundPickup",
+  "replaceWholeCodeGs": false,
+  "automaticDeploy": false,
+  "automaticMerge": false
+}
