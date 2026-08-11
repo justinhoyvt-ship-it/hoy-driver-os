@@ -1,0 +1,28 @@
+{
+  "taskId": "PULSE-085A",
+  "title": "Request reliability, rider status repair, driver fare alert",
+  "status": "STAGED_FOR_REVIEW",
+  "targets": ["Friend Request app-Main", "Hoy Driver OS"],
+  "acceptance": {
+    "trackMyRideOneClick": true,
+    "pinFallbackPreserved": true,
+    "statusPageUsesConfirmationVisualLanguage": true,
+    "statusPageShowsRideDetailsAndFare": true,
+    "statusPageAutoRefreshSeconds": 20,
+    "rawLockTimeoutHidden": true,
+    "futureRequestEmailsOutsideScriptLock": true,
+    "qrTransientLockRetry": true,
+    "nowQrAlertsDriver": true,
+    "laterQrAlertsDriver": true,
+    "driverAlertShowsFare": true,
+    "driverInboxRequiresQuotedFareWhenPresent": true,
+    "automaticProductionDeployment": false
+  },
+  "preserve": [
+    "working QR NOW/LATER TODAY lane",
+    "future/rebook RequestForm lane",
+    "signed fare validation",
+    "Ride Requests single writer",
+    "confirmation and completion receipt flow"
+  ]
+}
