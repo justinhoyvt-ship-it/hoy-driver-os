@@ -9,7 +9,11 @@
       "Stronger ride hierarchy, cleaner spacing, fewer glass panels and internal labels",
       "Use route/fare/status as the dominant information",
       "Retain Pulse night visual identity and current map functionality",
-      "Make active ride and incoming request states visually distinct at a glance"
+      "Make active ride and incoming request states visually distinct at a glance",
+      "Remove TEST T-001 and other test/debug chrome from the normal live driving surface",
+      "Never lead the console with an expired opportunity/event card",
+      "Separate Uber trip-mirroring controls from private Pulse ride controls so the two lifecycles do not visually compete",
+      "Preserve Uber mirror data capture but make it a clearly labeled secondary lane when no mirrored Uber trip is active"
     ],
     "map": [
       "Evaluate MapLibre GL JS as an upgrade path from the current Leaflet presentation",
@@ -18,8 +22,11 @@
   },
   "acceptance": [
     "Console looks like a purpose-built driver app rather than an admin dashboard",
-    "Incoming request, Scheduled and active ride are immediately distinguishable",
-    "No functional regression in QR, Inbox, map, shift, or rider lifecycle"
+    "Incoming request, Scheduled, active Pulse ride, and Uber mirror mode are immediately distinguishable",
+    "Expired opportunity cards are filtered out of the live console",
+    "Test/debug target information is hidden from normal driving view",
+    "Uber mirror controls no longer dominate the primary Pulse ride surface when idle",
+    "No functional regression in QR, Inbox, map, shift, Uber mirroring, or rider lifecycle"
   ],
   "production": {"automaticDeploy": false, "automaticMerge": false}
 }
