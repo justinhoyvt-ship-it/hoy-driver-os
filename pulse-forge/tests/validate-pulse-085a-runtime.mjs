@@ -1,0 +1,23 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+const here=path.dirname(fileURLToPath(import.meta.url));
+const root=path.resolve(here,'../..');
+const read=p=>fs.readFileSync(path.join(root,p),'utf8');
+const reliable=read('pulse-autobuild/request-app/Pulse085ARequestReliability.gs');
+const qrServer=read('pulse-autobuild/request-app/QrLiveServer.gs');
+const driverCode=read('apps-script/hoy-driver-os-writer/Code.gs');
+const driverUi=read('apps-script/hoy-driver-os-writer/Index.html');
+const patch=read('pulse-forge/tasks/PULSE-085A/request-app-code.patch.md');
+const qrPatch=read('pulse-forge/tasks/PULSE-085A/qr-live-html.patch.md');
+const failures=[]; const check=(ok,msg)=>{if(!ok)failures.push(msg)};
+for(const marker of ['submitQrLiveRideReliable','Utilities.sleep(350)','notifyDriverOfRequest_','result.driverEmailSent = true']) check(reliable.includes(marker),'reliability marker missing: '+marker);
+check(qrPatch.includes('submitQrLiveRideReliable(data)'),'QR reliable submit handoff missing');
+check(qrServer.includes("if (customer.timing === 'LATER') notifyDriverOfRequest_(row)"),'existing LATER alert contract changed');
+for(const marker of ['signed 90-day status token','PIN form remains fallback','car hero','When / From / To / Fare','20-second refresh','Send driver/customer mail after releasing the lock','quoted fare']) check(patch.includes(marker),'Code patch contract missing: '+marker);
+check(driverCode.includes("'Quoted Fare'"),'Hoy Driver reader lacks Quoted Fare');
+check(driverCode.includes('quotedFare:'),'Hoy Driver projection lacks quotedFare');
+check(driverUi.includes('inbox-fare'),'Hoy Driver fare visual missing');
+check(driverUi.includes('r.quotedFare!=null'),'Hoy Driver Inbox fare render missing');
+if(failures.length){console.error('PULSE-085A FAIL');failures.forEach(x=>console.error('- '+x));process.exit(1)}
+console.log('PULSE-085A PASS');
