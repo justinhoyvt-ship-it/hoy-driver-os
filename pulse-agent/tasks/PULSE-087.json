@@ -1,0 +1,26 @@
+{
+  "taskId": "PULSE-087",
+  "title": "Branded rider shell / masked Apps Script origin",
+  "status": "STAGED",
+  "dependsOn": ["PULSE-085A", "PULSE-085C"],
+  "scope": {
+    "frontend": [
+      "Move rider-facing request/status surfaces behind a Pulse-branded HTTPS frontend",
+      "Use Pulse/VT URL instead of exposing script.google.com to riders",
+      "Reuse confirmation-email hero treatment as rider-app shell",
+      "Provide status progress and later route/map panel inside the branded shell"
+    ],
+    "backend": [
+      "Keep Apps Script as the protected request/status backend initially",
+      "Use a controlled proxy/API boundary rather than trying to hide Google-owned browser chrome inside Apps Script HTML",
+      "Preserve existing Ride ID/PIN or replace with an equally private signed access token only after migration testing"
+    ]
+  },
+  "acceptance": [
+    "Rider sees a Pulse-branded URL and no Apps Script banner/chrome",
+    "Existing QR and future-booking links can migrate without changing ride data",
+    "No private backend URL or credentials exposed in page content",
+    "Rollback to direct Apps Script URL remains possible during beta"
+  ],
+  "production": {"automaticDeploy": false, "automaticMerge": false}
+}
