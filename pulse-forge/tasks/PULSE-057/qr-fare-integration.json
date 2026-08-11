@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "taskId": "PULSE-057",
   "packageType": "QR_FARE_INTEGRATION",
   "sourceOfTruth": {
@@ -21,7 +21,8 @@
     "futureSchedulingSeparate": true,
     "standaloneRequestAppSoleWriter": true,
     "noQuoteWrite": true,
-    "noCompetitorEstimate": true
+    "noCompetitorEstimate": true,
+    "manualFareGateSupersededByPulse085c": true
   },
   "requiredFareUiMarkers": [
     "id=\"quotePanel\"",
@@ -29,7 +30,7 @@
     "id=\"quoteResult\"",
     "id=\"quoteFare\"",
     ".pulseGetFareQuote({",
-    "Get fare first",
+    "Fare calculates automatically",
     "quoteIsCurrent_()"
   ],
   "release": {
