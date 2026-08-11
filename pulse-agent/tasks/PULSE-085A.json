@@ -1,0 +1,34 @@
+{
+  "taskId": "PULSE-085A",
+  "title": "Rider status repair + request alert/fare visibility",
+  "status": "STAGED",
+  "dependsOn": ["PULSE-084U"],
+  "scope": {
+    "requestApp": [
+      "Send driver email for every accepted QR request submission, including NOW",
+      "Include quoted fare in driver notification email",
+      "Repair lock contention so rider never sees raw Lock timeout errors",
+      "Keep one Ride Requests writer and existing lifecycle"
+    ],
+    "hoyDriver": [
+      "Require quotedFare to survive Ride Requests -> listRequestedRides -> Inbox",
+      "Show fare prominently on Accept/Decline request card",
+      "Show fare on confirmed Scheduled rider card"
+    ],
+    "riderStatus": [
+      "Replace blank Track my ride result with branded rider-safe status page",
+      "Use confirmation-email hero visual language",
+      "Show route, fare, driver/vehicle, current status and progress",
+      "Do not expose other rides, earnings, notes or private backend data"
+    ]
+  },
+  "acceptance": [
+    "NOW QR request sends driver notification email",
+    "Driver Inbox request card shows the same quoted fare as rider",
+    "Confirmation email Track my ride never resolves to a blank page",
+    "Rider status page renders branded current-state progress",
+    "Raw lock-timeout text is not rider-visible",
+    "No duplicate request is created during retry"
+  ],
+  "production": {"automaticDeploy": false, "automaticMerge": false}
+}
