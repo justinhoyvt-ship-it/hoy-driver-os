@@ -1,8 +1,8 @@
 {
   "taskId": "PULSE-085C",
   "title": "Smart address entry + automatic fare",
-  "status": "STAGED",
-  "dependsOn": ["PULSE-085A"],
+  "status": "BUILDING",
+  "dependsOn": ["PULSE-085A", "PULSE-085B"],
   "scope": {
     "qrAndFutureForms": [
       "Auto-resolve pickup and destination instead of relying on raw free text",
@@ -11,7 +11,8 @@
       "Automatically calculate route and fare when both endpoints are valid",
       "Recalculate on route or pickup-time change",
       "Keep a manual retry only for route/fare failures",
-      "Show fare explanation: distance, duration, and short pricing summary"
+      "Show fare explanation: distance, duration, and short pricing summary",
+      "Preserve existing signed fare verification as the authoritative write guard"
     ],
     "openSourceCandidates": [
       "Photon for search-as-you-type geocoding/location bias",
@@ -24,7 +25,8 @@
     "Address entry resolves to usable locations before quote",
     "Fare updates automatically after route/time changes",
     "Rider sees distance + duration + concise fare explanation",
-    "Existing signed fare verification remains authoritative"
+    "Existing signed fare verification remains authoritative",
+    "QR NOW/LATER-TODAY and future booking remain separate surfaces"
   ],
   "production": {"automaticDeploy": false, "automaticMerge": false}
 }
