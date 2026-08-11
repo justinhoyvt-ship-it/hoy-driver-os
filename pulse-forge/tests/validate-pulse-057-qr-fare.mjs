@@ -44,9 +44,10 @@ for(const marker of integration.requiredFareUiMarkers||[]){
   check(form.includes(marker),`QR fare UI marker missing: ${marker}`);
 }
 
-check(form.includes("['pickup','destination','date','time'].forEach")||form.includes("['pickup','destination','date','time']"),'Fare quote must be invalidated when route/time inputs change');
+// PULSE-085C supersedes the old single array listener with smart-input + date/time invalidation.
+check(form.includes('function resetQuote_()')&&form.includes("smartInput_('pickup')")&&form.includes("smartInput_('destination')")&&form.includes("['date','time'].forEach"),'Fare quote must be invalidated when route/time inputs change');
 check(form.includes("if(!quoteIsCurrent_())")||form.includes("quoteIsCurrent_()"),'Submission flow must check quote freshness');
-check(form.includes("submitRideRequest") ,'Existing request submission path must remain present');
+check(form.includes('submitRideRequest'),'Existing request submission path must remain present');
 check(!fare.includes('MailApp.')&&!fare.includes('CalendarApp.')&&!fare.includes('appendRow('),'Fare engine must remain no-write');
 check(requestCode.includes('submitRideRequest'),'Standalone request writer missing');
 
@@ -65,4 +66,4 @@ if(failures.length){
   failures.forEach(item=>console.error('- '+item));
   process.exit(1);
 }
-console.log('PULSE-057 validation passed: existing fare engine is wired to the existing request UI without rebuilding QR, Inbox, lifecycle, or writer paths.');
+console.log('PULSE-057 validation passed: existing fare engine remains authoritative while PULSE-085C auto-fare UX supersedes the manual gate.');

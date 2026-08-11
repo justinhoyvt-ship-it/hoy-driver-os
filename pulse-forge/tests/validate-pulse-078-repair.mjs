@@ -25,7 +25,6 @@ for (const marker of [
 for (const marker of [
   'data-rider-experience="off"',
   'id="quoteBtn"',
-  'function requestFareQuote_()',
   'pulseGetRiderExperienceConfig',
   'id="confirmRideBtn"',
   'Confirm Ride',
@@ -34,6 +33,7 @@ for (const marker of [
 ]) {
   assert.ok(form.includes(marker), `PULSE-078 repair form marker missing: ${marker}`);
 }
+assert.ok(/function\s+requestFareQuote_\s*\(/.test(form), 'PULSE-078 repair fare quote function missing');
 
 for (const regression of [
   "This is Justin’s ride-booking portal.",

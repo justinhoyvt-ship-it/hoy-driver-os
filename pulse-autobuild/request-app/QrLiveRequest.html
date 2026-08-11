@@ -16,7 +16,8 @@
     .body{padding:16px}h1{font-size:1.45rem;line-height:1.1;margin:0 0 4px}.sub{margin:0 0 15px;color:var(--muted);font-size:.82rem}label{display:block;margin:12px 0 6px;color:var(--muted);font-size:.68rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
     input,button{font:inherit}input{width:100%;min-height:46px;padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:#09132b;color:var(--text);font-size:16px}.timing{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px}.timing button,.location,.quote-btn{min-height:46px;border:1px solid var(--line);border-radius:11px;background:#0a1530;color:var(--text);font-weight:850}.timing button.active{border-color:var(--cyan);background:rgba(67,217,234,.13);color:var(--cyan)}
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.pickup{display:grid;grid-template-columns:1fr;gap:7px}.location{width:100%;color:var(--cyan)}.later{display:none}.later.show{display:block}
-    .quote{margin:16px 0 5px;padding:14px;border:1px solid var(--line);border-radius:14px;background:#0a142b}.quote-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.quote-head strong{font-size:.9rem}.quote-head span{color:var(--muted);font-size:.68rem}.quote-btn{width:100%;color:var(--cyan);border-color:rgba(67,217,234,.5)}.quote-btn:disabled{opacity:.5}.quote-result{display:none;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.09)}.quote-result.show{display:flex;align-items:end;justify-content:space-between;gap:12px}.fare{font-size:1.75rem;font-weight:950;color:var(--green)}.quote-meta{color:var(--muted);font-size:.72rem;text-align:right;line-height:1.35}
+    .smart-hint{margin-top:5px;color:var(--muted);font-size:.68rem}.smart-hint.busy{color:var(--cyan)}
+    .quote{margin:16px 0 5px;padding:14px;border:1px solid var(--line);border-radius:14px;background:#0a142b}.quote-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.quote-head strong{font-size:.9rem}.quote-head span{color:var(--muted);font-size:.68rem}.quote-btn{display:none;width:100%;margin-top:10px;color:var(--cyan);border-color:rgba(67,217,234,.5)}.quote-btn.retry{display:block}.quote-btn:disabled{opacity:.5}.quote-state{color:var(--muted);font-size:.75rem;line-height:1.4}.quote-state.busy{color:var(--cyan)}.quote-result{display:none;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.09)}.quote-result.show{display:block}.fare-row{display:flex;align-items:end;justify-content:space-between;gap:12px}.fare{font-size:1.75rem;font-weight:950;color:var(--green)}.quote-meta{color:var(--muted);font-size:.72rem;text-align:right;line-height:1.35}.fare-why{margin-top:9px;color:var(--muted);font-size:.7rem;line-height:1.4}
     .consent{display:grid;grid-template-columns:21px 1fr;gap:9px;margin:15px 0;color:var(--muted);font-size:.75rem;line-height:1.35}.consent input{width:19px;height:19px;min-height:0;margin:0;accent-color:var(--cyan)}
     .send{width:100%;min-height:50px;border:0;border-radius:12px;background:linear-gradient(180deg,#9cf5c9,var(--green));color:#062218;font-weight:950;font-size:.96rem}.send:disabled{opacity:.48}.error{display:none;margin:0 0 12px;padding:10px 11px;border:1px solid var(--red);color:#ff9fb1;border-radius:10px;font-size:.82rem}.error.show{display:block}
     .done{display:none;text-align:center;padding:34px 18px 40px}.done.show{display:block}.check{width:56px;height:56px;border-radius:50%;margin:0 auto 13px;display:grid;place-items:center;background:var(--green);color:#082317;font-size:1.9rem;font-weight:950}.done .fare-done{margin:12px 0 5px;font-size:1.45rem;font-weight:950;color:var(--green)}.test{display:none;margin:0 16px 10px;text-align:center;color:#ffd06f;font-weight:850}.test.show{display:block}@media(max-width:390px){.grid{grid-template-columns:1fr}}
@@ -32,14 +33,18 @@
     <div class="timing" role="group" aria-label="Ride timing"><button type="button" id="nowBtn" class="active">Now</button><button type="button" id="laterBtn">Later today</button></div>
     <label for="name">Name</label><input id="name" autocomplete="name">
     <div class="grid"><div><label for="phone">Phone</label><input id="phone" type="tel" autocomplete="tel"></div><div><label for="email">Email</label><input id="email" type="email" autocomplete="email"></div></div>
-    <label for="pickup">Leaving from</label><div class="pickup"><input id="pickup" autocomplete="street-address"><button class="location" id="locationBtn" type="button">Use my location</button></div>
-    <label for="destination">Going to</label><input id="destination">
+    <label for="pickup">Leaving from</label><div class="pickup"><input id="pickup" list="pickupSuggestions" autocomplete="street-address" placeholder="Address or place"><datalist id="pickupSuggestions"></datalist><div class="smart-hint" id="pickupHint">Start typing an address or place.</div><button class="location" id="locationBtn" type="button">Use my location</button></div>
+    <label for="destination">Going to</label><input id="destination" list="destinationSuggestions" placeholder="Address or place"><datalist id="destinationSuggestions"></datalist><div class="smart-hint" id="destinationHint">Start typing an address or place.</div>
     <div class="later" id="laterFields"><label for="time">Time today</label><input id="time" type="time"></div>
 
     <div class="quote" id="quotePanel">
-      <div class="quote-head"><strong>Fare</strong><span>shown before you request</span></div>
-      <button class="quote-btn" id="quoteBtn" type="button">Get fare</button>
-      <div class="quote-result" id="quoteResult"><div class="fare" id="quoteFare"></div><div class="quote-meta" id="quoteMeta"></div></div>
+      <div class="quote-head"><strong>Fare</strong><span>calculated automatically</span></div>
+      <div class="quote-state" id="quoteState">Enter your From and To locations to see the fare.</div>
+      <button class="quote-btn" id="quoteBtn" type="button">Retry fare</button>
+      <div class="quote-result" id="quoteResult">
+        <div class="fare-row"><div class="fare" id="quoteFare"></div><div class="quote-meta" id="quoteMeta"></div></div>
+        <div class="fare-why" id="quoteWhy">Includes base fare, route distance, drive time, and booking fee.</div>
+      </div>
     </div>
 
     <div class="grid"><div><label for="passengers">Passengers</label><input id="passengers" type="number" min="1" max="7" value="1"></div><div><label for="notes">Note</label><input id="notes"></div></div>
@@ -53,7 +58,9 @@
   'use strict';
   var $=function(id){return document.getElementById(id)};
   var requestToken='',testMode=false,requestOpen=false,timing='NOW';
-  var pickupLat='',pickupLng='',quote=null,quoteFingerprint='';
+  var pickupLat='',pickupLng='',quote=null,quoteFingerprint='',fareTimer=null;
+  var suggestionTimers={pickup:null,destination:null};
+  var suggestionSeq={pickup:0,destination:0};
   var now=new Date();
   var yyyy=now.getFullYear(),mm=String(now.getMonth()+1).padStart(2,'0'),dd=String(now.getDate()).padStart(2,'0');
   var today=yyyy+'-'+mm+'-'+dd;
@@ -73,45 +80,91 @@
     timing,timing==='LATER'?$('time').value.trim():'NOW',pickupLat,pickupLng
   ].join('|')}
   function quoteIsCurrent_(){return !!quote && quoteFingerprint===fingerprint_() && Date.parse(quote.expiresAt)>Date.now()}
-  function invalidateQuote_(){quote=null;quoteFingerprint='';$('quoteResult').classList.remove('show');$('quoteFare').textContent='';$('quoteMeta').textContent='';updateSendState_()}
+  function setQuoteState_(text,busy){var el=$('quoteState');el.textContent=text;el.classList.toggle('busy',!!busy)}
+  function invalidateQuote_(){
+    quote=null;quoteFingerprint='';$('quoteResult').classList.remove('show');$('quoteFare').textContent='';$('quoteMeta').textContent='';$('quoteBtn').classList.remove('retry');
+    setQuoteState_('Enter your From and To locations to see the fare.',false);updateSendState_();
+  }
   function updateSendState_(){
     if(!requestOpen){$('sendBtn').disabled=true;$('sendBtn').textContent='Link unavailable';return}
     $('sendBtn').disabled=!quoteIsCurrent_();
-    $('sendBtn').textContent=quoteIsCurrent_()?'Send request':'Get fare first';
+    $('sendBtn').textContent=quoteIsCurrent_()?'Send request':'Waiting for fare';
   }
-  function setTiming(value){timing=value;$('nowBtn').classList.toggle('active',value==='NOW');$('laterBtn').classList.toggle('active',value==='LATER');$('laterFields').classList.toggle('show',value==='LATER');invalidateQuote_()}
+  function setTiming(value){timing=value;$('nowBtn').classList.toggle('active',value==='NOW');$('laterBtn').classList.toggle('active',value==='LATER');$('laterFields').classList.toggle('show',value==='LATER');invalidateQuote_();scheduleFare_()}
   $('nowBtn').onclick=function(){setTiming('NOW')};$('laterBtn').onclick=function(){setTiming('LATER')};
 
-  function shortAddress_(value){var parts=String(value||'').split(',').map(function(part){return part.trim()}).filter(Boolean);return parts.slice(0,3).join(', ')}
-  function reverseGeocode_(lat,lng){var url='https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&addressdetails=0&lat='+encodeURIComponent(lat)+'&lon='+encodeURIComponent(lng);return fetch(url,{headers:{'Accept':'application/json'}}).then(function(response){if(!response.ok)throw new Error('reverse geocode failed');return response.json()}).then(function(data){return shortAddress_(data&&data.display_name)})}
+  function smartInput_(id){
+    var input=$(id),list=$(id+'Suggestions'),hint=$(id+'Hint');
+    input.addEventListener('input',function(){
+      if(id==='pickup'){pickupLat='';pickupLng='';}
+      invalidateQuote_();
+      clearTimeout(suggestionTimers[id]);
+      var value=input.value.trim();
+      if(value.length<3){list.innerHTML='';hint.textContent='Start typing an address or place.';hint.classList.remove('busy');return}
+      hint.textContent='Finding nearby matches…';hint.classList.add('busy');
+      suggestionTimers[id]=setTimeout(function(){
+        var seq=++suggestionSeq[id];
+        google.script.run.withSuccessHandler(function(result){
+          if(seq!==suggestionSeq[id])return;
+          var suggestions=result&&result.suggestions||[];
+          list.innerHTML='';
+          suggestions.forEach(function(item){var option=document.createElement('option');option.value=item.label;list.appendChild(option);});
+          hint.textContent=suggestions.length?'Choose a match or keep typing.':'No match yet — keep typing.';hint.classList.remove('busy');
+        }).withFailureHandler(function(){if(seq!==suggestionSeq[id])return;hint.textContent='Keep typing; route check will verify it.';hint.classList.remove('busy');})
+          .pulseSmartAddressSuggestions({query:value,requestToken:requestToken,testMode:testMode});
+      },280);
+      scheduleFare_();
+    });
+    input.addEventListener('change',function(){scheduleFare_(250)});
+    input.addEventListener('blur',function(){scheduleFare_(350)});
+  }
+  smartInput_('pickup');smartInput_('destination');
 
-  $('pickup').addEventListener('input',function(){if(this.value.trim()!=='Current location'){pickupLat='';pickupLng=''}invalidateQuote_()});
-  $('destination').addEventListener('input',invalidateQuote_);$('time').addEventListener('input',invalidateQuote_);
+  $('time').addEventListener('input',function(){invalidateQuote_();scheduleFare_()});
   $('locationBtn').onclick=function(){
     clearError();if(!navigator.geolocation){showError('Location is not available on this phone.');return}
     var btn=this;btn.disabled=true;btn.textContent='Locating…';
     navigator.geolocation.getCurrentPosition(function(position){
-      pickupLat=Number(position.coords.latitude).toFixed(6);pickupLng=Number(position.coords.longitude).toFixed(6);$('pickup').value='Current location';invalidateQuote_();btn.textContent='Finding address…';
-      reverseGeocode_(pickupLat,pickupLng).then(function(label){if(label)$('pickup').value=label;else showError('Enter the pickup address before getting a fare.');}).catch(function(){$('pickup').value='';showError('Enter the pickup address before getting a fare.');}).then(function(){invalidateQuote_();btn.disabled=false;btn.textContent='Use my location'});
+      pickupLat=Number(position.coords.latitude).toFixed(6);pickupLng=Number(position.coords.longitude).toFixed(6);btn.textContent='Finding address…';
+      google.script.run.withSuccessHandler(function(result){
+        $('pickup').value=result&&result.label?result.label:(pickupLat+', '+pickupLng);$('pickupHint').textContent='Current location ready.';btn.disabled=false;btn.textContent='Use my location';invalidateQuote_();scheduleFare_(100);
+      }).withFailureHandler(function(){
+        $('pickup').value=pickupLat+', '+pickupLng;$('pickupHint').textContent='Current location ready.';btn.disabled=false;btn.textContent='Use my location';invalidateQuote_();scheduleFare_(100);
+      }).pulseSmartReverseGeocode({lat:pickupLat,lng:pickupLng,requestToken:requestToken,testMode:testMode});
     },function(){pickupLat='';pickupLng='';btn.disabled=false;btn.textContent='Use my location';showError('Location was not shared. Enter the pickup instead.')},{enableHighAccuracy:true,timeout:10000,maximumAge:30000});
   };
 
-  $('quoteBtn').onclick=function(){
+  function routeReady_(){
+    if(!requestOpen)return false;
+    if($('pickup').value.trim().length<3||$('destination').value.trim().length<3)return false;
+    if(timing==='LATER'&&!$('time').value.trim())return false;
+    return !!pickupAtIso_();
+  }
+  function scheduleFare_(delay){
+    clearTimeout(fareTimer);
+    if(!routeReady_()){updateSendState_();return}
+    setQuoteState_('Route ready — calculating fare…',true);$('sendBtn').disabled=true;$('sendBtn').textContent='Calculating fare…';
+    fareTimer=setTimeout(calculateFare_,typeof delay==='number'?delay:650);
+  }
+  function calculateFare_(){
+    if(!routeReady_())return;
     clearError();
-    if(!requestOpen){showError('This QR link is not available.');return}
     var pickup=$('pickup').value.trim(),destination=$('destination').value.trim(),pickupAt=pickupAtIso_();
-    if(!pickup||!destination){showError('Enter where you are leaving from and going to first.');return}
-    if(timing==='LATER'&&!pickupAt){showError('Choose a time later today.');return}
-    var btn=this;btn.disabled=true;btn.textContent='Calculating…';
+    var requestedFingerprint=fingerprint_();
+    $('quoteBtn').classList.remove('retry');setQuoteState_('Calculating route and fare…',true);
     google.script.run.withSuccessHandler(function(result){
-      btn.disabled=false;btn.textContent='Recalculate fare';quote=result||null;quoteFingerprint=fingerprint_();
-      if(!quote||quote.ok!==true){invalidateQuote_();showError('The fare could not be calculated.');return}
+      if(requestedFingerprint!==fingerprint_())return scheduleFare_(250);
+      quote=result||null;quoteFingerprint=requestedFingerprint;
+      if(!quote||quote.ok!==true){return fareFailed_('The fare could not be calculated.');}
       $('quoteFare').textContent='$'+Number(quote.fare||0).toFixed(2);
       $('quoteMeta').textContent=Number(quote.distanceMiles||0).toFixed(1)+' mi · '+Number(quote.durationMinutes||0)+' min';
-      $('quoteResult').classList.add('show');updateSendState_();
-    }).withFailureHandler(function(err){btn.disabled=false;btn.textContent='Get fare';invalidateQuote_();showError((err&&err.message)?err.message:'The fare could not be calculated.');})
+      $('quoteWhy').textContent='Includes base fare, '+Number(quote.distanceMiles||0).toFixed(1)+' route miles, '+Number(quote.durationMinutes||0)+' drive minutes, and booking fee.';
+      $('quoteResult').classList.add('show');setQuoteState_('Fare ready.',false);updateSendState_();
+    }).withFailureHandler(function(err){fareFailed_((err&&err.message)?err.message:'The fare could not be calculated.');})
       .pulseGetFareQuote({pickup:pickup,destination:destination,pickupAt:pickupAt,requestToken:requestToken,testMode:testMode});
-  };
+  }
+  function fareFailed_(message){quote=null;quoteFingerprint='';$('quoteResult').classList.remove('show');setQuoteState_('Fare unavailable. Check the locations and retry.',false);$('quoteBtn').classList.add('retry');$('quoteBtn').disabled=false;updateSendState_();showError(message)}
+  $('quoteBtn').onclick=function(){calculateFare_()};
 
   function collect(){return {
     name:$('name').value.trim(),phone:$('phone').value.trim(),email:$('email').value.trim(),pickup:$('pickup').value.trim(),pickupLat:pickupLat,pickupLng:pickupLng,destination:$('destination').value.trim(),date:today,time:timing==='LATER'?$('time').value.trim():'',timing:timing,passengers:$('passengers').value,notes:$('notes').value.trim(),consent:$('consent').checked,requestToken:requestToken,testMode:testMode,
@@ -119,7 +172,7 @@
   }}
 
   $('sendBtn').onclick=function(){
-    clearError();if(!requestOpen){showError('This QR link is not available.');return}if(!quoteIsCurrent_()){invalidateQuote_();showError('Get a current fare before sending the request.');return}
+    clearError();if(!requestOpen){showError('This QR link is not available.');return}if(!quoteIsCurrent_()){scheduleFare_(50);showError('The route changed. Your fare is recalculating.');return}
     var data=collect();if(!data.name||!data.phone||!data.email||!data.pickup||!data.destination){showError('Complete the name, phone, email, from, and to fields.');return}if(data.timing==='LATER'&&!data.time){showError('Choose a time later today.');return}if(!data.consent){showError('Consent is required.');return}
     var btn=this;btn.disabled=true;btn.textContent=testMode?'Testing…':'Sending…';
     google.script.run.withSuccessHandler(function(result){$('formView').style.display='none';$('doneView').classList.add('show');$('doneFare').textContent=result&&Number.isFinite(Number(result.quotedFare))?'$'+Number(result.quotedFare).toFixed(2):'';$('doneText').textContent=testMode?'Test passed. Nothing was written or emailed.':'Request sent to your Pulse driver. Watch your email for confirmation.';})
@@ -129,7 +182,7 @@
 
   google.script.url.getLocation(function(route){
     var params=(route&&route.parameter)||{};requestToken=String(params.request||'');testMode=String(params.mode||'').toLowerCase()==='test';if(testMode)$('testBadge').classList.add('show');
-    google.script.run.withSuccessHandler(function(config){requestOpen=!!(config&&config.requestOpen);updateSendState_();if(!requestOpen)showError('This QR link is not available.');}).withFailureHandler(function(err){requestOpen=false;updateSendState_();showError((err&&err.message)?err.message:'The link could not be checked.');}).getPublicConfig({requestToken:requestToken,testMode:testMode});
+    google.script.run.withSuccessHandler(function(config){requestOpen=!!(config&&config.requestOpen);updateSendState_();if(!requestOpen)showError('This QR link is not available.');else scheduleFare_();}).withFailureHandler(function(err){requestOpen=false;updateSendState_();showError((err&&err.message)?err.message:'The link could not be checked.');}).getPublicConfig({requestToken:requestToken,testMode:testMode});
   });
 })();
 </script>
