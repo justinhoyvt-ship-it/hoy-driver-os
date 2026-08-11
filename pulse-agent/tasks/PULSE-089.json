@@ -1,0 +1,26 @@
+{
+  "taskId": "PULSE-089",
+  "title": "Payment state + Venmo / future authorize-capture",
+  "status": "STAGED",
+  "dependsOn": ["PULSE-085C", "PULSE-087"],
+  "scope": {
+    "nearTerm": [
+      "Add ride payment state: NOT_DUE, PENDING, PAID, UNPAID, WAIVED",
+      "After driver acceptance, confirmation email may show Pay with Venmo using the quoted fare and Ride ID",
+      "Completion receipt shows Paid or Payment due",
+      "If a completed ride remains unpaid, flag rider email/phone with balance due",
+      "Block or warn on the next request until prior balance is resolved",
+      "Declined requests never create a payment obligation"
+    ],
+    "venmo": {
+      "profileUrl": "https://venmo.com/u/justinhoyvt",
+      "role": "near-term direct payment option",
+      "notAuthorityFor": ["authorization hold", "automatic capture", "automatic release on decline"]
+    },
+    "future": [
+      "Evaluate PayPal authorize/capture for preauthorization after acceptance and capture at ride completion",
+      "Keep payment provider behind Pulse payment-state abstraction so ride lifecycle does not change"
+    ]
+  },
+  "production": {"automaticDeploy": false, "automaticMerge": false}
+}
