@@ -12,6 +12,21 @@ const fare=read('pulse-autobuild/request-app/FareQuote.gs');
 const task=JSON.parse(read('pulse-agent/tasks/PULSE-085C.json'));
 const failures=[];const check=(ok,msg)=>{if(!ok)failures.push(msg)};
 
+function scripts_(html){
+  return [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map(match=>match[1]);
+}
+function parseScripts_(name,html){
+  const scripts=scripts_(html);
+  check(scripts.length>0,name+' has no inline script');
+  scripts.forEach((script,index)=>{
+    try{new Function(script);}catch(error){failures.push(name+' script '+(index+1)+' syntax error: '+error.message);}
+  });
+}
+function duplicateIds_(html){
+  const ids=[...html.matchAll(/\sid=["']([^"']+)["']/gi)].map(match=>match[1]);
+  return [...new Set(ids.filter((id,index)=>ids.indexOf(id)!==index))];
+}
+
 check(task.status==='STAGED_FOR_REVIEW','task not staged for review');
 check(task.runtime?.qr===true,'QR runtime flag missing');
 check(task.runtime?.futureForm===true,'future-form runtime flag missing');
@@ -36,6 +51,9 @@ for(const [name,html] of [['QR',qr],['Future',future]]){
     'drive minutes'
   ]) check(html.toLowerCase().includes(marker.toLowerCase()),name+' marker missing: '+marker);
   check(html.includes('datalist'),name+' address suggestions datalist missing');
+  parseScripts_(name,html);
+  const duplicates=duplicateIds_(html);
+  check(duplicates.length===0,name+' duplicate HTML ids: '+duplicates.join(', '));
 }
 
 check(qr.includes('pulseSmartReverseGeocode'),'QR phone-location reverse geocode did not move to Apps Script Maps');
