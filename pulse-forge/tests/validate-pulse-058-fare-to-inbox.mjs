@@ -40,9 +40,9 @@ for(const marker of [
   'var requestPayload=Object.assign({},data,{',
   'quotedFare:submittedQuote.fare',
   'quoteToken:submittedQuote.quoteToken',
-  '.submitRideRequest(requestPayload);',
   'if(!quoteIsCurrent_())'
 ]) check(form.includes(marker),`Request form fare handoff marker missing: ${marker}`);
+check(/\.submitRideRequest\s*\(\s*requestPayload\s*\)/.test(form),'Request form fare handoff marker missing: submitRideRequest(requestPayload)');
 
 for(const marker of [
   "'Quoted Fare','Quote ID','Quote Expires At','Pricing Version'",
