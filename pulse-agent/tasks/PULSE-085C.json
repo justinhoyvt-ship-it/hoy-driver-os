@@ -1,32 +1,38 @@
 {
   "taskId": "PULSE-085C",
   "title": "Smart address entry + automatic fare",
-  "status": "BUILDING",
+  "status": "STAGED_FOR_REVIEW",
   "dependsOn": ["PULSE-085A", "PULSE-085B"],
+  "runtime": {
+    "qr": true,
+    "futureForm": true,
+    "smartAddressService": "SmartRequest.gs",
+    "pricingAuthority": "existing signed pulseGetFareQuote"
+  },
   "scope": {
     "qrAndFutureForms": [
-      "Auto-resolve pickup and destination instead of relying on raw free text",
-      "Bias address suggestions to Vermont/local rider context",
-      "Keep Use my location",
-      "Automatically calculate route and fare when both endpoints are valid",
-      "Recalculate on route or pickup-time change",
-      "Keep a manual retry only for route/fare failures",
-      "Show fare explanation: distance, duration, and short pricing summary",
+      "Vermont-biased search-as-you-type address/place suggestions",
+      "QR Use my location reverse-geocoded through Apps Script Maps instead of public Nominatim",
+      "Automatically calculate route and fare when route/time inputs are sufficient",
+      "Recalculate automatically on pickup, destination, date, or time change",
+      "Keep a manual fare control only as failure retry",
+      "Show distance, duration, and concise fare explanation",
       "Preserve existing signed fare verification as the authoritative write guard"
     ],
     "openSourceCandidates": [
-      "Photon for search-as-you-type geocoding/location bias",
-      "MapLibre GL JS for rider/driver route visuals",
-      "OSRM as an optional future routing layer or route-preview source"
+      "Photon remains Code Depot candidate for future public-web autocomplete at larger scale",
+      "MapLibre GL JS remains queued for rider/driver map visuals",
+      "OSRM remains optional future routing / route-preview source"
     ]
   },
   "acceptance": [
     "Normal rider flow has no required Get fare tap",
-    "Address entry resolves to usable locations before quote",
+    "Both QR and future/rebook forms offer address suggestions",
     "Fare updates automatically after route/time changes",
     "Rider sees distance + duration + concise fare explanation",
     "Existing signed fare verification remains authoritative",
-    "QR NOW/LATER-TODAY and future booking remain separate surfaces"
+    "QR NOW/LATER-TODAY and future booking remain separate surfaces",
+    "No request, Sheet, email, or calendar write is added to the smart-address service"
   ],
   "production": {"automaticDeploy": false, "automaticMerge": false}
 }
