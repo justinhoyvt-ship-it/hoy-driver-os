@@ -9,6 +9,7 @@ The driver console is passable only if all of these hold:
 - Request Accept/Decline uses the authenticated `decideRequestedRide` server bridge rather than opening a decision tab.
 - A NOW request accepted while idle becomes the active pickup.
 - A NOW request accepted while another ride is active is appended to a multi-ride queue without interrupting the current ride.
+- Queued accepted rides remain server-backed as confirmed Scheduled rides until they are actually promoted into pickup, so losing browser state does not make an accepted ride disappear.
 - A LATER request accepted from Inbox becomes a Scheduled ride.
 - Scheduled ride action is `Route to pickup` while idle and `Queue next` while another ride is active.
 - A scheduled ride never jumps directly to in-trip state. Pickup routing occurs before `Start ride`.
