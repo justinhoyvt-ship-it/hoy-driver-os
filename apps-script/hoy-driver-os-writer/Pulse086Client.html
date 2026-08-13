@@ -117,4 +117,264 @@
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start_);else start_();
 })();
+</script><style id="pulse086r-style">
+  /* PULSE-086R2 — production shift/lifecycle reconciliation */
+  #overlay{display:none!important}
+  #testStrip{display:none!important}
+  .p086r-shift-busy{pointer-events:none;opacity:.62}
+</style>
+<script>
+(function(){
+  'use strict';
+
+  var P086R_STATE_KEY='pulse-hoy-driver-state-v2';
+  var P086R_LEGACY_STATE_KEY='pulse-hoy-driver-state-v1';
+  var P086R_SHIFT_MAX_MS=18*60*60*1000;
+  var P086R_RIDE_MAX_MS=12*60*60*1000;
+  var P086R_QUEUE_MAX_MS=8*60*60*1000;
+  var P086R_TRIP_RETRY_KEY='pulse-hoy-driver-pending-trips-v1';
+  var shiftEndBusy=false;
+
+  var baseRender=typeof render==='function'?render:null;
+  var basePickedUp=typeof pickedUp==='function'?pickedUp:null;
+  var baseDropOff=typeof dropOff==='function'?dropOff:null;
+  var baseCancelActive=typeof cancelActive==='function'?cancelActive:null;
+  var baseStartScheduled=typeof startScheduled==='function'?startScheduled:null;
+
+  function p086rNow_(){return Date.now();}
+  function p086rFinite_(value){var n=Number(value);return isFinite(n)?n:null;}
+  function p086rSafeDateMs_(value){var n=Number(value);if(isFinite(n)&&n>0)return n;var d=Date.parse(value||'');return isFinite(d)?d:null;}
+  function p086rFresh_(at,maxAge){var n=p086rSafeDateMs_(at);if(!n)return false;var age=p086rNow_()-n;return age>=-5*60*1000&&age<=maxAge;}
+
+  function p086rNormalizeShift_(shift){
+    if(!shift||typeof shift!=='object'||!p086rFresh_(shift.startedAt,P086R_SHIFT_MAX_MS))return null;
+    return {
+      startedAt:Number(shift.startedAt),
+      miles:Math.max(0,p086rFinite_(shift.miles)||0),
+      rides:Math.max(0,Math.round(p086rFinite_(shift.rides)||0)),
+      earned:Math.max(0,p086rFinite_(shift.earned)||0),
+      tips:Math.max(0,p086rFinite_(shift.tips)||0),
+      requestIds:Array.isArray(shift.requestIds)?shift.requestIds.slice(0,100):[]
+    };
+  }
+
+  function p086rNormalizeRide_(ride,maxAge){
+    if(!ride||typeof ride!=='object')return null;
+    var state=String(ride.state||'').toUpperCase();
+    if(state!=='ACCEPTED'&&state!=='ON_TRIP')return null;
+    var anchor=ride.acceptedAt||ride.pickedUpAt;
+    if(!p086rFresh_(anchor,maxAge))return null;
+    return ride;
+  }
+
+  function p086rReadState_(){
+    var state=null;
+    try{state=JSON.parse(localStorage.getItem(P086R_STATE_KEY)||'null');}catch(e){state=null;}
+    if(!state||typeof state!=='object')state={};
+    var shift=p086rNormalizeShift_(state.shift);
+    if(!shift)return {shift:null,active:null,queued:null,heldRequests:Array.isArray(state.heldRequests)?state.heldRequests:[],pendingTrips:Array.isArray(state.pendingTrips)?state.pendingTrips:[]};
+    return {
+      shift:shift,
+      active:p086rNormalizeRide_(state.active,P086R_RIDE_MAX_MS),
+      queued:p086rNormalizeRide_(state.queued,P086R_QUEUE_MAX_MS),
+      heldRequests:Array.isArray(state.heldRequests)?state.heldRequests:[],
+      pendingTrips:Array.isArray(state.pendingTrips)?state.pendingTrips:[]
+    };
+  }
+
+  function p086rWriteState_(){
+    try{
+      localStorage.setItem(P086R_STATE_KEY,JSON.stringify({
+        shift:S.shift||null,
+        active:S.active||null,
+        queued:S.queued||null,
+        heldRequests:Array.isArray(S.heldRequests)?S.heldRequests:[],
+        pendingTrips:Array.isArray(S.pendingTrips)?S.pendingTrips:[]
+      }));
+    }catch(e){}
+  }
+
+  function p086rResetLegacyState_(){
+    try{localStorage.removeItem(P086R_LEGACY_STATE_KEY);}catch(e){}
+    var restored=p086rReadState_();
+    S.shift=restored.shift;
+    S.active=restored.active;
+    S.queued=restored.queued;
+    S.heldRequests=restored.heldRequests||[];
+    S.pendingTrips=restored.pendingTrips;
+    if(!S.shift){S.active=null;S.queued=null;}
+  }
+
+  /* All persistence after this point uses the versioned, stale-safe state. */
+  persistState=p086rWriteState_;
+
+  if(typeof newRideId_!=='function'){
+    window.newRideId_=function(prefix){return String(prefix||'ride')+'-'+p086rNow_()+'-'+Math.floor(Math.random()*1000000);};
+  }
+
+  if(typeof queueTripLog_!=='function'){
+    window.queueTripLog_=function(payload){
+      if(!payload||!payload.rideId)return;
+      S.pendingTrips=S.pendingTrips||[];
+      if(!S.pendingTrips.some(function(x){return x&&x.rideId===payload.rideId;}))S.pendingTrips.push(payload);
+      p086rWriteState_();
+      p086rFlushPendingTrips_();
+    };
+  }
+
+  function p086rFlushPendingTrips_(){
+    if(!LIVE||!S.pendingTrips||!S.pendingTrips.length)return Promise.resolve();
+    var payload=S.pendingTrips[0];
+    return srv('logCompletedTrip',payload).then(function(){
+      S.pendingTrips.shift();p086rWriteState_();return p086rFlushPendingTrips_();
+    }).catch(function(error){toast((error&&error.message)||'Trip log pending');});
+  }
+
+  function p086rSetButtonLabel_(id,label){
+    var btn=$(id);if(!btn)return;
+    var text=btn.querySelector('.pulse-control-label');
+    if(text)text.textContent=label;
+    else if(id==='goBtn')btn.textContent=label;
+  }
+
+  function p086rShiftClock_(startedAt){
+    var seconds=Math.max(0,Math.floor((p086rNow_()-Number(startedAt||p086rNow_()))/1000));
+    var h=Math.floor(seconds/3600),m=Math.floor((seconds%3600)/60),s=seconds%60;
+    return (h?h+':':'')+(m<10&&h?'0':'')+m+':'+(s<10?'0':'')+s;
+  }
+
+  function p086rSyncUi_(){
+    var online=!!S.shift,a=S.active,rider=typeof isRiderRide_==='function'&&isRiderRide_(a);
+    p086rSetButtonLabel_('goBtn','Start shift');
+    p086rSetButtonLabel_('endShiftBtn',shiftEndBusy?'Ending…':'End shift');
+
+    if($('goInBar'))$('goInBar').style.display=online?'none':'block';
+    if($('rideBar'))$('rideBar').style.display=online?'block':'none';
+    if($('onlineBar'))$('onlineBar').style.display=online?'flex':'none';
+    if(online&&$('obTimer'))$('obTimer').textContent=p086rShiftClock_(S.shift.startedAt);
+
+    var acceptBtn=$('acceptBtn'),pickupBtn=$('pickupBtn'),dropoffBtn=$('dropoffBtn');
+    if(acceptBtn){acceptBtn.style.display=rider?'none':'';acceptBtn.disabled=!online||shiftEndBusy;}
+    if(pickupBtn){pickupBtn.style.display=rider?'none':'';pickupBtn.disabled=!online||rider||!(a&&a.state==='ACCEPTED');}
+    if(dropoffBtn){dropoffBtn.style.display=rider?'none':'';dropoffBtn.disabled=!online||rider||!(a&&a.state==='ON_TRIP');}
+    if($('endShiftBtn')){$('endShiftBtn').disabled=shiftEndBusy;$('endShiftBtn').classList.toggle('p086r-shift-busy',shiftEndBusy);}
+  }
+
+  if(baseRender){
+    render=function(){var out=baseRender.apply(this,arguments);p086rSyncUi_();return out;};
+  }
+
+  goOnline=function(){
+    if(S.shift){toast('Shift already started');return;}
+    S.shift={startedAt:p086rNow_(),miles:0,rides:0,earned:0,tips:0,requestIds:[]};
+    p086rWriteState_();toast('Shift started');render();
+  };
+
+  accept=function(){
+    if(!S.shift){toast('Start shift first');return;}
+    if(!S.active){
+      S.active={rideId:newRideId_('uber'),source:'uber-mirror',state:'ACCEPTED',acceptedAt:p086rNow_(),pickedUpAt:null,pickup:'',dest:''};
+      toast('Ride accepted');
+    }else if(typeof isRiderRide_==='function'&&isRiderRide_(S.active)){
+      toast('Pulse ride active');return;
+    }else if(!S.queued){
+      S.queued={rideId:newRideId_('uber'),source:'uber-mirror',state:'ACCEPTED',acceptedAt:p086rNow_(),pickedUpAt:null,pickup:'',dest:''};
+      toast('Next ride stacked');
+    }else{
+      toast('Queue full');
+    }
+    p086rWriteState_();render();
+  };
+
+  pickedUp=function(){
+    if(!S.shift){toast('Start shift first');return;}
+    if(!S.active||S.active.state!=='ACCEPTED'||(typeof isRiderRide_==='function'&&isRiderRide_(S.active))){toast('No accepted Uber ride');p086rSyncUi_();return;}
+    if(basePickedUp)basePickedUp.apply(this,arguments);
+    else{S.active.state='ON_TRIP';S.active.pickedUpAt=p086rNow_();startTrace();toast('Ride started');render();}
+    p086rWriteState_();p086rSyncUi_();
+  };
+
+  dropOff=function(){
+    var completed=S.active?Object.assign({},S.active):null;
+    var wasOnTrip=!!(completed&&completed.state==='ON_TRIP');
+    var miles=Math.round((Number(trace&&trace.miles)||0)*100)/100;
+    var completedAt=p086rNow_();
+    var result=baseDropOff?baseDropOff.apply(this,arguments):null;
+    if(wasOnTrip&&completed){
+      queueTripLog_({
+        rideId:completed.rideId||newRideId_('completed'),
+        requestId:completed.requestId||'',
+        source:completed.source||((completed.requestId)?'rider':'uber-mirror'),
+        acceptedISO:new Date(completed.acceptedAt||completed.pickedUpAt||completedAt).toISOString(),
+        pickedUpISO:new Date(completed.pickedUpAt||completed.acceptedAt||completedAt).toISOString(),
+        completedISO:new Date(completedAt).toISOString(),
+        pickup:completed.pickup||'',
+        destination:completed.dest||completed.destination||'',
+        miles:miles,
+        fare:completed.quotedFare!=null?completed.quotedFare:'',
+        tip:''
+      });
+    }
+    p086rWriteState_();p086rSyncUi_();return result;
+  };
+
+  cancelActive=function(){
+    var result=baseCancelActive?baseCancelActive.apply(this,arguments):null;
+    p086rWriteState_();p086rSyncUi_();return result;
+  };
+
+  if(baseStartScheduled){
+    startScheduled=function(id){
+      if(!S.shift){toast('Start shift first');return;}
+      return baseStartScheduled.call(this,id);
+    };
+  }
+
+  function p086rEndShift_(){
+    if(!S.shift||shiftEndBusy)return;
+    if(S.active||S.queued){toast('Complete or cancel the active ride first');return;}
+    var snapshot=Object.assign({},S.shift),endedAt=p086rNow_();
+    var onlineHours=Math.max(0.0001,(endedAt-Number(snapshot.startedAt))/3600000);
+    var requestNote=(snapshot.requestIds&&snapshot.requestIds.length)?(' · requests '+snapshot.requestIds.join(',')):'';
+    var payload={
+      startISO:new Date(snapshot.startedAt).toISOString(),
+      endISO:new Date(endedAt).toISOString(),
+      onlineHours:onlineHours,
+      miles:Math.max(0,Number(snapshot.miles)||0),
+      earnings:'',
+      tips:'',
+      zone:'',
+      notes:(snapshot.rides?(''+snapshot.rides+' rides'):'Shift ended')+requestNote+' · earnings pending reconciliation'
+    };
+    shiftEndBusy=true;p086rSyncUi_();
+    srv('endShiftToSheet',payload).then(function(){
+      S.shift=null;S.active=null;S.queued=null;
+      try{stopTrace();}catch(e){}
+      p086rWriteState_();
+      shiftEndBusy=false;
+      if(window.PulseRouteLayer&&typeof window.PulseRouteLayer.clearTrip==='function')try{window.PulseRouteLayer.clearTrip();}catch(e){}
+      toast('Shift ended');render();
+    }).catch(function(error){
+      shiftEndBusy=false;p086rSyncUi_();toast((error&&error.message)||'Could not end shift');
+    });
+  }
+
+  /* Rebind controls because the base page assigned function references before this late patch loaded. */
+  p086rResetLegacyState_();
+  if($('goBtn'))$('goBtn').onclick=goOnline;
+  if($('endShiftBtn'))$('endShiftBtn').onclick=p086rEndShift_;
+  if($('acceptBtn'))$('acceptBtn').onclick=accept;
+  if($('pickupBtn'))$('pickupBtn').onclick=pickedUp;
+  if($('dropoffBtn'))$('dropoffBtn').onclick=dropOff;
+  if($('cancelActiveBtn'))$('cancelActiveBtn').onclick=cancelActive;
+
+  /* The old T-001/end-shift form is retired; remove it from the live DOM. */
+  try{var oldOverlay=$('overlay');if(oldOverlay&&oldOverlay.parentNode)oldOverlay.parentNode.removeChild(oldOverlay);}catch(e){}
+  try{var oldTest=$('testStrip');if(oldTest&&oldTest.parentNode)oldTest.parentNode.removeChild(oldTest);}catch(e){}
+
+  p086rWriteState_();
+  render();
+  p086rFlushPendingTrips_();
+  window.addEventListener('focus',function(){p086rFlushPendingTrips_();p086rSyncUi_();});
+})();
 </script>
