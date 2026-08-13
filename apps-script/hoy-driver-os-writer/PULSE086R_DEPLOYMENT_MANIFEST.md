@@ -1,6 +1,6 @@
-# PULSE-086R2 Hoy Driver OS Apps Script deployment manifest
+# PULSE-086R3 Hoy Driver OS Apps Script deployment manifest
 
-Runtime Apps Script project must contain exactly these files for the PULSE-085B / PULSE-086 activation path:
+Runtime Hoy Driver Apps Script project must contain these nine files:
 
 - appsscript.json
 - Code.gs
@@ -16,24 +16,38 @@ Dependency notes:
 - Apps Script requires unique base names, so the server file is `ForegroundPickupServer.gs` while the client file is `ForegroundPickup.html`.
 - Index.html uses the PulseUiControls template include.
 - Code.gs evaluates Index.html as a template and injects ForegroundPickup.html, Pulse085BClient.html, then Pulse086Client.html.
-- Pulse085BClient.html calls beginForegroundPickup(), provided by ForegroundPickupServer.gs.
-- Pulse085BClient.html calls pulse085bRoutePreview(), provided by Pulse085B.gs.
-- Pulse086Client.html is the late-loaded visual/interaction layer and now also contains the PULSE-086R2 production repair.
+- Pulse085BClient.html calls `beginForegroundPickup()`, provided by ForegroundPickupServer.gs, and `pulse085bRoutePreview()`, provided by Pulse085B.gs.
+- Pulse086Client.html is the final authoritative driver interaction layer.
 
-PULSE-086R2 repair contract, based on the first production test after PULSE-086 activation:
-- Discard the stale legacy `pulse-hoy-driver-state-v1` browser state that reopened the console as a 41-hour shift with a stacked ride.
-- Persist only the stale-guarded `pulse-hoy-driver-state-v2` state going forward.
-- Opening the console must be offline and show `Start shift` unless a valid v2 shift exists.
-- Accepting an Uber-mirror ride must never implicitly start a shift; the driver starts the shift first.
-- After Accept, Picked up is enabled. After Picked up, Drop off is enabled.
-- End shift is a direct one-tap Shift Log write with earnings left pending; the legacy Save shift / T-001 modal is retired.
-- An active or queued ride blocks End shift until the ride is completed or cancelled.
-- Completed rides are queued to the idempotent Trip Log bridge when the older Index does not already provide that queue.
+## PULSE-086R3 locked driver contract
 
-Validation performed before staging:
-- JavaScript syntax parse passed for the combined Pulse086Client runtime.
-- State-transition harness passed: stale shift clears -> Start shift -> Accept -> Picked up -> Drop off -> End shift.
+- Pulse-only ride workflow. The legacy generic mirrored `Accept ride / Picked up / Drop off` bottom rail is retired.
+- Opening the console does not create a shift. Offline state shows an explicit `Start shift` control.
+- Legacy v1/v2 browser state is retired; current state is stored under `pulse-hoy-driver-state-v3` with stale-state guards.
+- Inbox remains reviewable during an active ride.
+- Accept/Decline uses the authenticated `decideRequestedRide()` server bridge.
+- NOW accepted while idle -> active pickup.
+- NOW accepted while another ride is active -> append to the multi-request Next Ride queue without interrupting the current ride.
+- LATER accepted -> Scheduled.
+- Scheduled ride while idle -> `Route to pickup`; while another ride is active -> `Queue next`.
+- Scheduled rides do not jump directly into trip state. Pickup routing comes before `Start ride`.
+- Active ride lifecycle: Route to pickup -> Start ride -> Route to destination -> Complete ride.
+- Completing a ride logs it and promotes the first queued ride into pickup flow.
+- End shift is a direct Shift Log write, does not open the legacy earnings/T-001 form, and is blocked until active/queued rides are cleared.
+- Accepted future Scheduled rides are server-backed and are not erased by ending a driver session.
+- Inbox refreshes during the shift for back-to-back request handling.
+- The driver console uses distinct mobile-first hierarchy for session, Inbox, Active Ride, Next Ride, map, fare, and Scheduled.
 
-Production rule: do not deploy if any of the nine runtime files are missing. Do not treat README.md, validation.json, or this manifest as Apps Script runtime files.
+## Rider payment preference companion artifact
 
-Source-control reconciliation note: PulseUiControls.html was recovered from the captured live PULSE-078 source because the canonical folder referenced it but did not contain it.
+The PULSE-086R3 build also prepares a full replacement QR request form that captures `Pay now` or `Pay after ride` as a preference only. No payment credentials are collected and no charge is represented as completed until the payment backend is connected. The preference is carried in existing Notes metadata as `[PAY:NOW]` or `[PAY:AFTER]`, which Pulse086Client.html can display.
+
+The GitHub connector safety classifier blocked committing the full rider HTML because the existing form contains rider contact fields together with payment-language. Therefore the driver PR must not claim that the rider form source is committed. The validated rider form is a separate deployment artifact for the request Apps Script project.
+
+## Validation
+
+- Generated PULSE-086R3 driver JavaScript passed `node --check` before commit.
+- Local regression contract passed for: old rail removal, direct decision bridge, multi-queue, NOW queueing during active ride, LATER scheduling, scheduled pickup routing, Start Ride after arrival, automatic queue promotion, explicit Start Shift, direct End Shift, v1/v2 retirement, and Inbox polling.
+- Production still requires one live phone/computer lifecycle test after Apps Script deployment.
+
+Do not deploy if any of the nine Hoy Driver runtime files are missing. README, validation files, and this manifest are not Apps Script runtime files.
