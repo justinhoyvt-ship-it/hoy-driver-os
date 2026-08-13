@@ -1,380 +1,82 @@
-<style id="pulse086-style">
-  /* PULSE-086 — live driver console visual / interaction cleanup */
-  #app{gap:12px;padding-left:12px;padding-right:12px;padding-bottom:150px}
-  .opp,.test{display:none!important}
-  .head{margin-bottom:2px}
-  .brand{font-size:1.04rem}
-  .tag.live{padding:5px 9px}
-
-  .online-bar{border-radius:16px;padding:13px 14px;background:linear-gradient(180deg,rgba(69,227,148,.08),rgba(69,227,148,.03))}
-  .shift-btn.end{min-height:46px;padding-inline:18px}
-
-  .sched{padding:15px;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.025))}
-  .sched-head{margin-bottom:11px}.sched-head span{font-size:1.02rem}.sched-add{min-height:42px;padding:0 13px;font-size:.72rem}
-  .sched-card,.sched-card.p082-card{padding:15px 14px;border-radius:15px;gap:12px;background:rgba(255,255,255,.035)}
-  .sched-card.due{border-color:rgba(247,178,59,.48);background:linear-gradient(180deg,rgba(247,178,59,.105),rgba(247,178,59,.035))}
-  .sc-main b,.p084-route{font-size:.98rem;line-height:1.3}.sc-main small,.p084-time{font-size:.75rem}.p084-fare{font-size:1.28rem;color:var(--green);font-weight:800}
-  .p084-action button,.sched-card button{min-height:48px;border-radius:12px}
-
-  .inbox-card{padding:16px;border-radius:17px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.026))}
-  .inbox-card b{font-size:1.08rem;margin-bottom:5px}.inbox-time{font-size:.74rem}.inbox-route{font-size:.92rem;line-height:1.42}
-  .inbox-fare{font-size:1.48rem;font-weight:800;color:var(--green);margin-top:10px}
-  .inbox-actions{gap:10px}.inbox-actions button{min-height:52px;border-radius:13px;font-size:.92rem}
-
-  .map-wrap{border-radius:18px;overflow:hidden;min-height:210px}
-  #map{min-height:210px}
-  .p085b-route-chip{left:10px;right:10px;bottom:10px;border-radius:12px;padding:10px 12px}
-
-  .status{border-radius:18px;padding:17px;background:linear-gradient(180deg,rgba(247,178,59,.07),rgba(255,255,255,.025))}
-  .status h2,.status .big{font-size:1.5rem;line-height:1.14}
-  .status .sub,.status small{font-size:.8rem}
-
-  .rider-flow{padding:15px;border-radius:18px;background:linear-gradient(180deg,rgba(69,227,148,.09),rgba(69,227,148,.035))}
-  .rider-flow-head{font-size:.95rem}.rider-flow-head small{font-size:.76rem}
-  .rider-flow-actions,.rider-flow-actions.two{grid-template-columns:1fr;gap:9px}
-  .rider-flow-actions button{min-height:54px;border-radius:13px;font-size:.9rem}
-  .rider-flow-actions button.primary{font-size:.96rem}
-
-  .p086-busy{position:relative;pointer-events:none;opacity:.66}
-  .p086-busy::after{content:'Working…';position:absolute;inset:0;display:grid;place-items:center;border-radius:inherit;background:rgba(5,8,19,.72);color:var(--cyan);font-family:var(--mono);font-size:.68rem;letter-spacing:.04em}
-  .p086-secondary{opacity:.72}
-  .p086-hidden{display:none!important}
-
-  @media(max-width:430px){
-    #app{padding-left:10px;padding-right:10px}
-    .sched,.inbox-card,.rider-flow,.status{border-radius:16px}
-    .inbox-route{font-size:.88rem}.inbox-fare{font-size:1.4rem}
-  }
+<style id="pulse086r3-style">
+  /* PULSE-086R3 — authoritative Pulse-only driver console */
+  :root{--p87-card:rgba(13,20,44,.94);--p87-card2:rgba(18,28,58,.94);--p87-line:rgba(132,164,224,.22);--p87-cyan:#43d9ea;--p87-green:#65e5a4;--p87-amber:#ffc45d;--p87-red:#ff748e;--p87-text:#f7f9ff;--p87-muted:#9fabc4}
+  #app{width:min(560px,100%);gap:12px;padding:12px 12px 118px}
+  .opp,.test,#testStrip,#status,#queue,#actionbar,#overlay,#fareOverlay{display:none!important}
+  .head{position:sticky;top:0;z-index:850;margin:0 -2px 2px;padding:10px 4px 8px;background:linear-gradient(180deg,rgba(5,8,19,.98),rgba(5,8,19,.86),transparent);backdrop-filter:blur(12px)}
+  .brand{font-size:1.06rem}.tag.live{border-color:rgba(101,229,164,.5);color:var(--p87-green)}
+  #onlineBar{display:none!important}
+  #schedLane{order:70;padding:15px;border:1px solid var(--p87-line);border-radius:20px;background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.022));box-shadow:0 18px 46px rgba(0,0,0,.18)}
+  #schedLane .sched-head{margin-bottom:11px}#schedLane .sched-head span{font-size:1rem;font-weight:800}#addSchedBtn{display:none!important}
+  .map-wrap{order:50;min-height:270px;border:1px solid rgba(67,217,234,.18);border-radius:22px;overflow:hidden;box-shadow:0 20px 55px rgba(0,0,0,.28)}
+  #map{min-height:270px}.map-miles{border-radius:10px}.p085b-route-chip{left:10px!important;right:10px!important;bottom:10px!important;border-radius:13px!important;padding:11px 12px!important}
+  #riderFlow{display:none!important}
+  .p87-shell{display:grid;gap:12px;order:30}
+  .p87-shift{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border:1px solid var(--p87-line);border-radius:17px;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.018))}
+  .p87-shift-main{min-width:0}.p87-shift-label{font-size:.67rem;font-weight:850;letter-spacing:.09em;text-transform:uppercase;color:var(--p87-muted)}.p87-shift-time{margin-top:3px;font-family:var(--mono);font-size:1.08rem;color:var(--p87-text)}.p87-shift-sub{margin-top:2px;font-size:.72rem;color:var(--p87-muted)}
+  .p87-shift button{min-height:44px;padding:0 16px;border:0;border-radius:12px;font-weight:900;font-size:.78rem;white-space:nowrap}.p87-start{background:linear-gradient(180deg,#9cf5c9,var(--p87-green));color:#062218}.p87-end{background:rgba(255,116,142,.12);border:1px solid rgba(255,116,142,.42)!important;color:#ff9cb0}.p87-end:disabled{opacity:.45}
+  .p87-active{display:none;padding:17px;border:1px solid rgba(67,217,234,.3);border-radius:22px;background:radial-gradient(circle at 100% 0%,rgba(67,217,234,.13),transparent 44%),linear-gradient(180deg,var(--p87-card2),var(--p87-card));box-shadow:0 22px 58px rgba(0,0,0,.3)}
+  .p87-active.show{display:block}.p87-active-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.p87-kicker{font-size:.65rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--p87-cyan)}.p87-name{margin-top:5px;font-size:1.35rem;font-weight:900;line-height:1.06}.p87-fare{font-size:1.55rem;font-weight:950;color:var(--p87-green);white-space:nowrap}.p87-pay{margin-top:3px;text-align:right;font-size:.65rem;color:var(--p87-muted)}
+  .p87-route{display:grid;grid-template-columns:14px 1fr;column-gap:10px;row-gap:4px;margin-top:16px}.p87-dot{width:10px;height:10px;border-radius:50%;margin-top:5px;background:var(--p87-amber);box-shadow:0 0 0 4px rgba(255,196,93,.11)}.p87-dot.dest{background:var(--p87-cyan);box-shadow:0 0 0 4px rgba(67,217,234,.11)}.p87-route b{font-size:.92rem;line-height:1.35}.p87-route small{grid-column:2;color:var(--p87-muted);font-size:.68rem;margin-bottom:7px}
+  .p87-status-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:11px;padding-top:11px;border-top:1px solid rgba(255,255,255,.08)}.p87-status-pill{padding:6px 9px;border-radius:999px;background:rgba(67,217,234,.1);color:var(--p87-cyan);font-size:.66rem;font-weight:850}.p87-timing{font-size:.68rem;color:var(--p87-muted)}
+  .p87-actions{display:grid;gap:9px;margin-top:13px}.p87-actions.two{grid-template-columns:1fr 1fr}.p87-actions button{min-height:54px;border-radius:14px;border:1px solid rgba(255,255,255,.13);background:#101a39;color:var(--p87-text);font-weight:900;font-size:.88rem}.p87-actions button.primary{border:0;background:linear-gradient(180deg,#94f1c1,var(--p87-green));color:#062218}.p87-actions button.danger{color:#ff9db0;border-color:rgba(255,116,142,.35);background:rgba(255,116,142,.08)}.p87-actions button:disabled{opacity:.46}
+  .p87-next{display:none;padding:14px 15px;border:1px solid rgba(255,196,93,.28);border-radius:18px;background:linear-gradient(180deg,rgba(255,196,93,.08),rgba(255,255,255,.02))}.p87-next.show{display:block}.p87-next-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}.p87-next-head span:first-child{font-size:.68rem;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--p87-amber)}.p87-next-count{font-size:.65rem;color:var(--p87-muted)}.p87-next-main{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.p87-next-name{font-size:1rem;font-weight:850}.p87-next-route{margin-top:4px;color:var(--p87-muted);font-size:.75rem;line-height:1.35}.p87-next-fare{font-size:1.12rem;font-weight:900;color:var(--p87-green);white-space:nowrap}.p87-next-time{margin-top:7px;font-size:.68rem;color:var(--p87-amber)}
+  .p87-inbox-trigger{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:52px;padding:0 15px;border:1px solid rgba(67,217,234,.24);border-radius:15px;background:rgba(67,217,234,.07);color:var(--p87-text);font-weight:900}.p87-inbox-trigger span:last-child{display:inline-grid;place-items:center;min-width:25px;height:25px;padding:0 7px;border-radius:999px;background:var(--p87-cyan);color:#06131d;font-size:.72rem}.p87-inbox-trigger.zero span:last-child{background:rgba(255,255,255,.09);color:var(--p87-muted)}
+  #inboxOverlay .sheet{max-width:520px;padding:18px;border-radius:22px;background:#0b132d;border-color:rgba(67,217,234,.22)}#inboxHoldNotice{display:none!important}.inbox-card{padding:15px!important;border-radius:17px!important;border:1px solid rgba(255,255,255,.1)!important;background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.022))!important}.inbox-card+.inbox-card{margin-top:10px}.inbox-card b{font-size:1.04rem!important}.inbox-time{margin-top:3px;color:var(--p87-amber)!important;font-size:.71rem!important}.inbox-route{margin-top:9px!important;font-size:.88rem!important;line-height:1.4!important}.inbox-fare{margin-top:10px!important;font-size:1.45rem!important;color:var(--p87-green)!important}.p87-inbox-pay{margin-top:4px;font-size:.68rem;color:var(--p87-muted)}.inbox-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:9px!important;margin-top:12px}.inbox-actions button{min-height:50px!important;border-radius:13px!important;font-size:.88rem!important;font-weight:900!important}.inbox-accept{background:linear-gradient(180deg,#97f2c3,var(--p87-green))!important;color:#062218!important;border:0!important}.inbox-decline{background:rgba(255,116,142,.08)!important;color:#ff9db0!important;border:1px solid rgba(255,116,142,.32)!important}
+  .sched-card.p082-card{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:11px!important;padding:13px 12px!important;border-radius:14px!important;background:rgba(255,255,255,.035)!important}.p084-main{gap:5px!important}.p084-time{font-size:.7rem!important;color:var(--p87-amber)!important}.p084-fare{font-size:1.1rem!important;color:var(--p87-green)!important}.p084-route{font-size:.85rem!important;white-space:normal!important}.p084-action button{min-height:44px!important;padding:0 12px!important;border-radius:11px!important;font-size:.72rem!important}.p87-scheduled-queued{color:var(--p87-amber);font-size:.66rem;margin-top:4px}
+  .p87-busy{pointer-events:none!important;opacity:.58!important}
+  @media(max-width:430px){#app{padding-left:10px;padding-right:10px}.map-wrap,#schedLane,.p87-active{border-radius:18px}.p87-active{padding:15px}.p87-name{font-size:1.2rem}.p87-fare{font-size:1.35rem}.p87-actions.two{grid-template-columns:1fr}.sched-card.p082-card{grid-template-columns:1fr!important}.p084-action button{width:100%}}
 </style>
 <script>
 (function(){
   'use strict';
-  var P086={observer:null,busyUntil:0};
-
-  function q(sel,root){return (root||document).querySelector(sel)}
-  function qa(sel,root){return [].slice.call((root||document).querySelectorAll(sel))}
-
-  function hideDebug_(){
-    qa('.test').forEach(function(el){el.classList.add('p086-hidden')});
-    qa('.opp').forEach(function(el){el.classList.add('p086-hidden')});
-  }
-
-  function cleanCopy_(){
-    qa('.sc-when,.p084-time,.inbox-time').forEach(function(el){
-      var text=String(el.textContent||'').replace(/\bDUE\b\s*$/i,'').trim();
-      if(text!==String(el.textContent||'').trim())el.textContent=text;
-    });
-    qa('button').forEach(function(btn){
-      var text=String(btn.textContent||'').trim();
-      if(/^accept ride\s*start ride$/i.test(text))btn.textContent='Accept ride';
-      if(/^navigate pickup$/i.test(text))btn.textContent='Route to pickup';
-    });
-  }
-
-  function deEmphasizeUber_(){
-    qa('.go').forEach(function(btn){
-      if(document.querySelector('.rider-flow.show')||document.querySelector('.inbox-card'))btn.classList.add('p086-secondary');
-      else btn.classList.remove('p086-secondary');
-    });
-  }
-
-  function guardButtons_(){
-    qa('.rider-flow-actions button,.inbox-actions button,.p084-action button,.sched-card button').forEach(function(btn){
-      if(btn.dataset.p086Guard==='1')return;
-      btn.dataset.p086Guard='1';
-      btn.addEventListener('click',function(){
-        if(btn.disabled||btn.classList.contains('p086-busy'))return;
-        var text=String(btn.textContent||'').toLowerCase();
-        if(!/(accept|decline|start|complete|route|pickup|destination|arriv)/.test(text))return;
-        btn.classList.add('p086-busy');
-        btn.disabled=true;
-        window.setTimeout(function(){
-          btn.classList.remove('p086-busy');
-          btn.disabled=false;
-        },1800);
-      },true);
-    });
-  }
-
-  function improveHierarchy_(){
-    qa('.inbox-card').forEach(function(card){
-      var fare=q('.inbox-fare',card),actions=q('.inbox-actions',card);
-      if(fare&&actions&&fare.nextElementSibling!==actions){card.insertBefore(fare,actions)}
-    });
-  }
-
-  function refreshEnhancements_(){
-    hideDebug_();cleanCopy_();deEmphasizeUber_();guardButtons_();improveHierarchy_();
-  }
-
-  function start_(){
-    refreshEnhancements_();
-    P086.observer=new MutationObserver(function(){window.requestAnimationFrame(refreshEnhancements_)});
-    P086.observer.observe(document.body,{subtree:true,childList:true,characterData:true});
-    window.addEventListener('focus',function(){window.setTimeout(refreshEnhancements_,50)});
-    window.setInterval(refreshEnhancements_,5000);
-  }
-
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start_);else start_();
-})();
-</script><style id="pulse086r-style">
-  /* PULSE-086R2 — production shift/lifecycle reconciliation */
-  #overlay{display:none!important}
-  #testStrip{display:none!important}
-  .p086r-shift-busy{pointer-events:none;opacity:.62}
-</style>
-<script>
-(function(){
-  'use strict';
-
-  var P086R_STATE_KEY='pulse-hoy-driver-state-v2';
-  var P086R_LEGACY_STATE_KEY='pulse-hoy-driver-state-v1';
-  var P086R_SHIFT_MAX_MS=18*60*60*1000;
-  var P086R_RIDE_MAX_MS=12*60*60*1000;
-  var P086R_QUEUE_MAX_MS=8*60*60*1000;
-  var P086R_TRIP_RETRY_KEY='pulse-hoy-driver-pending-trips-v1';
-  var shiftEndBusy=false;
-
+  var P87={build:'PULSE-086R3-2026-08-13.1',stateKey:'pulse-hoy-driver-state-v3',legacy:['pulse-hoy-driver-state-v1','pulse-hoy-driver-state-v2'],shiftMax:18*3600000,rideMax:12*3600000,busy:{},queue:[],promoting:false,endBusy:false,shell:null};
   var baseRender=typeof render==='function'?render:null;
-  var basePickedUp=typeof pickedUp==='function'?pickedUp:null;
-  var baseDropOff=typeof dropOff==='function'?dropOff:null;
-  var baseCancelActive=typeof cancelActive==='function'?cancelActive:null;
-  var baseStartScheduled=typeof startScheduled==='function'?startScheduled:null;
-
-  function p086rNow_(){return Date.now();}
-  function p086rFinite_(value){var n=Number(value);return isFinite(n)?n:null;}
-  function p086rSafeDateMs_(value){var n=Number(value);if(isFinite(n)&&n>0)return n;var d=Date.parse(value||'');return isFinite(d)?d:null;}
-  function p086rFresh_(at,maxAge){var n=p086rSafeDateMs_(at);if(!n)return false;var age=p086rNow_()-n;return age>=-5*60*1000&&age<=maxAge;}
-
-  function p086rNormalizeShift_(shift){
-    if(!shift||typeof shift!=='object'||!p086rFresh_(shift.startedAt,P086R_SHIFT_MAX_MS))return null;
-    return {
-      startedAt:Number(shift.startedAt),
-      miles:Math.max(0,p086rFinite_(shift.miles)||0),
-      rides:Math.max(0,Math.round(p086rFinite_(shift.rides)||0)),
-      earned:Math.max(0,p086rFinite_(shift.earned)||0),
-      tips:Math.max(0,p086rFinite_(shift.tips)||0),
-      requestIds:Array.isArray(shift.requestIds)?shift.requestIds.slice(0,100):[]
-    };
-  }
-
-  function p086rNormalizeRide_(ride,maxAge){
-    if(!ride||typeof ride!=='object')return null;
-    var state=String(ride.state||'').toUpperCase();
-    if(state!=='ACCEPTED'&&state!=='ON_TRIP')return null;
-    var anchor=ride.acceptedAt||ride.pickedUpAt;
-    if(!p086rFresh_(anchor,maxAge))return null;
-    return ride;
-  }
-
-  function p086rReadState_(){
-    var state=null;
-    try{state=JSON.parse(localStorage.getItem(P086R_STATE_KEY)||'null');}catch(e){state=null;}
-    if(!state||typeof state!=='object')state={};
-    var shift=p086rNormalizeShift_(state.shift);
-    if(!shift)return {shift:null,active:null,queued:null,heldRequests:Array.isArray(state.heldRequests)?state.heldRequests:[],pendingTrips:Array.isArray(state.pendingTrips)?state.pendingTrips:[]};
-    return {
-      shift:shift,
-      active:p086rNormalizeRide_(state.active,P086R_RIDE_MAX_MS),
-      queued:p086rNormalizeRide_(state.queued,P086R_QUEUE_MAX_MS),
-      heldRequests:Array.isArray(state.heldRequests)?state.heldRequests:[],
-      pendingTrips:Array.isArray(state.pendingTrips)?state.pendingTrips:[]
-    };
-  }
-
-  function p086rWriteState_(){
-    try{
-      localStorage.setItem(P086R_STATE_KEY,JSON.stringify({
-        shift:S.shift||null,
-        active:S.active||null,
-        queued:S.queued||null,
-        heldRequests:Array.isArray(S.heldRequests)?S.heldRequests:[],
-        pendingTrips:Array.isArray(S.pendingTrips)?S.pendingTrips:[]
-      }));
-    }catch(e){}
-  }
-
-  function p086rResetLegacyState_(){
-    try{localStorage.removeItem(P086R_LEGACY_STATE_KEY);}catch(e){}
-    var restored=p086rReadState_();
-    S.shift=restored.shift;
-    S.active=restored.active;
-    S.queued=restored.queued;
-    S.heldRequests=restored.heldRequests||[];
-    S.pendingTrips=restored.pendingTrips;
-    if(!S.shift){S.active=null;S.queued=null;}
-  }
-
-  /* All persistence after this point uses the versioned, stale-safe state. */
-  persistState=p086rWriteState_;
-
-  if(typeof newRideId_!=='function'){
-    window.newRideId_=function(prefix){return String(prefix||'ride')+'-'+p086rNow_()+'-'+Math.floor(Math.random()*1000000);};
-  }
-
-  if(typeof queueTripLog_!=='function'){
-    window.queueTripLog_=function(payload){
-      if(!payload||!payload.rideId)return;
-      S.pendingTrips=S.pendingTrips||[];
-      if(!S.pendingTrips.some(function(x){return x&&x.rideId===payload.rideId;}))S.pendingTrips.push(payload);
-      p086rWriteState_();
-      p086rFlushPendingTrips_();
-    };
-  }
-
-  function p086rFlushPendingTrips_(){
-    if(!LIVE||!S.pendingTrips||!S.pendingTrips.length)return Promise.resolve();
-    var payload=S.pendingTrips[0];
-    return srv('logCompletedTrip',payload).then(function(){
-      S.pendingTrips.shift();p086rWriteState_();return p086rFlushPendingTrips_();
-    }).catch(function(error){toast((error&&error.message)||'Trip log pending');});
-  }
-
-  function p086rSetButtonLabel_(id,label){
-    var btn=$(id);if(!btn)return;
-    var text=btn.querySelector('.pulse-control-label');
-    if(text)text.textContent=label;
-    else if(id==='goBtn')btn.textContent=label;
-  }
-
-  function p086rShiftClock_(startedAt){
-    var seconds=Math.max(0,Math.floor((p086rNow_()-Number(startedAt||p086rNow_()))/1000));
-    var h=Math.floor(seconds/3600),m=Math.floor((seconds%3600)/60),s=seconds%60;
-    return (h?h+':':'')+(m<10&&h?'0':'')+m+':'+(s<10?'0':'')+s;
-  }
-
-  function p086rSyncUi_(){
-    var online=!!S.shift,a=S.active,rider=typeof isRiderRide_==='function'&&isRiderRide_(a);
-    p086rSetButtonLabel_('goBtn','Start shift');
-    p086rSetButtonLabel_('endShiftBtn',shiftEndBusy?'Ending…':'End shift');
-
-    if($('goInBar'))$('goInBar').style.display=online?'none':'block';
-    if($('rideBar'))$('rideBar').style.display=online?'block':'none';
-    if($('onlineBar'))$('onlineBar').style.display=online?'flex':'none';
-    if(online&&$('obTimer'))$('obTimer').textContent=p086rShiftClock_(S.shift.startedAt);
-
-    var acceptBtn=$('acceptBtn'),pickupBtn=$('pickupBtn'),dropoffBtn=$('dropoffBtn');
-    if(acceptBtn){acceptBtn.style.display=rider?'none':'';acceptBtn.disabled=!online||shiftEndBusy;}
-    if(pickupBtn){pickupBtn.style.display=rider?'none':'';pickupBtn.disabled=!online||rider||!(a&&a.state==='ACCEPTED');}
-    if(dropoffBtn){dropoffBtn.style.display=rider?'none':'';dropoffBtn.disabled=!online||rider||!(a&&a.state==='ON_TRIP');}
-    if($('endShiftBtn')){$('endShiftBtn').disabled=shiftEndBusy;$('endShiftBtn').classList.toggle('p086r-shift-busy',shiftEndBusy);}
-  }
-
-  if(baseRender){
-    render=function(){var out=baseRender.apply(this,arguments);p086rSyncUi_();return out;};
-  }
-
-  goOnline=function(){
-    if(S.shift){toast('Shift already started');return;}
-    S.shift={startedAt:p086rNow_(),miles:0,rides:0,earned:0,tips:0,requestIds:[]};
-    p086rWriteState_();toast('Shift started');render();
-  };
-
-  accept=function(){
-    if(!S.shift){toast('Start shift first');return;}
-    if(!S.active){
-      S.active={rideId:newRideId_('uber'),source:'uber-mirror',state:'ACCEPTED',acceptedAt:p086rNow_(),pickedUpAt:null,pickup:'',dest:''};
-      toast('Ride accepted');
-    }else if(typeof isRiderRide_==='function'&&isRiderRide_(S.active)){
-      toast('Pulse ride active');return;
-    }else if(!S.queued){
-      S.queued={rideId:newRideId_('uber'),source:'uber-mirror',state:'ACCEPTED',acceptedAt:p086rNow_(),pickedUpAt:null,pickup:'',dest:''};
-      toast('Next ride stacked');
-    }else{
-      toast('Queue full');
-    }
-    p086rWriteState_();render();
-  };
-
-  pickedUp=function(){
-    if(!S.shift){toast('Start shift first');return;}
-    if(!S.active||S.active.state!=='ACCEPTED'||(typeof isRiderRide_==='function'&&isRiderRide_(S.active))){toast('No accepted Uber ride');p086rSyncUi_();return;}
-    if(basePickedUp)basePickedUp.apply(this,arguments);
-    else{S.active.state='ON_TRIP';S.active.pickedUpAt=p086rNow_();startTrace();toast('Ride started');render();}
-    p086rWriteState_();p086rSyncUi_();
-  };
-
-  dropOff=function(){
-    var completed=S.active?Object.assign({},S.active):null;
-    var wasOnTrip=!!(completed&&completed.state==='ON_TRIP');
-    var miles=Math.round((Number(trace&&trace.miles)||0)*100)/100;
-    var completedAt=p086rNow_();
-    var result=baseDropOff?baseDropOff.apply(this,arguments):null;
-    if(wasOnTrip&&completed){
-      queueTripLog_({
-        rideId:completed.rideId||newRideId_('completed'),
-        requestId:completed.requestId||'',
-        source:completed.source||((completed.requestId)?'rider':'uber-mirror'),
-        acceptedISO:new Date(completed.acceptedAt||completed.pickedUpAt||completedAt).toISOString(),
-        pickedUpISO:new Date(completed.pickedUpAt||completed.acceptedAt||completedAt).toISOString(),
-        completedISO:new Date(completedAt).toISOString(),
-        pickup:completed.pickup||'',
-        destination:completed.dest||completed.destination||'',
-        miles:miles,
-        fare:completed.quotedFare!=null?completed.quotedFare:'',
-        tip:''
-      });
-    }
-    p086rWriteState_();p086rSyncUi_();return result;
-  };
-
-  cancelActive=function(){
-    var result=baseCancelActive?baseCancelActive.apply(this,arguments):null;
-    p086rWriteState_();p086rSyncUi_();return result;
-  };
-
-  if(baseStartScheduled){
-    startScheduled=function(id){
-      if(!S.shift){toast('Start shift first');return;}
-      return baseStartScheduled.call(this,id);
-    };
-  }
-
-  function p086rEndShift_(){
-    if(!S.shift||shiftEndBusy)return;
-    if(S.active||S.queued){toast('Complete or cancel the active ride first');return;}
-    var snapshot=Object.assign({},S.shift),endedAt=p086rNow_();
-    var onlineHours=Math.max(0.0001,(endedAt-Number(snapshot.startedAt))/3600000);
-    var requestNote=(snapshot.requestIds&&snapshot.requestIds.length)?(' · requests '+snapshot.requestIds.join(',')):'';
-    var payload={
-      startISO:new Date(snapshot.startedAt).toISOString(),
-      endISO:new Date(endedAt).toISOString(),
-      onlineHours:onlineHours,
-      miles:Math.max(0,Number(snapshot.miles)||0),
-      earnings:'',
-      tips:'',
-      zone:'',
-      notes:(snapshot.rides?(''+snapshot.rides+' rides'):'Shift ended')+requestNote+' · earnings pending reconciliation'
-    };
-    shiftEndBusy=true;p086rSyncUi_();
-    srv('endShiftToSheet',payload).then(function(){
-      S.shift=null;S.active=null;S.queued=null;
-      try{stopTrace();}catch(e){}
-      p086rWriteState_();
-      shiftEndBusy=false;
-      if(window.PulseRouteLayer&&typeof window.PulseRouteLayer.clearTrip==='function')try{window.PulseRouteLayer.clearTrip();}catch(e){}
-      toast('Shift ended');render();
-    }).catch(function(error){
-      shiftEndBusy=false;p086rSyncUi_();toast((error&&error.message)||'Could not end shift');
-    });
-  }
-
-  /* Rebind controls because the base page assigned function references before this late patch loaded. */
-  p086rResetLegacyState_();
-  if($('goBtn'))$('goBtn').onclick=goOnline;
-  if($('endShiftBtn'))$('endShiftBtn').onclick=p086rEndShift_;
-  if($('acceptBtn'))$('acceptBtn').onclick=accept;
-  if($('pickupBtn'))$('pickupBtn').onclick=pickedUp;
-  if($('dropoffBtn'))$('dropoffBtn').onclick=dropOff;
-  if($('cancelActiveBtn'))$('cancelActiveBtn').onclick=cancelActive;
-
-  /* The old T-001/end-shift form is retired; remove it from the live DOM. */
-  try{var oldOverlay=$('overlay');if(oldOverlay&&oldOverlay.parentNode)oldOverlay.parentNode.removeChild(oldOverlay);}catch(e){}
-  try{var oldTest=$('testStrip');if(oldTest&&oldTest.parentNode)oldTest.parentNode.removeChild(oldTest);}catch(e){}
-
-  p086rWriteState_();
-  render();
-  p086rFlushPendingTrips_();
-  window.addEventListener('focus',function(){p086rFlushPendingTrips_();p086rSyncUi_();});
+  var baseSchedFromServer=typeof schedFromServer==='function'?schedFromServer:null;
+  function q(id){return document.getElementById(id)}
+  function esc87(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function n87(v){var n=Number(v);return isFinite(n)?n:null}
+  function fresh87(ms,max){ms=Number(ms);return isFinite(ms)&&ms>0&&Date.now()-ms>=-300000&&Date.now()-ms<=max}
+  function fullWhen87(iso){var d=new Date(iso||'');if(isNaN(d.getTime()))return '';return d.toLocaleString([],{weekday:'short',hour:'numeric',minute:'2-digit'})}
+  function fare87(r){var x=r&&r.quotedFare;if(x===''||x==null)return null;var n=Number(x);return isFinite(n)&&n>=0?n:null}
+  function pay87(r){var m=String((r&&r.notes)||'').match(/\[PAY:(NOW|AFTER)\]/i);return m?(String(m[1]).toUpperCase()==='NOW'?'Pay now':'Pay after ride'):''}
+  function timing87(r){var notes=String((r&&r.notes)||'');var m=notes.match(/\[QR_LIVE:(NOW|LATER)\]/i);if(m)return String(m[1]).toUpperCase();var t=Date.parse((r&&r.whenISO)||'');return isFinite(t)&&t>Date.now()+35*60000?'LATER':'NOW'}
+  function rider87(r){return !!(r&&r.requestId)}
+  function status87(r){return String((r&&r.riderStatus)||'Confirmed')}
+  function rideFromRequest87(r){return {rideId:'request-'+r.requestId,requestId:r.requestId||'',source:'rider',state:'ACCEPTED',acceptedAt:Date.now(),pickedUpAt:null,name:r.name||'Ride',pickup:r.pickup||'',dest:r.destination||r.dest||'',whenISO:r.whenISO||'',notes:r.notes||'',quotedFare:fare87(r),riderStatus:r.riderStatus||'Confirmed'} }
+  function rideFromScheduled87(s){return {rideId:s.requestId?('request-'+s.requestId):('scheduled-'+s.id),requestId:s.requestId||'',reservationId:s.id||'',source:s.source||'scheduled',state:'ACCEPTED',acceptedAt:Date.now(),pickedUpAt:null,name:s.name||'Ride',pickup:s.pickup||'',dest:s.dest||s.destination||'',whenISO:s.whenISO||(s.whenTS?new Date(s.whenTS).toISOString():''),notes:s.notes||'',quotedFare:fare87(s),riderStatus:s.riderStatus||'Confirmed'} }
+  function syncQueued87(){S.queued=P87.queue.length?P87.queue[0]:null}
+  function persist87(){try{localStorage.setItem(P87.stateKey,JSON.stringify({shift:S.shift||null,active:S.active||null,queue:P87.queue||[],pendingTrips:Array.isArray(S.pendingTrips)?S.pendingTrips:[]}))}catch(e){}syncQueued87()}
+  function restore87(){P87.legacy.forEach(function(k){try{localStorage.removeItem(k)}catch(e){}});var x=null;try{x=JSON.parse(localStorage.getItem(P87.stateKey)||'null')}catch(e){x=null}if(!x||typeof x!=='object'||!x.shift||!fresh87(x.shift.startedAt,P87.shiftMax)){S.shift=null;S.active=null;P87.queue=[];S.queued=null;return persist87()}S.shift=x.shift;S.active=x.active&&fresh87(x.active.acceptedAt||x.active.pickedUpAt,P87.rideMax)?x.active:null;P87.queue=(Array.isArray(x.queue)?x.queue:[]).filter(function(r){return r&&fresh87(r.acceptedAt||Date.now(),P87.rideMax)});S.pendingTrips=Array.isArray(x.pendingTrips)?x.pendingTrips:[];syncQueued87();persist87()}
+  persistState=persist87;
+  function buildShell87(){if(q('p87Shell')){P87.shell=q('p87Shell');return}var shell=document.createElement('div');shell.id='p87Shell';shell.className='p87-shell';shell.innerHTML='<div class="p87-shift"><div class="p87-shift-main"><div class="p87-shift-label" id="p87ShiftLabel">Driver session</div><div class="p87-shift-time" id="p87ShiftTime">Offline</div><div class="p87-shift-sub" id="p87ShiftSub">Start shift when you are ready to take rides.</div></div><button id="p87ShiftBtn" class="p87-start" type="button">Start shift</button></div><button class="p87-inbox-trigger zero" id="p87InboxBtn" type="button"><span>Ride requests</span><span id="p87InboxCount">0</span></button><section class="p87-active" id="p87Active"><div class="p87-active-top"><div><div class="p87-kicker" id="p87ActiveKicker">ACTIVE RIDE</div><div class="p87-name" id="p87ActiveName"></div></div><div><div class="p87-fare" id="p87ActiveFare"></div><div class="p87-pay" id="p87ActivePay"></div></div></div><div class="p87-route"><span class="p87-dot"></span><b id="p87Pickup"></b><small>Pickup</small><span class="p87-dot dest"></span><b id="p87Dest"></b><small>Destination</small></div><div class="p87-status-row"><span class="p87-status-pill" id="p87Status"></span><span class="p87-timing" id="p87Timing"></span></div><div class="p87-actions" id="p87Actions"></div></section><section class="p87-next" id="p87Next"><div class="p87-next-head"><span>NEXT RIDE</span><span class="p87-next-count" id="p87NextCount"></span></div><div class="p87-next-main"><div><div class="p87-next-name" id="p87NextName"></div><div class="p87-next-route" id="p87NextRoute"></div><div class="p87-next-time" id="p87NextTime"></div></div><div class="p87-next-fare" id="p87NextFare"></div></div></section>';var head=document.querySelector('#app .head');if(head&&head.nextSibling)head.parentNode.insertBefore(shell,head.nextSibling);else q('app').appendChild(shell);P87.shell=shell;q('p87ShiftBtn').onclick=toggleShift87;q('p87InboxBtn').onclick=function(){if(typeof openInbox==='function')openInbox()}}
+  function shiftClock87(){if(!S.shift)return 'Offline';var sec=Math.max(0,Math.floor((Date.now()-Number(S.shift.startedAt))/1000)),h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;return (h?h+':':'')+(h&&m<10?'0':'')+m+':'+(s<10?'0':'')+s}
+  function toggleShift87(){if(P87.endBusy)return;if(S.shift)endShift87();else startShift87()}
+  function startShift87(){if(S.shift)return;S.shift={startedAt:Date.now(),miles:0,rides:0,earned:0,tips:0,requestIds:[]};persist87();toast('Shift started');render();if(!S.active&&P87.queue.length)promote87()}
+  function endShift87(){if(!S.shift||P87.endBusy)return;if(S.active||P87.queue.length){toast('Complete queued rides before ending shift');return}var end=Date.now(),snap=S.shift,hours=Math.max(.0001,(end-Number(snap.startedAt))/3600000),payload={startISO:new Date(snap.startedAt).toISOString(),endISO:new Date(end).toISOString(),onlineHours:hours,miles:Number(snap.miles)||0,earnings:'',tips:'',zone:'',notes:(snap.rides?(''+snap.rides+' Pulse rides'):'No completed rides')+' · earnings pending reconciliation'};P87.endBusy=true;render87();srv('endShiftToSheet',payload).then(function(){S.shift=null;persist87();toast('Shift ended')}).catch(function(e){toast((e&&e.message)||'Could not end shift')}).then(function(){P87.endBusy=false;render()})}
+  function button87(label,cls,handler){var b=document.createElement('button');b.type='button';b.textContent=label;b.className=cls||'';b.onclick=handler;return b}
+  function route87(address,label){if(!address){toast('Address unavailable');return}toast(label||'Route');navTo(address)}
+  function beginPickup87(ride){if(!ride)return Promise.resolve(null);if(!S.shift){toast('Start shift first');return Promise.resolve(null)}var id=ride.requestId||'',reservation=ride.reservationId||id;if(!id){S.active=ride;ride.riderStatus='Confirmed';persist87();render();route87(ride.pickup,'Route to pickup');return Promise.resolve(ride)}return srv('beginForegroundPickup',id,reservation,ride.pickup||'').catch(function(){return new Promise(function(resolve,reject){setTimeout(function(){srv('beginForegroundPickup',id,reservation,ride.pickup||'').then(resolve).catch(reject)},650)})}).then(function(result){ride.riderStatus=(result&&result.status)||'Leaving';ride.pickupTarget=(result&&result.pickupTarget)||null;ride.pickupTargetError=(result&&result.pickupTargetError)||'';ride.pickupOrigin=null;ride.pickupMovedMiles=0;ride.pickupStoppedSince=0;S.active=ride;persist87();if(result&&result.reservations&&typeof schedFromServer==='function')schedFromServer(result.reservations);render();route87(ride.pickup,'Route to pickup');return ride})}
+  function queue87(ride){if(!ride)return;var id=ride.requestId||ride.rideId;if(P87.queue.some(function(x){return (x.requestId||x.rideId)===id})||(S.active&&(S.active.requestId||S.active.rideId)===id))return;ride.state='QUEUED';ride.acceptedAt=ride.acceptedAt||Date.now();P87.queue.push(ride);syncQueued87();persist87();render87()}
+  function promote87(){if(P87.promoting||S.active||!S.shift||!P87.queue.length)return;P87.promoting=true;var ride=P87.queue.shift();syncQueued87();persist87();ride.state='ACCEPTED';beginPickup87(ride).catch(function(e){P87.queue.unshift(ride);syncQueued87();persist87();toast((e&&e.message)||'Could not start next pickup')}).then(function(){P87.promoting=false;render()})}
+  function logCompleted87(completed,miles,completedAt){if(!completed)return;queueTripLog_({rideId:completed.rideId||('request-'+(completed.requestId||completedAt)),requestId:completed.requestId||'',source:completed.source||'rider',acceptedISO:new Date(completed.acceptedAt||completed.pickedUpAt||completedAt).toISOString(),pickedUpISO:new Date(completed.pickedUpAt||completed.acceptedAt||completedAt).toISOString(),completedISO:new Date(completedAt).toISOString(),pickup:completed.pickup||'',destination:completed.dest||'',miles:miles,fare:completed.quotedFare!=null?completed.quotedFare:'',tip:''})}
+  function completeRide87(){var completed=S.active;if(!completed)return;var at=Date.now(),miles=typeof stopTrace==='function'?stopTrace():0;logCompleted87(completed,miles,at);if(S.shift){S.shift.miles=(Number(S.shift.miles)||0)+(Number(miles)||0);S.shift.rides=(Number(S.shift.rides)||0)+1;S.shift.requestIds=S.shift.requestIds||[];if(completed.requestId&&S.shift.requestIds.indexOf(completed.requestId)<0)S.shift.requestIds.push(completed.requestId)}S.active=null;persist87();toast('Ride complete');render();setTimeout(promote87,150);setTimeout(refreshInbox,250)}
+  dropOff=completeRide87;
+  function activeActions87(){var box=q('p87Actions');if(!box)return;box.innerHTML='';box.className='p87-actions';var a=S.active;if(!a)return;var st=status87(a);if(!rider87(a)){if(a.state==='ON_TRIP'){box.classList.add('two');box.appendChild(button87('Route to destination','',function(){route87(a.dest,'Destination')}));box.appendChild(button87('Complete ride','primary',completeRide87));return}box.classList.add('two');box.appendChild(button87('Route to pickup','',function(){a.routeOpened=true;persist87();render87();route87(a.pickup,'Pickup')}));var start=button87('Start ride','primary',function(){a.state='ON_TRIP';a.pickedUpAt=Date.now();startTrace();persist87();render();route87(a.dest,'Destination')});start.disabled=!a.routeOpened;box.appendChild(start);return}if(st==='Leaving'||st==='On the way'||st==='Arriving soon'||st==='Confirmed'){box.appendChild(button87('Route to pickup','primary',function(){route87(a.pickup,'Pickup')}));return}if(st==='Arrived'){box.appendChild(button87('Start ride','primary',function(){advanceRiderStatus_('Ride in progress',function(){a.state='ON_TRIP';a.pickedUpAt=Date.now();startTrace();persist87();route87(a.dest,'Destination')})}));return}if(st==='Ride in progress'){box.classList.add('two');box.appendChild(button87('Route to destination','',function(){route87(a.dest,'Destination')}));box.appendChild(button87('Complete ride','primary',function(){advanceRiderStatus_('Complete',completeRide87)}));return}if(st==='Complete'){var done=button87('Ride complete','');done.disabled=true;box.appendChild(done)}}
+  function renderActive87(){var card=q('p87Active'),a=S.active;if(!card)return;if(!a){card.classList.remove('show');return}card.classList.add('show');q('p87ActiveKicker').textContent=status87(a)==='Ride in progress'?'ACTIVE TRIP':'ACTIVE PICKUP';q('p87ActiveName').textContent=a.name||'Pulse rider';var f=fare87(a);q('p87ActiveFare').textContent=f!=null?'$'+f.toFixed(2):'Fare';q('p87ActivePay').textContent=pay87(a);q('p87Pickup').textContent=a.pickup||'Pickup';q('p87Dest').textContent=a.dest||'Destination';q('p87Status').textContent=status87(a);q('p87Timing').textContent=a.whenISO?fullWhen87(a.whenISO):'';activeActions87()}
+  function renderQueue87(){var card=q('p87Next');if(!card)return;if(!P87.queue.length){card.classList.remove('show');return}var r=P87.queue[0],f=fare87(r);card.classList.add('show');q('p87NextCount').textContent=P87.queue.length===1?'1 queued':P87.queue.length+' queued';q('p87NextName').textContent=r.name||'Pulse rider';q('p87NextRoute').textContent=(r.pickup||'Pickup')+' → '+(r.dest||'Destination');q('p87NextTime').textContent=r.whenISO?fullWhen87(r.whenISO):'After current ride';q('p87NextFare').textContent=f!=null?'$'+f.toFixed(2):''}
+  function renderShift87(){var btn=q('p87ShiftBtn');if(!btn)return;if(S.shift){q('p87ShiftLabel').textContent='ON SHIFT';q('p87ShiftTime').textContent=shiftClock87();q('p87ShiftSub').textContent=(Number(S.shift.rides)||0)+' rides · '+(Number(S.shift.miles)||0).toFixed(1)+' mi';btn.textContent=P87.endBusy?'Ending…':'End shift';btn.className='p87-end';btn.disabled=P87.endBusy}else{q('p87ShiftLabel').textContent='DRIVER SESSION';q('p87ShiftTime').textContent='Offline';q('p87ShiftSub').textContent='Start shift when you are ready to take rides.';btn.textContent='Start shift';btn.className='p87-start';btn.disabled=false}}
+  function renderInboxCount87(){var c=(S.requests||[]).length;q('p87InboxCount').textContent=c;q('p87InboxBtn').classList.toggle('zero',!c)}
+  function render87(){buildShell87();renderShift87();renderActive87();renderQueue87();renderInboxCount87();try{if(map)map.invalidateSize(false)}catch(e){}}
+  function uniqueReq87(list){var out=[],seen={};(list||[]).forEach(function(r){var id=String((r&&r.requestId)||'');if(id&&!seen[id]){seen[id]=1;out.push(r)}});return out}
+  requestReviewLocked_=function(){return false};
+  requestsFromServer=function(payload){var list=Array.isArray(payload)?payload:((payload&&payload.items)||[]);S.requests=uniqueReq87(list);S.heldRequests=[];persist87();renderInbox();render87()};
+  function decide87(r,decision,btn){var id=r&&r.requestId;if(!id||P87.busy[id])return;if(decision==='CONFIRM'&&timing87(r)==='NOW'&&!S.shift){toast('Start shift first for a Now request');return}P87.busy[id]=true;if(btn)btn.classList.add('p87-busy');srv('decideRequestedRide',id,decision).then(function(){S.requests=(S.requests||[]).filter(function(x){return x.requestId!==id});if(decision==='DECLINE'){toast('Ride declined');renderInbox();render87();return}var ride=rideFromRequest87(r);if(timing87(r)==='LATER'){toast('Ride added to Scheduled');return srv('listReservations').then(function(list){schedFromServer(list)})}if(S.active){return srv('startReservation',id).catch(function(){return null}).then(function(list){queue87(ride);if(Array.isArray(list))schedFromServer(list);toast('Ride queued next')})}return beginPickup87(ride).then(function(){toast('Ride accepted')})}).catch(function(e){toast((e&&e.message)||'Could not update request')}).then(function(){delete P87.busy[id];if(btn)btn.classList.remove('p87-busy');renderInbox();render87()})}
+  renderInbox=function(){var list=q('inboxList');if(!list)return;list.innerHTML='';var rides=(S.requests||[]).slice().sort(function(a,b){var ta=timing87(a)==='NOW'?0:1,tb=timing87(b)==='NOW'?0:1;if(ta!==tb)return ta-tb;return (Date.parse(a.whenISO)||0)-(Date.parse(b.whenISO)||0)});if(!rides.length){var empty=document.createElement('div');empty.style.cssText='padding:18px 4px;color:var(--p87-muted);font-size:.78rem';empty.textContent='No new ride requests';list.appendChild(empty);renderInboxCount87();return}rides.forEach(function(r){var f=fare87(r),card=document.createElement('div');card.className='inbox-card';var timing=timing87(r)==='NOW'?'NOW':fullWhen87(r.whenISO);card.innerHTML='<b>'+esc87(r.name||'Pulse rider')+'</b><div class="inbox-time">'+esc87(timing)+'</div><div class="inbox-route">'+esc87(r.pickup||'Pickup')+' → '+esc87(r.destination||r.dest||'Destination')+'</div>'+(f!=null?'<div class="inbox-fare">$'+f.toFixed(2)+'</div>':'')+(pay87(r)?'<div class="p87-inbox-pay">'+esc87(pay87(r))+'</div>':'');var acts=document.createElement('div');acts.className='inbox-actions';var yes=button87(timing87(r)==='NOW'?(S.active?'Accept · queue':'Accept'):'Accept · schedule','inbox-accept',function(){decide87(r,'CONFIRM',yes)});var no=button87('Decline','inbox-decline',function(){decide87(r,'DECLINE',no)});acts.appendChild(yes);acts.appendChild(no);card.appendChild(acts);list.appendChild(card)});renderInboxCount87()};
+  schedFromServer=function(list){var result=baseSchedFromServer?baseSchedFromServer.call(this,list):null;if(!baseSchedFromServer){S.scheduled=(list||[]).map(function(r){return {id:r.id,requestId:r.requestId||'',name:r.name||'Ride',pickup:r.pickup||'',dest:r.dest||r.destination||'',notes:r.notes||'',whenISO:r.whenISO,whenTS:Date.parse(r.whenISO),source:r.source||'rider',riderStatus:r.riderStatus||'Confirmed',quotedFare:r.quotedFare}})}renderSched();render87();return result};
+  startScheduled=function(id){var s=(S.scheduled||[]).filter(function(x){return x.id===id})[0];if(!s||P87.busy['s:'+id])return;if(!S.shift){toast('Start shift first');return}var ride=rideFromScheduled87(s);P87.busy['s:'+id]=true;renderSched();if(S.active){srv('startReservation',s.requestId||id).then(function(list){queue87(ride);if(Array.isArray(list))schedFromServer(list);toast('Scheduled ride queued next')}).catch(function(e){toast((e&&e.message)||'Could not queue ride')}).then(function(){delete P87.busy['s:'+id];renderSched();render87()});return}beginPickup87(ride).catch(function(e){toast((e&&e.message)||'Could not begin pickup')}).then(function(){delete P87.busy['s:'+id];renderSched();render87()})};
+  renderSched=function(){var lane=q('schedList');if(!lane)return;lane.innerHTML='';var rides=(S.scheduled||[]).slice().filter(function(s){return !P87.queue.some(function(qr){return qr.requestId&&qr.requestId===s.requestId})&&!(S.active&&S.active.requestId&&S.active.requestId===s.requestId)}).sort(function(a,b){return (a.whenTS||Date.parse(a.whenISO)||0)-(b.whenTS||Date.parse(b.whenISO)||0)});if(!rides.length){var e=document.createElement('div');e.style.cssText='padding:3px 1px;color:var(--p87-muted);font-size:.75rem';e.textContent='No upcoming rides';lane.appendChild(e);return}rides.forEach(function(s){var f=fare87(s),card=document.createElement('div');card.className='sched-card p082-card';var main=document.createElement('div');main.className='p084-main';var tf=document.createElement('div');tf.className='p084-timefare';var tm=document.createElement('div');tm.className='p084-time';tm.textContent=fullWhen87(s.whenISO||(s.whenTS?new Date(s.whenTS).toISOString():''));tf.appendChild(tm);var fe=document.createElement('div');fe.className='p084-fare';fe.textContent=f!=null?'$'+f.toFixed(2):'Fare pending';tf.appendChild(fe);main.appendChild(tf);var route=document.createElement('div');route.className='p084-route';route.textContent=(s.pickup||'Pickup')+' → '+(s.dest||'Destination');main.appendChild(route);card.appendChild(main);var act=document.createElement('div');act.className='p084-action';var b=button87(S.active?'Queue next':'Route to pickup','',function(){startScheduled(s.id)});b.disabled=!!P87.busy['s:'+s.id];act.appendChild(b);card.appendChild(act);lane.appendChild(card)})};
+  if(baseRender){render=function(){var out=baseRender.apply(this,arguments);render87();return out}}
+  restore87();buildShell87();render87();renderInbox();renderSched();setInterval(function(){render87();if(S.shift)refreshInbox()},8000);window.addEventListener('focus',function(){refreshInbox();render87()});window.PulseDriverR3={build:P87.build,state:function(){return {shift:S.shift,active:S.active,queue:P87.queue.slice(),requests:(S.requests||[]).slice(),scheduled:(S.scheduled||[]).slice()}}};
 })();
 </script>
