@@ -1,0 +1,28 @@
+ne">Phone</label><input id="phone" type="tel" autocomplete="tel"></div><div><label for="email">Email</label><input id="email" type="email" autocomplete="email"></div></div>
+    <label for="pickup">Leaving from</label><input id="pickup" list="pickupSuggestions" autocomplete="street-address" placeholder="Address or place"><datalist id="pickupSuggestions"></datalist><div class="hint" id="pickupHint">Start typing an address or place.</div><button class="location" id="locationBtn" type="button">Use my location</button>
+    <label for="destination">Going to</label><input id="destination" list="destinationSuggestions" placeholder="Address or place"><datalist id="destinationSuggestions"></datalist><div class="hint" id="destinationHint">Start typing an address or place.</div>
+    <div class="later" id="laterFields"><label for="time">Time today</label><input id="time" type="time"></div>
+    <div class="quote"><div class="quote-head"><strong>Pulse fare</strong><span>automatic</span></div><div class="quote-state" id="quoteState">Enter your pickup and destination.</div><button class="retry" id="quoteBtn" type="button">Retry fare</button><div class="quote-result" id="quoteResult"><div class="fare-row"><div class="fare" id="quoteFare"></div><div class="quote-meta" id="quoteMeta"></div></div></div></div>
+    <label>Payment</label><div class="pay-note" id="payNote">Pay in the car with Tap to Pay. No online payment is collected when you request the ride.</div>
+    <div class="grid"><div><label for="passengers">Passengers</label><input id="passengers" type="number" min="1" max="7" value="1"></div><div><label for="notes">Note</label><input id="notes" placeholder="optional"></div></div>
+    <div class="consent"><input id="consent" type="checkbox"><span>I consent to sharing these contact and trip details with the driver for this ride request.</span></div>
+    <button class="send" id="sendBtn" type="button" disabled>Checking link…</button>
+  </div>
+  <div class="done" id="doneView"><div class="check">✓</div><h1>Request sent</h1><div class="done-fare" id="doneFare"></div><div class="done-pay" id="donePay"></div><p class="sub">Watch your email for driver confirmation and next steps.</p></div>
+</section>
+<script>
+(function(){
+  'use strict';
+  var $=function(id){return document.getElementById(id)},requestToken='',testMode=false,requestOpen=false,timing='NOW',payment='AFTER',pickupLat='',pickupLng='',quote=null,quoteFingerprint='',fareTimer=null,suggestionTimers={},suggestionSeq={pickup:0,destination:0};
+  var d=new Date(),yyyy=d.getFullYear(),mm=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0'),today=yyyy+'-'+mm+'-'+dd;
+  function error(m){$('error').textContent=m;$('error').classList.add('show')}function clearError(){$('error').classList.remove('show')}
+  function setTiming(v){timing=v;$('nowBtn').classList.toggle('active',v==='NOW');$('laterBtn').classList.toggle('active',v==='LATER');$('laterFields').classList.toggle('show',v==='LATER');invalidate();scheduleFare()}
+  $('nowBtn').onclick=function(){setTiming('NOW')};$('laterBtn').onclick=function(){setTiming('LATER')};
+  function pickupISO(){if(timing==='NOW')return new Date().toISOString();var v=$('time').value.trim();if(!v)return '';var p=v.split(':').map(Number),x=new Date(yyyy,Number(mm)-1,Number(dd),p[0],p[1],0,0);return isNaN(x.getTime())?'':x.toISOString()}
+  function fingerprint(){return [$('pickup').value.trim().toLowerCase(),$('destination').value.trim().toLowerCase(),timing,timing==='LATER'?$('time').value:'NOW',pickupLat,pickupLng].join('|')}
+  function currentQuote(){return !!quote&&quoteFingerprint===fingerprint()&&Date.parse(quote.expiresAt)>Date.now()}
+  function updateSend(){if(!requestOpen){$('sendBtn').disabled=true;$('sendBtn').textContent='Link unavailable';return}$('sendBtn').disabled=!currentQuote();$('sendBtn').textContent=currentQuote()?'Send request':'Waiting for fare'}
+  function invalidate(){quote=null;quoteFingerprint='';$('quoteResult').classList.remove('show');$('quoteBtn').classList.remove('show');$('quoteState').textContent='Enter your pickup and destination.';$('quoteState').classList.remove('busy');updateSend()}
+  function routeReady(){return requestOpen&&$('pickup').value.trim().length>=3&&$('destination').value.trim().length>=3&&(timing==='NOW'||!!$('time').value.trim())&&!!pickupISO()}
+  function scheduleFare(delay){clearTimeout(fareTimer);if(!routeReady()){updateSend();return}$('quoteState').textContent='Calculating route and fare…';$('quoteState').classList.add('busy');$('sendBtn').disabled=true;fareTimer=setTimeout(calcFare,typeof delay==='number'?delay:600)}
+  function calcFare(){if(!routeReady())return;clearError();var fp=fingerprint();google.script.run.withSuccessHandler(function(r){if(fp!==fingerprint())return scheduleFare(150);quote=r||null;quoteFingerprint=fp;if(!quote||quote.ok!==true)return fareFail('Fare unavailable.');$('quoteFare').textContent='$'+Number(quote.fare||0).toFixed(2);$('quoteMeta').textCon
