@@ -9,15 +9,14 @@ function cancelPulseRide(requestId) {
   const cfg = requestDecisionBridge_();
   if (!cfg || !cfg.url || !cfg.token) throw new Error('Request decision bridge is not configured.');
   const sep = cfg.url.indexOf('?') >= 0 ? '&' : '?';
-  const response = UrlFetchApp.fetch(cfg.url + sep + 'action=driver-status', {
+  const response = UrlFetchApp.fetch(cfg.url + sep + 'action=driver-decision', {
     method: 'post',
     contentType: 'application/json',
     payload: JSON.stringify({
-      action: 'driver-status',
+      action: 'driver-decision',
       request: cfg.token,
       id: id,
-      status: 'Cancelled',
-      key: id + ':cancelled-by-driver'
+      decision: 'CANCEL'
     }),
     muteHttpExceptions: true,
     followRedirects: true
