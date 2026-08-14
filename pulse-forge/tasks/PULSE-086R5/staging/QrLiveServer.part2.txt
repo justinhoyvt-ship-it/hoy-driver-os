@@ -1,0 +1,78 @@
+-weight:400">' + esc_(payNote) + '</span>' : '') + '</td></tr>' +
+    '<tr><td style="padding:14px 0;color:#8199aa;border-top:1px solid #29465c">Fare</td><td style="padding:14px 0;text-align:right;font-size:26px;font-weight:800;color:#6ee7b7;border-top:1px solid #29465c">' + esc_(rideFareText_(obj)) + '</td></tr></table>' +
+    button + (options.securityHtml || '') + '<p style="margin:24px 0 0;color:#688092;font-size:12px">Local rides · Pulse Vermont</p></div></div></div>';
+}
+
+function pulseR4NotifyCustomerReceived_(row) {
+  const payment = pulseR4PaymentTextFromNotes_(row['Notes']);
+  MailApp.sendEmail({
+    to: row['Customer Email'],
+    subject: 'Ride request received',
+    body: 'Hi ' + row['Customer Name'] + ',\n\nRequest sent to your Pulse driver. It is not confirmed yet.\n\nWhen: ' + formatPickup_(row['Pickup At']) + '\nFrom: ' + row['Pickup Address'] + '\nTo: ' + row['Destination'] + '\nFare: ' + rideFareText_(row) + '\nPayment: ' + payment + '\n',
+    htmlBody: pulseR4EmailHtml_('Request received', 'Request sent to your Pulse driver. It is not confirmed yet.', row, {})
+  });
+}
+
+function pulseR4NotifyDriverRequest_(row) {
+  const clean = pulseR4CleanNotes_(row['Notes']);
+  MailApp.sendEmail({
+    to: rideCfg_().driverEmail,
+    subject: 'Ride request — ' + row['Customer Name'] + ' · ' + formatPickup_(row['Pickup At']),
+    body:
+      'New private ride request\n\n' +
+      'Customer: ' + row['Customer Name'] + '\n' +
+      'Phone: ' + row['Customer Phone'] + '\n' +
+      'Email: ' + row['Customer Email'] + '\n' +
+      'When: ' + formatPickup_(row['Pickup At']) + '\n' +
+      'Pickup: ' + row['Pickup Address'] + '\n' +
+      'Destination: ' + row['Destination'] + '\n' +
+      'Passengers: ' + row['Passengers'] + '\n' +
+      'Fare: ' + rideFareText_(row) + '\n' +
+      'Payment: ' + pulseR4PaymentTextFromNotes_(row['Notes']) + '\n' +
+      'Notes: ' + (clean || '(none)') + '\n\n' +
+      'Review this request in the Pulse driver Inbox.\n'
+  });
+}
+
+function pulseR4NotifyCustomerConfirmed_(obj, access) {
+  const cfg = rideCfg_();
+  if (!access || !access.rideId || !access.pin) throw new Error('Ride access details are required for confirmation email.');
+  const url = pulseR4StatusUrl_(access.rideId);
+  const security = '<div style="margin-top:22px;padding:14px;border-radius:10px;background:#0a1423;color:#9db0c1;font-size:12px;line-height:1.55">Ride ID: <b style="color:#fff">' + esc_(access.rideId) + '</b><br>PIN: <b style="color:#fff">' + esc_(access.pin) + '</b><br>Keep these private as fallback access details.</div>';
+  const payment = pulseR4PaymentTextFromNotes_(obj['Notes']);
+  MailApp.sendEmail({
+    to: obj['Customer Email'],
+    subject: 'Ride confirmed — ' + formatPickup_(obj['Pickup At']),
+    body: 'Your ride is confirmed.\nFare: ' + rideFareText_(obj) + '\nPayment: ' + payment + '\nStatus: ' + url + '\nRide ID: ' + access.rideId + '\nPIN: ' + access.pin,
+    htmlBody: pulseR4EmailHtml_('Ride confirmed', cfg.driverName + (cfg.vehicle ? ' · ' + cfg.vehicle : '') + ' will be your driver.', obj, {buttonUrl:url, buttonLabel:'Track my ride', securityHtml:security})
+  });
+}
+
+function normalizeQrLivePayload_(payload) {
+  payload = payload || {};
+  const name = String(payload.name || '').trim();
+  const phone = String(payload.phone || '').trim();
+  const email = String(payload.email || '').trim().toLowerCase();
+  const pickup = String(payload.pickup || '').trim();
+  const destination = String(payload.destination || '').trim();
+  const passengers = Math.max(1, Math.min(7, Number(payload.passengers) || 1));
+  const rawNotes = String(payload.notes || '').trim();
+  const notes = /\[PAY:(NOW|AFTER)\]/i.test(rawNotes) ? rawNotes.replace(/\[PAY:NOW\]/ig, '[PAY:AFTER]') : '[PAY:AFTER]' + (rawNotes ? ' ' + rawNotes : '');
+  const timing = qrLiveTiming_(payload.timing);
+  const today = qrLiveToday_();
+  const submittedDate = String(payload.date || today).trim();
+  const pickupLatRaw = String(payload.pickupLat == null ? '' : payload.pickupLat).trim();
+  const pickupLngRaw = String(payload.pickupLng == null ? '' : payload.pickupLng).trim();
+  const pickupLatNumber = Number(pickupLatRaw);
+  const pickupLngNumber = Number(pickupLngRaw);
+  const hasPickupCoordinates = !!pickupLatRaw && !!pickupLngRaw && Number.isFinite(pickupLatNumber) && pickupLatNumber >= -90 && pickupLatNumber <= 90 && Number.isFinite(pickupLngNumber) && pickupLngNumber >= -180 && pickupLngNumber <= 180;
+  if (!name || !phone || !email || !pickup || !destination) throw new Error('Name, phone, email, pickup, and destination are required.');
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new Error('That email address does not look right.');
+  if (submittedDate !== today) throw new Error('QR rides are available for today only.');
+  const now = new Date();
+  let pickupAt;
+  if (timing === 'NOW') pickupAt = now;
+  else {
+    const time = String(payload.time || '').trim();
+    if (!time) throw new Error('Choose a time later today.');
+    picku
