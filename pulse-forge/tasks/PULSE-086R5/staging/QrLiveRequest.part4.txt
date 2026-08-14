@@ -1,0 +1,5 @@
+questOpen)error('This request link is not available.');else scheduleFare()}).withFailureHandler(function(e){requestOpen=false;updateSend();error((e&&e.message)||'The link could not be checked.')}).getPublicConfig({requestToken:requestToken,testMode:testMode})});
+})();
+</script>
+</body>
+</html>
