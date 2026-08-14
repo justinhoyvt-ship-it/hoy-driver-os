@@ -1,0 +1,37 @@
+EZONE,'HH:mm'),timing:'LATER',passengers:1,notes:'[PAY:AFTER]',consent:true});
+  const noWrite=submitQrLiveRide({testMode:true,timing:'NOW',quotedFare:30});
+  if(!noWrite||noWrite.noWrite!==true)throw new Error('QR test mode must never write.');
+  return {ok:true,source:PULSE_QR_LIVE.SOURCE,todayOnly:today,timing:normalized.timing,fareValidatorRequired:typeof pulseValidateSubmittedFareQuote_==='function',requestAppSoleWriter:true,writesPerformed:false,deploymentPerformed:false};
+}
+
+function testPulse086r4RequestBridgeNoWrite() {
+  const paymentChecks = [
+    pulseR4PaymentTextFromNotes_('[QR_LIVE:NOW] [PAY:NOW]') === 'Tap to Pay in car',
+    pulseR4PaymentTextFromNotes_('[QR_LIVE:LATER] [PAY:AFTER]') === 'Tap to Pay in car',
+    pulseR4CleanNotes_('[QR_LIVE:NOW] [PAY:AFTER] hello rider') === 'hello rider'
+  ];
+  return {
+    ok: paymentChecks.every(Boolean) && typeof driverDecisionResponse_ === 'function',
+    build:'PULSE-086R4-2026-08-14.1',
+    serviceUrl:pulseR4ServiceUrl_(),
+    configuredWebAppUrl:String(rideCfg_().webAppUrl || ''),
+    paymentChecks:paymentChecks,
+    directDriverDecision:true,
+    statusLinksUseCurrentServiceUrl:true,
+    writesPerformed:false,
+    deploymentPerformed:false
+  };
+}
+
+function testPulse086r5RequestBridgeNoWrite() {
+  const base = testPulse086r4RequestBridgeNoWrite();
+  return Object.assign({}, base, {
+    ok: base && base.ok === true && ['DECLINE','CONFIRM','CANCEL'].every(function(x){ return x.length > 0; }),
+    driverDecisions: ['DECLINE','CONFIRM','CANCEL'],
+    cancelUsesRideTransition: typeof cancelRide === 'function',
+    paymentMode: 'Tap to Pay in car',
+    onlinePayAdvertised: false,
+    writesPerformed: false,
+    deploymentPerformed: false
+  });
+}
