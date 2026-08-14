@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "validate": "node scripts/validate.mjs && node tests/validate-pulse-079.mjs",
+    "validate": "node scripts/validate-current-driver-layout.mjs && node tests/validate-pulse-079.mjs",
     "build": "node scripts/build.mjs",
     "autobuild": "npm run validate && npm run build"
   },
