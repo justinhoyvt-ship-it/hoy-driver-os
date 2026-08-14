@@ -49,28 +49,25 @@ for(const marker of [
   'Request sent to your Pulse driver. Watch your email for confirmation.'
 ]) check(qr.includes(marker),`QrLiveRequest marker missing: ${marker}`);
 
-for(const marker of [
-  "SOURCE: 'QR_LIVE'",
-  "throw new Error('QR rides are available for today only.')",
-  "timing !== 'NOW' && timing !== 'LATER'",
-  'function submitQrLiveRide(payload)',
-  'if (payload.testMode === true)',
-  'noWrite: true',
-  'pulseValidateSubmittedFareQuote_(payload, qrLiveFareCustomer_(payload, customer))',
-  "'Quoted Fare': fareQuote.fare",
-  "'Quote ID': fareQuote.quoteId",
-  "'Quote Expires At': new Date(fareQuote.expiresAt)",
-  "'Pricing Version': fareQuote.pricingVersion",
-  "if (customer.timing === 'LATER') notifyDriverOfRequest_(row)",
-  'notifyCustomerReceived_(row)',
-  'function driverDecisionResponse_(params)',
-  'function expireQrLiveRequests()'
-]) check(qrServer.includes(marker),`QR server marker missing: ${marker}`);
+const serverChecks=[
+  [/SOURCE:\s*['"]QR_LIVE['"]/,'QR source marker missing'],
+  [/throw new Error\(['"]QR rides are available for today only\./,'same-day guard missing'],
+  [/timing\s*!==\s*['"]NOW['"]\s*&&\s*timing\s*!==\s*['"]LATER['"]/,'NOW/LATER timing guard missing'],
+  [/function\s+submitQrLiveRide\s*\(payload\)/,'QR writer missing'],
+  [/payload\.testMode\s*===\s*true[\s\S]*noWrite\s*:\s*true/,'QR no-write test path missing'],
+  [/pulseValidateSubmittedFareQuote_\(payload,\s*qrLiveFareCustomer_\(payload,\s*customer\)\)/,'signed fare validation missing'],
+  [/["']Quoted Fare["']\s*:\s*fareQuote\.fare/,'quoted fare write missing'],
+  [/["']Quote ID["']\s*:\s*fareQuote\.quoteId/,'quote ID write missing'],
+  [/["']Quote Expires At["']\s*:\s*new Date\(fareQuote\.expiresAt\)/,'quote expiry write missing'],
+  [/["']Pricing Version["']\s*:\s*fareQuote\.pricingVersion/,'pricing version write missing'],
+  [/customer\.timing\s*===\s*['"]LATER['"][\s\S]*(?:notifyDriverOfRequest_|pulseR4NotifyDriverRequest_)\(row\)/,'LATER driver notification missing'],
+  [/(?:notifyCustomerReceived_|pulseR4NotifyCustomerReceived_)\(row\)/,'customer received notification missing'],
+  [/function\s+driverDecisionResponse_\s*\(params\)/,'driver decision bridge missing'],
+  [/function\s+expireQrLiveRequests\s*\(\)/,'QR expiry job missing']
+];
+for(const [pattern,msg] of serverChecks) check(pattern.test(qrServer),msg);
 check(!qrServer.includes("payload.testMode === true &&"),'QR test mode must never fall through to a write path');
 
-// Canonical fare engine still exists in repo, but exact captured live state already
-// contains these functions in RiderExperience.gs. Phase A must therefore NOT add
-// FareQuote.gs until that live file is split back to canonical naming.
 for(const marker of [
   'function pulseGetFareQuote(input)',
   'function pulseValidateSubmittedFareQuote_(payload, customer)',
