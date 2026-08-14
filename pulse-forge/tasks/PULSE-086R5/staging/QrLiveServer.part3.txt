@@ -1,0 +1,65 @@
+pAt = parseRideStart_(today, time);
+    if (pickupAt.getTime() < now.getTime() + 35 * 60000) throw new Error('For a ride within 35 minutes, choose Now.');
+  }
+  const dedupKey = [PULSE_QR_LIVE.SOURCE,email,timing,timing === 'NOW' ? Utilities.formatDate(now, RIDE.TIMEZONE, 'yyyy-MM-dd-HH-mm') : pickupAt.toISOString(),hasPickupCoordinates ? pickupLatNumber.toFixed(6) + ',' + pickupLngNumber.toFixed(6) : pickup.toLowerCase(),destination.toLowerCase()].join('|');
+  return {name:name,phone:phone,email:email,pickup:pickup,pickupLat:hasPickupCoordinates?pickupLatNumber:'',pickupLng:hasPickupCoordinates?pickupLngNumber:'',destination:destination,pickupAt:pickupAt,passengers:passengers,notes:qrLiveNotes_(timing,notes),timing:timing,dedupKey:dedupKey};
+}
+
+function qrLiveFareCustomer_(payload, customer) {
+  if (customer.timing !== 'NOW') return customer;
+  const signedPickup = new Date(String(payload.quotePickupAt || ''));
+  if (isNaN(signedPickup.getTime())) return customer;
+  return Object.assign({}, customer, { pickupAt: signedPickup });
+}
+
+function submitQrLiveRide(payload) {
+  payload = payload || {};
+  if (payload.testMode === true) return {ok:true,noWrite:true,requestId:'TEST-QR-LIVE',status:'REQUESTED',source:PULSE_QR_LIVE.SOURCE,timing:qrLiveTiming_(payload.timing||'NOW'),driverName:rideCfg_().driverName,quotedFare:Number.isFinite(Number(payload.quotedFare))?Number(payload.quotedFare):null};
+  const cfg = rideCfg_();
+  if (!secureEqual_(String(payload.requestToken || ''), cfg.requestToken)) throw new Error('This QR request link is not valid.');
+  if (payload.consent !== true) throw new Error('Consent is required before sending a request.');
+  const customer = normalizeQrLivePayload_(payload);
+  const fareQuote = pulseValidateSubmittedFareQuote_(payload, qrLiveFareCustomer_(payload, customer));
+  const lock = LockService.getScriptLock(); lock.waitLock(10000);
+  try {
+    const duplicate = findDuplicateRide_(customer.dedupKey);
+    if (duplicate) return {ok:true,duplicate:true,requestId:String(duplicate.obj['Request ID']||''),status:String(duplicate.obj.Status||''),source:PULSE_QR_LIVE.SOURCE,timing:customer.timing,driverName:cfg.driverName,quotedFare:Number(duplicate.obj['Quoted Fare']||fareQuote.fare)};
+    const now = new Date(), requestId = 'FR-' + Utilities.getUuid().slice(0, 8).toUpperCase();
+    const row = {'Request ID':requestId,'Received At':now,'Updated At':now,'Status':'REQUESTED','Source':PULSE_QR_LIVE.SOURCE,'Customer Name':customer.name,'Customer Phone':customer.phone,'Customer Email':customer.email,'Pickup Address':customer.pickup,'Destination':customer.destination,'Pickup At':customer.pickupAt,'Passengers':customer.passengers,'Notes':customer.notes,'Consent':true,'Confirmed At':'','Cancelled At':'','Completed At':'','Calendar Event ID':'','Driver Notes':'','Dedup Key':customer.dedupKey,'Quoted Fare':fareQuote.fare,'Quote ID':fareQuote.quoteId,'Quote Expires At':new Date(fareQuote.expiresAt),'Pricing Version':fareQuote.pricingVersion};
+    rideSheet_().appendRow(RIDE.HEADERS.map(function(header){return row[header]===undefined?'':row[header];}));
+    if (customer.timing === 'LATER') pulseR4NotifyDriverRequest_(row);
+    pulseR4NotifyCustomerReceived_(row);
+    return {ok:true,requestId:requestId,status:'REQUESTED',source:PULSE_QR_LIVE.SOURCE,timing:customer.timing,driverEmailSent:customer.timing==='LATER',driverName:cfg.driverName,quotedFare:fareQuote.fare,quoteId:fareQuote.quoteId,paymentPreference:pulseR4PaymentCodeFromNotes_(row['Notes'])};
+  } finally { lock.releaseLock(); }
+}
+
+function appendQrLiveDriverNote_(found, note) {
+  const old = String(found.obj['Driver Notes'] || '').trim();
+  const next = old ? old + '\n' + note : note;
+  updateRideCells_(found.rowIndex, {'Driver Notes': next, 'Updated At': new Date()});
+}
+
+function pulseR4ConfirmRide_(requestId) {
+  const id = String(requestId || '').trim();
+  const lock = LockService.getScriptLock(); lock.waitLock(10000);
+  try {
+    const found = findRideRow_(id);
+    if (!found) throw new Error('Ride request not found.');
+    const current = String(found.obj.Status || 'REQUESTED').toUpperCase();
+    if (current === 'CONFIRMED') {
+      if (!found.obj['Access Email Sent At']) {
+        const existingAccess = issueRideAccessUnlocked_(found);
+        pulseR4NotifyCustomerConfirmed_(found.obj, existingAccess);
+        const sentAt = new Date();
+        updateRideCells_(found.rowIndex, {'Access Email Sent At':sentAt});
+        found.obj['Access Email Sent At'] = sentAt;
+      }
+      const duplicateResult = rideTransitionResult_(found.obj);
+      duplicateResult.duplicate = true;
+      return duplicateResult;
+    }
+    if (current !== 'REQUESTED') throw new Error('Only a requested ride can be confirmed.');
+    const now = new Date();
+    const start = new Date(found.obj['Pickup At']);
+    const end = new Date(start.getTime() + RIDE.DEFAULT_RIDE_MINUTES * 60000);
+    const updates = {'Status':'CONFIRMED','Updated At':now,'Confirmed At':now,'Calendar

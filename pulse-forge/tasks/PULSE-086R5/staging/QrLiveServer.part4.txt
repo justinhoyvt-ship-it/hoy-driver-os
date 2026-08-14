@@ -1,0 +1,79 @@
+ Event ID':createCalendarEvent_(found.obj,start,end)};
+    updateRideCells_(found.rowIndex, updates);
+    Object.keys(updates).forEach(function(key){found.obj[key]=updates[key];});
+    appendRideStatusEventUnlocked_(id,'Confirmed','REQUEST_APP',id+':confirmed');
+    const access = issueRideAccessUnlocked_(found);
+    pulseR4NotifyCustomerConfirmed_(found.obj, access);
+    const sentAt = new Date();
+    updateRideCells_(found.rowIndex, {'Access Email Sent At':sentAt});
+    found.obj['Access Email Sent At'] = sentAt;
+    const result = rideTransitionResult_(found.obj);
+    result.rideId = access.rideId;
+    result.accessEmailSent = true;
+    result.duplicate = false;
+    return result;
+  } finally { lock.releaseLock(); }
+}
+
+function driverDecisionResponse_(params) {
+  const cfg = rideCfg_();
+  const supplied = String((params && params.request) || '');
+  if (!secureEqual_(supplied, cfg.requestToken)) return jsonResponse_({ok:false,message:'Driver decision access is not valid.'});
+  const id = String((params && params.id) || '').trim();
+  const decision = String((params && params.decision) || '').trim().toUpperCase();
+  if (!/^FR-[A-Z0-9]+$/i.test(id)) return jsonResponse_({ok:false,message:'Ride request ID is not valid.'});
+  if (decision !== 'DECLINE' && decision !== 'CONFIRM' && decision !== 'CANCEL') return jsonResponse_({ok:false,message:'Decision is not valid.'});
+  try {
+    const before = findRideRow_(id);
+    if (!before) throw new Error('Ride request not found.');
+    const target = decision === 'DECLINE' ? 'DECLINED' : decision === 'CANCEL' ? 'CANCELLED' : 'CONFIRMED';
+    const duplicate = String(before.obj.Status || '').toUpperCase() === target;
+    const result = decision === 'DECLINE' ? declineRide(id) : decision === 'CANCEL' ? cancelRide(id) : pulseR4ConfirmRide_(id);
+    const after = findRideRow_(id);
+    const note = decision === 'DECLINE' ? 'Declined in Pulse Driver' : decision === 'CANCEL' ? 'Cancelled in Pulse Driver' : 'Confirmed in Pulse Driver';
+    if (after && !duplicate) appendQrLiveDriverNote_(after,note+' at '+new Date().toISOString());
+    return jsonResponse_({ok:true,requestId:String(result.requestId||id),status:String(result.status||target),duplicate:duplicate,payment:pulseR4PaymentTextFromNotes_(after&&after.obj&&after.obj['Notes'])});
+  } catch (error) { return jsonResponse_({ok:false,message:String((error&&error.message)||error)}); }
+}
+
+function qrLiveExpiryDeadline_(obj) {
+  const timing = qrLiveTimingFromNotes_(obj.Notes);
+  if (!timing) return null;
+  if (timing === 'NOW') {
+    const received = obj['Received At'] instanceof Date ? obj['Received At'] : new Date(obj['Received At']);
+    if (isNaN(received.getTime())) return null;
+    return new Date(received.getTime() + qrLiveNowResponseMinutes_() * 60000);
+  }
+  const pickup = obj['Pickup At'] instanceof Date ? obj['Pickup At'] : new Date(obj['Pickup At']);
+  if (isNaN(pickup.getTime())) return null;
+  return new Date(pickup.getTime() - PULSE_QR_LIVE.LATER_CUTOFF_MINUTES * 60000);
+}
+
+function expireQrLiveRequests() {
+  const sh = rideSheet_();
+  const values = sh.getDataRange().getValues();
+  if (values.length < 2) return {ok:true, checked:0, expired:0, errors:[], writesPerformed:false};
+  const headers = values[0].map(String), now = new Date();
+  let checked = 0, expired = 0; const errors = [];
+  for (let i = 1; i < values.length; i++) {
+    const obj = {}; headers.forEach(function(header,col){obj[header]=values[i][col];});
+    if (String(obj.Source||'').toUpperCase() !== PULSE_QR_LIVE.SOURCE || String(obj.Status||'').toUpperCase() !== 'REQUESTED') continue;
+    checked++;
+    const deadline = qrLiveExpiryDeadline_(obj);
+    if (!deadline || now.getTime() < deadline.getTime()) continue;
+    const requestId = String(obj['Request ID'] || '');
+    try { declineRide(requestId); const found=findRideRow_(requestId); if(found)appendQrLiveDriverNote_(found,'AUTO_DECLINED at '+now.toISOString()); expired++; }
+    catch(error){ errors.push({requestId:requestId,message:String((error&&error.message)||error)}); }
+  }
+  return {ok:errors.length===0,checked:checked,expired:expired,errors:errors,writesPerformed:expired>0};
+}
+
+function installQrLiveExpiryTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function(trigger){if(trigger.getHandlerFunction()===PULSE_QR_LIVE.EXPIRY_HANDLER)ScriptApp.deleteTrigger(trigger);});
+  ScriptApp.newTrigger(PULSE_QR_LIVE.EXPIRY_HANDLER).timeBased().everyMinutes(5).create();
+  return {ok:true,handler:PULSE_QR_LIVE.EXPIRY_HANDLER,everyMinutes:5,laterCutoffMinutes:PULSE_QR_LIVE.LATER_CUTOFF_MINUTES,nowResponseMinutes:qrLiveNowResponseMinutes_(),productionDeploymentPerformed:false};
+}
+
+function testPulse084tQrLiveNoWrite() {
+  const today=qrLiveToday_(),later=new Date(Date.now()+2*60*60000);
+  const normalized=normalizeQrLivePayload_({name:'Test Rider',phone:'802-555-0100',email:'test@example.com',pickup:'44.475000, -73.212000',destination:'BTV Airport',date:today,time:Utilities.formatDate(later,RIDE.TIM
